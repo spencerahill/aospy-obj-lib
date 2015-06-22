@@ -1,74 +1,10 @@
 from aospy.utils import _load_user_data
-from aospy.constants import c_p, r_e, day2sec, sec2day
-from aospy.units import Units
+from aospy.constants import c_p, r_e
 from aospy.var import Var
 
+units = _load_user_data('units')
 calcs = _load_user_data('calcs')
             
-unitless = Units(units='')
-K = Units(units='K')
-s=Units(
-    units=r's',
-    plot=r'day',
-    plot_conv=sec2day
-)
-s1=Units(
-    units=r's$^{-1}$',
-    plot=r'day$^{-1}$',
-    plot_conv=day2sec,
-)
-K_s1=Units(
-    units=r'K s$^{-1}$',
-    vert_int_plot=r'W m$^{-2}$',
-    vert_int_plot_conv=c_p
-)
-m_s=Units(
-    units=r'm s$^{-1}$',
-    vert_int=r'kg m$^{-1}$ s$^{-1}$'
-)
-m_s2 = Units(
-    units=r'm s$^{-2}$',
-    vert_int=r'kg m$^{-1}$ s$^{-2}$'
-)
-kg_m2_s = Units(
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot=r'mm day$^{-1}$',
-    plot_conv=day2sec
-)
-kg_m2_s_mass = Units(           # For vertical integrals of divergence.
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot=r'10$^{-2}$ kg m$^{-2}$ s',    
-    plot_conv=1e2
-)
-W_m2 = Units(
-    units=r'W m$^{-2}$',
-    vert_int=r''
-    )
-J_kg1 = Units(
-    units=r'J kg$^{-1}$',
-    plot='K',
-    plot_conv=1/c_p,
-    vert_int='J m$^{-2}$',
-    vert_int_plot='10$^6$ J m$^{-2}$',
-    vert_int_plot_conv=1e-6
-)
-J_kg1_s1 = Units(
-    units=r'J kg$^{-1}$ s$^{-1}$',
-    plot='K day$^{-1}',
-    plot_conv=day2sec/c_p,
-    vert_int='W m$^{-2}$',
-    vert_int_plot='W m$^{-2}$',
-    vert_int_plot_conv=1
-)
-Pa=Units(
-    units=r'Pa',
-    plot=r'hPa',
-    plot_conv=1e-2
-)
-hPa=Units(
-    units=r'hPa',
-)
-
 alb_sfc = Var(
     name='alb_sfc',
     units='Surface albedo',
@@ -99,7 +35,7 @@ cld_amt = Var(
 divg = Var(
     name='divg',
     math_str=r"\nabla\cdot\vec{v}",
-    units=s1,
+    units=units.s1,
     domain='atmos',
     description='Divergence.',
     def_time=True,
@@ -126,7 +62,7 @@ evap = Var(
     name='evap',
     alt_names=('ET_mean', 'evspsbl'),
     math_str=r"$E$",
-    units=kg_m2_s,
+    units=units.kg_m2_s,
     domain='atmos',
     description='Surface evaporation',
     def_time=True,
@@ -167,7 +103,7 @@ lwdn_sfc = Var(
     math_str="$R^{LW\downarrow_{sfc}$",
     description='All-sky downwelling longwave radiation at the surface.',
     domain='atmos',
-    units=W_m2,
+    units=units.W_m2,
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -177,7 +113,7 @@ lwdn_sfc = Var(
 lwdn_sfc_clr = Var(
     name='lwdn_sfc_clr',
     alt_names=('rldscs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky downwelling longwave radiation at the surface.',
     def_time=True,
@@ -189,7 +125,7 @@ lwdn_sfc_clr = Var(
 lwup_sfc = Var(
     name='lwup_sfc',
     alt_names=('rlus',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='All-sky upwelling longwave radiation at the surface.',
     def_time=True,
@@ -201,7 +137,7 @@ lwup_sfc = Var(
 lwup_sfc_clr = Var(
     name='lwup_sfc_clr',
     alt_names=('rluscs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky upwelling longwave radiation at the surface.',
     def_time=True,
@@ -305,7 +241,7 @@ mid_cld_amt = Var(
 olr = Var(
     name='olr',
     alt_names=('rlut',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='All-sky outgoing longwave radiation at TOA.',
     def_time=True,
@@ -317,7 +253,7 @@ olr = Var(
 olr_clr = Var(
     name='olr_clr',
     alt_names=('rlutcs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky outgoing longwave radiation at TOA.',
     def_time=True,
@@ -343,7 +279,7 @@ omega = Var(
 precip = Var(
     name='precip',
     alt_names=('pr', 'pre'),
-    units = kg_m2_s,
+    units=units.kg_m2_s,
     domain='atmos',
     description='Liquid precipitation reaching surface.',
     def_time=True,
@@ -355,9 +291,7 @@ precip = Var(
 prec_conv = Var(
     name='prec_conv',
     alt_names=('prc',),
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot_units=r'mm day$^{-1}$',
-    plot_units_conv=24.*3600.,
+    units=units.kg_m2_s,
     domain='atmos',
     description='Liquid precipitation reaching surface from convection scheme.',
     def_time=True,
@@ -368,9 +302,7 @@ prec_conv = Var(
 )
 prec_ls = Var(
     name='prec_ls',
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot_units=r'mm day$^{-1}$',
-    plot_units_conv=24.*3600.,
+    units=units.kg_m2_s,
     domain='atmos',
     description='Liquid precipitation reaching surface from large scale ascent.',
     def_time=True,
@@ -381,9 +313,7 @@ prec_ls = Var(
 )
 ps = Var(
     name='ps',
-    units='Pa',
-    plot_units='hPa',
-    plot_units_conv=1e-2,
+    units=units.Pa,
     domain='atmos',
     description='Surface pressure.',
     def_time=True,
@@ -394,9 +324,7 @@ ps = Var(
 )
 pv = Var(
     name='pv',
-    units=r's$^{-1}$',
-    plot_units=r'10$^{-8}$ s$^{-1}$',
-    plot_units_conv=1e8,
+    units=units.s1,
     domain='atmos',
     description='Potential vorticity',
     def_time=True,
@@ -435,7 +363,7 @@ rh_ref = Var(
 shflx = Var(
     name='shflx',
     alt_names=('hfss',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Surface sensible heat flux into the atmosphere.',
     def_time=True,
@@ -447,7 +375,7 @@ shflx = Var(
 slp = Var(
     name='slp',
     alt_names=('psl',),
-    units=hPa,
+    units=units.hPa,
     domain='atmos',
     description='Sea level pressure.',
     def_time=True,
@@ -458,9 +386,6 @@ slp = Var(
 )
 snow_conv = Var(
     name='snow_conv',
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot_units=r'mm day$^{-1}$',
-    plot_units_conv=24.*3600.,
     domain='atmos',
     description='Snow reaching surface from convection scheme.',
     def_time=True,
@@ -471,9 +396,7 @@ snow_conv = Var(
 )
 snow_ls = Var(
     name='snow_ls',
-    units=r'kg m$^{-2}$ s$^{-1}$',
-    plot_units=r'mm day$^{-1}$',
-    plot_units_conv=24.*3600.,
+    units=units.kg_m2_s,
     domain='atmos',
     description='Snow reaching surface from large scale ascent.',
     def_time=True,
@@ -526,7 +449,7 @@ sphum = Var(
 sst = Var(
     name='sst',
     alt_names=('ts',),
-    units=K,
+    units=units.K,
     domain='ocean',
     description='Sea surface temperature.',
     def_time=True,
@@ -538,7 +461,7 @@ sst = Var(
 swdn_sfc = Var(
     name='swdn_sfc',
     alt_names=('rsds',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='All-sky downwelling shortwave radiation at the surface.',
     def_time=True,
@@ -550,7 +473,7 @@ swdn_sfc = Var(
 swdn_sfc_clr = Var(
     name='swdn_sfc_clr',
     alt_names=('rsdscs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky downwelling shortwave radiation at the surface.',
     def_time=True,
@@ -562,7 +485,7 @@ swdn_sfc_clr = Var(
 swup_sfc = Var(
     name='swup_sfc',
     alt_names=('rsus',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='All-sky upwelling shortwave radiation at the surface.',
     def_time=True,
@@ -574,7 +497,7 @@ swup_sfc = Var(
 swup_sfc_clr = Var(
     name='swup_sfc_clr',
     alt_names=('rsuscs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky upwelling shortwave radiation at the surface.',
     def_time=True,
@@ -586,7 +509,7 @@ swup_sfc_clr = Var(
 swdn_toa = Var(
     name='swdn_toa',
     alt_names=('rsdt',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Downwelling shortwave radiation at TOA.',
     def_time=True,
@@ -598,7 +521,7 @@ swdn_toa = Var(
 swdn_toa_clr = Var(
     name='swdn_toa_clr',
     alt_names=('rsdtcs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Downwelling shortwave radiation at TOA.',
     def_time=True,
@@ -610,7 +533,7 @@ swdn_toa_clr = Var(
 swup_toa = Var(
     name='swup_toa',
     alt_names=('rsut',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='All-sky Upwelling shortwave radiation at TOA.',
     def_time=True,
@@ -622,7 +545,7 @@ swup_toa = Var(
 swup_toa_clr = Var(
     name='swup_toa_clr',
     alt_names=('rsutcs',),
-    units=W_m2,
+    units=units.W_m2,
     domain='atmos',
     description='Clear-sky upwelling shortwave radiation at TOA.',
     def_time=True,
@@ -634,7 +557,7 @@ swup_toa_clr = Var(
 t_surf = Var(
     name='t_surf',
     alt_names=('tas', 'tmp'),
-    units=K,
+    units=units.K,
     domain='atmos',
     description='Surface air temperature.',
     def_time=True,
@@ -738,7 +661,7 @@ tdt_vdif = Var(
 temp = Var(
     name='temp',
     alt_names=('ta',),
-    units=K,
+    units=units.K,
     domain='atmos',
     description='Air temperature.',
     def_time=True,
@@ -841,7 +764,7 @@ lon = Var(
 )
 level = Var(
     name='level',
-    units=hPa,
+    units=units.hPa,
     domain='atmos',
     description='Pressure level.',
     def_time=False,
@@ -852,7 +775,7 @@ level = Var(
 )
 pk = Var(
     name='pk',
-    units=Pa,
+    units=units.Pa,
     domain='atmos_level',
     description='Pressure part of hybrid sigma coordinate.',
     def_time=False,
@@ -863,7 +786,7 @@ pk = Var(
 )
 bk = Var(
     name='bk',
-    units=Pa,
+    units=units.Pa,
     domain='atmos_level',
     description='Sigma part of hybrid sigma coordinate.',
     def_time=False,
@@ -965,7 +888,7 @@ column_energy = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.column_energy,
-    units=W_m2
+    units=units.W_m2
 )
 cre_lw = Var(
     name='cre_lw',
@@ -977,7 +900,7 @@ cre_lw = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.cre_lw,
-    units=W_m2
+    units=units.W_m2
 )
 cre_net = Var(
     name='cre_net',
@@ -990,7 +913,7 @@ cre_net = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.cre_net,
-    units=W_m2
+    units=units.W_m2
 )
 cre_sw = Var(
     name='cre_sw',
@@ -1003,7 +926,7 @@ cre_sw = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.cre_sw,
-    units=W_m2
+    units=units.W_m2
 )
 descent_tot = Var(
     name='descent_tot',
@@ -1044,7 +967,7 @@ dry_static_stab = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dry_static_stab,
-    units=K
+    units=units.K
 )
 dse = Var(
     name='dse',
@@ -1056,7 +979,7 @@ dse = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dse,
-    units=J_kg1
+    units=units.J_kg1
 )
 dse_horiz_advec = Var(
     name='dse_horiz_advec',
@@ -1068,7 +991,7 @@ dse_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dse_horiz_advec,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 dse_times_horiz_divg = Var(
     name='dse_times_horiz_divg',
@@ -1080,7 +1003,7 @@ dse_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dse_times_horiz_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 dse_horiz_flux_divg = Var(
     name='dse_horiz_flux_divg',
@@ -1092,7 +1015,7 @@ dse_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dse_horiz_flux_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 dse_horiz_advec_divg_sum = Var(
     name='dse_horiz_advec_divg_sum',
@@ -1104,7 +1027,7 @@ dse_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.dse_horiz_advec_divg_sum,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 du_dx = Var(
     name='du_dx',
@@ -1116,7 +1039,7 @@ du_dx = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.d_dx_from_latlon,
-    units=s1
+    units=units.s1
 )
 dv_dy = Var(
     name='dv_dy',
@@ -1128,7 +1051,7 @@ dv_dy = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.d_dy_from_latlon,
-    units=s1
+    units=units.s1
 )
 equiv_pot_temp = Var(
     name='equiv_pot_temp',
@@ -1140,7 +1063,7 @@ equiv_pot_temp = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.equiv_pot_temp,
-    units=K
+    units=units.K
 )
 esf = Var(
     name='esf',
@@ -1180,7 +1103,7 @@ fmse = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.fmse,
-    units=J_kg1
+    units=units.J_kg1
 )
 gms_change_est = Var(
     name='gms_change_est',
@@ -1192,7 +1115,7 @@ gms_change_est = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_change_est,
-    units=K
+    units=units.K
 )
 gms_change_est2 = Var(
     name='gms_change_est2',
@@ -1204,7 +1127,7 @@ gms_change_est2 = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_change_est2,
-    units=K
+    units=units.K
 )
 gms_h01 = Var(
     name='gms_h01',
@@ -1216,7 +1139,7 @@ gms_h01 = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_h01,
-    units=K
+    units=units.K
 )
 gms_h01est = Var(
     name='gms_h01est',
@@ -1228,7 +1151,7 @@ gms_h01est = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_h01est,
-    units=K
+    units=units.K
 )
 gms_h01est2 = Var(
     name='gms_h01est2',
@@ -1240,7 +1163,7 @@ gms_h01est2 = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_h01est2,
-    units=K
+    units=units.K
 )
 gms_moc = Var(
     name='gms_moc',
@@ -1252,7 +1175,7 @@ gms_moc = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_moc,
-    units=K
+    units=units.K
 )
 gms_msf = Var(
     name='gms_msf',
@@ -1264,7 +1187,7 @@ gms_msf = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_msf,
-    units=K
+    units=units.K
 )
 gms_up_low = Var(
     name='gms_up_low',
@@ -1276,7 +1199,7 @@ gms_up_low = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_up_low,
-    units=K
+    units=units.K
 )
 gms_each_level = Var(
     name='gms_each_level',
@@ -1288,7 +1211,7 @@ gms_each_level = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.gms_each_level,
-    units=K
+    units=units.K
 )
 gross_dry_stab = Var(
     name='gross_dry_stab',
@@ -1342,7 +1265,7 @@ hght_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_advec,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 hght_times_horiz_divg = Var(
     name='hght_times_horiz_divg',
@@ -1354,7 +1277,7 @@ hght_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_horiz_divg_mass_bal,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 hght_horiz_flux_divg = Var(
     name='hght_horiz_flux_divg',
@@ -1366,7 +1289,7 @@ hght_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_flux_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 hght_horiz_advec_divg_sum = Var(
     name='hght_horiz_advec_divg_sum',
@@ -1378,7 +1301,7 @@ hght_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_advec_divg_sum,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 horiz_divg = Var(
     name='horiz_divg',
@@ -1390,7 +1313,7 @@ horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_divg,
-    units=s1,
+    units=units.s1,
     cmap='RdBu'
 )
 horiz_divg_mass_bal = Var(
@@ -1403,7 +1326,7 @@ horiz_divg_mass_bal = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_divg_mass_bal,
-    units=s1,
+    units=units.s1,
     cmap='RdBu'
 )
 horiz_divg_vert_int_max = Var(
@@ -1417,7 +1340,7 @@ horiz_divg_vert_int_max = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_divg_vert_int_max,
-    units=kg_m2_s_mass
+    units=units.kg_m2_s_mass
 )
 moist_static_stab = Var(
     name='moist_static_stab',
@@ -1429,7 +1352,7 @@ moist_static_stab = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.moist_static_stab,
-    units=K,
+    units=units.K,
     cmap='RdBu_r'
 )
 mse = Var(
@@ -1442,7 +1365,7 @@ mse = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse,
-    units=J_kg1
+    units=units.J_kg1
 )
 mse_horiz_advec = Var(
     name='mse_horiz_advec',
@@ -1454,7 +1377,7 @@ mse_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_horiz_advec,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_times_horiz_divg = Var(
     name='mse_times_horiz_divg',
@@ -1466,7 +1389,7 @@ mse_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_times_horiz_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_horiz_flux_divg = Var(
     name='mse_horiz_flux_divg',
@@ -1478,7 +1401,7 @@ mse_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_horiz_flux_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_horiz_advec_divg_sum = Var(
     name='mse_horiz_advec_divg_sum',
@@ -1490,7 +1413,7 @@ mse_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_horiz_advec_divg_sum,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_vert_flux_divg = Var(
     name='mse_vert_flux_divg',
@@ -1502,7 +1425,7 @@ mse_vert_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_vert_flux_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_vert_advec = Var(
     name='mse_vert_advec',
@@ -1514,7 +1437,7 @@ mse_vert_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_vert_advec,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 mse_times_vert_divg = Var(
     name='mse_times_vert_divg',
@@ -1526,7 +1449,7 @@ mse_times_vert_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_times_vert_divg,
-    units=J_kg1_s1
+    units=units.J_kg1_s1
 )
 msf = Var(
     name='msf',
@@ -1567,7 +1490,7 @@ p_minus_e = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.p_minus_e,
-    units=kg_m2_s
+    units=units.kg_m2_s
 )
 pot_temp = Var(
     name='pot_temp',
@@ -1579,7 +1502,7 @@ pot_temp = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.pot_temp,
-    units=K
+    units=units.K
 )
 prec_conv_frac = Var(
     name='prec_conv_frac',
@@ -1605,7 +1528,7 @@ q_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.q_horiz_advec,
-    units=s1
+    units=units.s1
 )
 q_times_horiz_divg = Var(
     name='q_times_horiz_divg',
@@ -1617,7 +1540,7 @@ q_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.q_times_horiz_divg,
-    units=s1
+    units=units.s1
 )
 q_horiz_flux_divg = Var(
     name='q_horiz_flux_divg',
@@ -1629,7 +1552,7 @@ q_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.q_horiz_flux_divg,
-    units=s1
+    units=units.s1
 )
 q_horiz_advec_divg_sum = Var(
     name='q_horiz_advec_divg_sum',
@@ -1641,7 +1564,7 @@ q_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_advec_divg_sum,
-    units=s1
+    units=units.s1
 )
 q_vert_flux_divg = Var(
     name='q_vert_flux_divg',
@@ -1653,7 +1576,7 @@ q_vert_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_vert_flux_divg,
-    units=s1
+    units=units.s1
 )
 q_vert_advec = Var(
     name='q_vert_advec',
@@ -1665,7 +1588,7 @@ q_vert_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec,
-    units=s1
+    units=units.s1
 )
 q_times_vert_divg = Var(
     name='q_times_vert_divg',
@@ -1677,7 +1600,7 @@ q_times_vert_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_vert_divg_mass_bal,
-    units=s1
+    units=units.s1
 )
 qu = Var(
     name='qu',
@@ -1731,7 +1654,7 @@ sfc_energy = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_energy,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_lw = Var(
     name='sfc_lw',
@@ -1743,7 +1666,7 @@ sfc_lw = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_lw,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_lw_cld = Var(
     name='sfc_lw_cld',
@@ -1755,7 +1678,7 @@ sfc_lw_cld = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_lw_cld,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_rad = Var(
     name='sfc_rad',
@@ -1767,7 +1690,7 @@ sfc_rad = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_rad,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_rad_cld = Var(
     name='sfc_rad_cld',
@@ -1780,7 +1703,7 @@ sfc_rad_cld = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_rad_cld,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_sw = Var(
     name='sfc_sw',
@@ -1792,7 +1715,7 @@ sfc_sw = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_sw,
-    units=W_m2
+    units=units.W_m2
 )
 sfc_sw_cld = Var(
     name='sfc_sw_cld',
@@ -1804,7 +1727,7 @@ sfc_sw_cld = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.sfc_sw_cld,
-    units=W_m2
+    units=units.W_m2
 )
 temp_horiz_advec = Var(
     name='temp_horiz_advec',
@@ -1816,7 +1739,7 @@ temp_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_advec,
-    units=K_s1
+    units=units.K_s1
 )
 temp_times_horiz_divg = Var(
     name='temp_times_horiz_divg',
@@ -1828,7 +1751,7 @@ temp_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_horiz_divg_mass_bal,
-    units=K_s1
+    units=units.K_s1
 )
 temp_horiz_flux_divg = Var(
     name='temp_horiz_flux_divg',
@@ -1840,7 +1763,7 @@ temp_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_flux_divg,
-    units=K_s1
+    units=units.K_s1
 )
 temp_horiz_advec_divg_sum = Var(
     name='temp_horiz_advec_divg_sum',
@@ -1852,7 +1775,7 @@ temp_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_advec_divg_sum,
-    units=K_s1
+    units=units.K_s1
 )
 temp_vert_advec = Var(
     name='temp_vert_advec',
@@ -1864,7 +1787,7 @@ temp_vert_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec,
-    units=s1
+    units=units.s1
 )
 tdt_diab = Var(
     name='tdt_diab',
@@ -1919,7 +1842,7 @@ toa_rad = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.toa_rad,
-    units=W_m2
+    units=units.W_m2
 )
 toa_rad_clr = Var(
     name='toa_rad_clr',
@@ -1931,7 +1854,7 @@ toa_rad_clr = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.toa_rad_clr,
-    units=W_m2
+    units=units.W_m2
 )
 toa_sw = Var(
     name='toa_sw',
@@ -1943,7 +1866,7 @@ toa_sw = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.toa_sw,
-    units=W_m2
+    units=units.W_m2
 )
 total_gms = Var(
     name='total_gms',
@@ -1955,7 +1878,7 @@ total_gms = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.total_gms,
-    units=K
+    units=units.K
 )
 toa_swup_cld = Var(
     name='toa_swup_cld',
@@ -1967,7 +1890,7 @@ toa_swup_cld = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.toa_swup_cld,
-    units=W_m2
+    units=units.W_m2
 )
 vert_divg = Var(
     name='vert_divg',
@@ -1979,7 +1902,7 @@ vert_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_divg,
-    units=s1
+    units=units.s1
 )
 vert_divg_mass_bal = Var(
     name='vert_divg_mass_bal',
@@ -1991,7 +1914,7 @@ vert_divg_mass_bal = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_divg_mass_bal,
-    units=s1
+    units=units.s1
 )
 vert_divg_vert_int_max = Var(
     name='vert_divg_vert_int_max',
@@ -2004,7 +1927,7 @@ vert_divg_vert_int_max = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_divg_vert_int_max,
-    units=kg_m2_s_mass
+    units=units.kg_m2_s_mass
 )
 virt_pot_temp = Var(
     name='virt_pot_temp',
@@ -2016,7 +1939,7 @@ virt_pot_temp = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.virt_pot_temp,
-    units=K
+    units=units.K
 )
 
 master_vars_list = [
@@ -2049,11 +1972,3 @@ master_vars_list = [
     mse_times_vert_divg, mse_vert_flux_divg, horiz_divg_vert_int_max,
     vert_divg_vert_int_max, temp_vert_advec
 ]
-
-class variables(object):
-    def __init__(self, vars_list):
-        for var in vars_list:
-            setattr(self, var.name, var)
-
-def foo(bar):
-    pass

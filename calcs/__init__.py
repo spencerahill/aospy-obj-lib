@@ -1,4 +1,8 @@
-"""Calcs submodule of aospy module."""
+import numpy as np
+
+from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
+from aospy.model import Model
+
 ### Utility functions for sigma coordinates. ###
 def phalf_from_sigma(bk, pk, ps):
     """
@@ -13,7 +17,6 @@ def phalf_from_sigma(bk, pk, ps):
     and TOA, such that the number of sigma layers is one less than the length
     of either pk or bk.
     """
-    import numpy as np
     # 3D ps array assumed to be (time, lat, lon).
     if ps.ndim in (3, 4):
         bk = bk[np.newaxis,:,np.newaxis,np.newaxis]
@@ -49,7 +52,6 @@ def phalf_from_pfull(pfull, val_toa=0, val_sfc=0):
     Could be the pressure array itself, but it could also be any other data 
     defined at pressure levels.
     """
-    import numpy as np
     phalf = np.empty((pfull.shape[0] + 1, pfull.shape[1], pfull.shape[2]))
     phalf[0] = val_toa
     phalf[-1] = val_sfc
@@ -75,7 +77,6 @@ def dp_from_phalf(phalf):
 
 def dp_from_sigma(bk, pk, ps):
     """Compute sigma layer pressure thickness."""
-    import numpy as np
     phalf = phalf_from_sigma(bk, pk, ps)
     return dp_from_phalf(phalf)
 
@@ -83,18 +84,15 @@ def dp_from_sigma(bk, pk, ps):
 
 # def x_from_latlon(lat, lon, radius):
 #     """Create array of x-distances based on arrays of lons and lats."""
-#     import numpy as np
 #     rad = radius*np.abs(np.cos(np.deg2rad(lat)))[np.newaxis,:]
 #     return np.squeeze(rad*np.deg2rad(lon[:,np.newaxis]))
 
 # def y_from_latlon(lat, lon, radius):
 #     """Create an array of y-distances from an array of lats."""
-#     import numpy as np
 #     return radius*np.tile(np.sin(np.deg2rad(lat))[:,np.newaxis], len(lon)).T
 
 # def dx_from_latlon(lat, lon, radius):
 #     """Compute zonal spacing of grid cell centers."""
-#     import numpy as np
 #     x = x_from_latlon(lon, lat, radius)
 #     dx = np.empty(x.shape)
 #     dx[:,:-1] = np.diff(x, n=1, axis=-1)
@@ -110,12 +108,10 @@ def dp_from_sigma(bk, pk, ps):
 
 # def dlon_from_latlon(lat, lon):
     # """Compute longitude spacing of grid cell centers."""
-    # import numpy as np
     # return 
 
 # def dlat_from_latlon(lat, lon):
     # """Compute latitude spacing of grid cell centers."""
-    # import numpy as np
     # return 
 
 ### General finite differencing.
@@ -145,14 +141,12 @@ def cen_diff4(f, dx, dx_array=False):
 ### Derivatives in x, y, and p.
 
 def to_rad(field):
-    import numpy as np
     if np.max(np.abs(field)) > 2*np.pi:
         return np.deg2rad(field)
     else:
         return field
 
 def to_pascal(field):
-    import numpy as np
     # For dp fields, this won't work if the input data is already Pascals and
     # the largest level thickness is < 1200 Pa, i.e. 12 hPa.  This will almost
     # never come up in practice for data interpolated to pressure levels, but
@@ -164,7 +158,6 @@ def to_pascal(field):
 
 def d_dx_from_latlon(field, lat, lon, radius):
     """Compute \partial(field)/\partial x using centered differencing."""
-    import numpy as np
     # Verify longitude spacing is uniform.
     dlon = lon[1] - lon[0]
     assert np.allclose(360. - (lon[-1] - lon[0]), dlon)
@@ -183,7 +176,6 @@ def d_dx_from_latlon(field, lat, lon, radius):
 
 def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     """Compute \partial(field)/\partial y using centered differencing."""
-    import numpy as np
     lat = to_rad(lat)
     dlat = lat[1:] - lat[:-1]
     # Assume latitude and longitude are last two axes.
@@ -217,7 +209,6 @@ def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     return prefactor*df_dy.T
 
 def d_dp_from_p(field, p):
-    import numpy as np
     """Derivative in pressure of a given field."""
     # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
     f = field.T
@@ -248,7 +239,6 @@ def d_dp_from_p(field, p):
 #     2) Unmask the element directly below p_bot.
 #     3) Replace that element with the specified value at ps.
 #     """
-#     import numpy as np
 #     if p.ndim == 1:
 #         p = p[np.newaxis,:,np.newaaxis,np.newaxis]
 #     p_bot = np.ma.where(p < ps)
@@ -264,7 +254,6 @@ def weight_by_delta(integrand, delta):
     be of shape (vertical, lat, lon).  integrand is assumed to be 3 or 4
     dimensions, with time 1st if 4-D.  Both are assumed to be numpy arrays.
     """
-    import numpy as np
     try:
         intdel = integrand*delta
     except ValueError:
@@ -274,13 +263,11 @@ def weight_by_delta(integrand, delta):
 
 def integrate(integrand, delta, axis):
     """Integrate the array along the given axis using the given delta array."""
-    import numpy as np
     prod = weight_by_delta(integrand, delta)
     return np.ma.sum(prod, axis=axis)
 
 # def int_dlon(integrand, lat, lon, start=0., end=360.):
     # """Integrate in longitude."""
-    # import numpy as np
     # # Assume pressure is 3rd to last axis.
     # inds = np.where((lon >= start) & (lon <= end))
     # dlon = dlon_from_latlon(lat, lon)
@@ -298,8 +285,6 @@ def integrate(integrand, delta, axis):
 def int_dp_g(integrand, dp, start=0., end=None):
     """Integrate vertically in pressure."""
     # Assume pressure is 3rd to last axis.
-    import numpy as np
-    from aospy.constants import grav
     dp = to_pascal(dp)
     return integrate(integrand, dp, -3) / grav
 
@@ -343,7 +328,6 @@ def horiz_divg_from_windspharm(u, v):
     So we should have a single function that performs all steps, taking the
     function to be called in #3 as an argument.
     """
-    import numpy as np
     from windspharm.standard import VectorWind
     w = VectorWind(u, v)
     return w.divergence()
@@ -357,7 +341,6 @@ def field_vert_int_bal(field, dp):
 
     Most frequently used for mass flux divergence to impose mass balance.
     """
-    import numpy as np
     pos = np.ma.where(field > 0, field, 0)
     neg = np.ma.where(field < 0, field, 0)
     pos_int = int_dp_g(pos, dp)[:,np.newaxis,:,:]
@@ -366,13 +349,11 @@ def field_vert_int_bal(field, dp):
 
 def horiz_divg_mass_bal(u, v, lat, lon, radius, dp):
     """Horizontal divergence with column mass-balance correction applied."""
-    from aospy import calc_levs_thick
     div = horiz_divg(u, v, lat, lon, radius)
     return field_vert_int_bal(div, dp)
 
 def vert_divg_mass_bal(omega, p, dp):
     """Vertical divergence with column mass-balance correction applied."""
-    from aospy import calc_levs_thick
     div = vert_divg(omega, p)
     return field_vert_int_bal(div, dp)
 
@@ -502,9 +483,8 @@ def covariance(array1, array2, axis=None, weights=None):
     :param weights: Weights used to perform the average.
     :type weights: int or None
     """
-    from numpy import ma
-    prod = ma.multiply(array1, array2)
-    return ma.average(prod, axis=axis, weights=weights)
+    prod = np.ma.multiply(array1, array2)
+    return np.ma.average(prod, axis=axis, weights=weights)
 
 def eddy_component(array, axis=None, weights=None):
     """Compute the deviation from the average along the specified axis.
@@ -516,9 +496,8 @@ def eddy_component(array, axis=None, weights=None):
     :param weights: An array of weights used to compute the average.
     :type weights: Numpy array or `None`
     """
-    from numpy import ma
-    avg = ma.average(array, axis=axis, weights=weights)
-    return ma.subtract(array, avg)
+    avg = np.ma.average(array, axis=axis, weights=weights)
+    return np.ma.subtract(array, avg)
 
 def eddy_covar_avg(array1, array2, axis=None, weights=None):
     """Compute the average eddy covariance of two fields.
@@ -530,7 +509,6 @@ def eddy_covar_avg(array1, array2, axis=None, weights=None):
     :param weights: Weights used to perform the average.
     :type weights: int or None
     """
-    from numpy import ma
     cov1 = eddy_component(array1, axis=axis, weights=weights)
     cov2 = eddy_component(array2, axis=axis, weights=weights)
     return covariance(cov1, cov2, axis=axis, weights=weights)
@@ -539,17 +517,14 @@ def eddy_covar_avg(array1, array2, axis=None, weights=None):
 
 def mse(temp, hght, sphum):
     """Moist static energy, in Joules per kilogram."""
-    from aospy.constants import L_v
     return dse(temp, hght) + L_v*sphum
 
 def fmse(temp, hght, sphum, ice_wat):
     """Frozen moist static energy, in Joules per kilogram."""
-    from aospy.constants import L_f
     return mse(temp, hght, sphum) - L_f*ice_wat
 
 def dse(temp, hght):
     """Dry static energy, in Joules per kilogram."""
-    from aospy.constants import c_p, grav
     try:
         ds = c_p*temp + grav*hght
     except ValueError:
@@ -562,8 +537,6 @@ def dse(temp, hght):
 
 def pot_temp(temp, p, p0=1000.):
     """Potential temperature."""
-    import numpy as np
-    from aospy.constants import kappa
     return temp*(p0/p[:,np.newaxis,np.newaxis])**kappa
 
 def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
@@ -571,23 +544,17 @@ def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
     specific humidities.
 
     """
-    import numpy as np
-    from aospy.constants import kappa
     return ((temp*(p0/p[:,np.newaxis,np.newaxis])**kappa) *
             (1. + 0.61*sphum - liq_wat))
 
 def equiv_pot_temp(temp, p, sphum, p0=1000.):
     """Equivalent potential temperature."""
-    import numpy as np
-    from aospy.constants import kappa, L_v, c_p
     return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
     
 ### Gross moist stability-related quantities
 
 # def dse_int_sigma(bk, pk, ps, hght, temp):
 #     """Column integral of DSE using data on sigma-coordinates."""
-#     import numpy as np
-#     from aospy.constants import grav
 #     dp_g = dp_from_sigma(bk, pk, ps) / grav
 #     # temp is on level centers; hght is on level borders.
 #     # So interpolate to level centers by simple averaging.
@@ -597,8 +564,6 @@ def equiv_pot_temp(temp, p, sphum, p0=1000.):
 
 def field_vert_int_max(field, dp):
     """Maximum magnitude of integral of a field from surface up."""
-    import numpy as np
-    from aospy.constants import grav
     dp = to_pascal(dp)
     # 2015-05-15: Problem: Sigma data indexing starts at TOA, while pressure
     #             data indexing starts at 1000 hPa.  So for now only do for
@@ -621,8 +586,6 @@ def vert_divg_vert_int_max(omega, p, dp):
 
 def gms_like_ratio(weights, tracer, dp):
     """Compute ratio of integrals in the style of gross moist stability."""
-    import numpy as np
-    from aospy.constants import grav
     # Integrate weights over lower tropospheric layer
     dp = to_pascal(dp)
     denominator = field_vert_int_max(weights, dp)
@@ -632,7 +595,6 @@ def gms_like_ratio(weights, tracer, dp):
 
 def gross_moist_strat(sphum, u, v, lat, lon, radius, dp):
     """Gross moisture stratification, in horizontal divergence form."""
-    from aospy.constants import L_v
     divg = horiz_divg(u, v, lat, lon, radius)
     return L_v*gms_like_ratio(divg, sphum, dp)
 
@@ -648,13 +610,11 @@ def gross_moist_stab(temp, hght, sphum, u, v, lat, lon, radius, dp):
 
 def albedo(swdn_toa, swup_toa):
     """Net column albedo, i.e. fraction of insolation reflected back."""
-    from numpy.ma import masked_where
-    return masked_where(swdn_toa == 0., swup_toa/swdn_toa)
+    return np.ma.masked_where(swdn_toa == 0., swup_toa/swdn_toa)
 
 def sfc_albedo(swdn_sfc, swup_sfc):
     """Net surface albedo, i.e. fraction of SW at surface reflected back."""
-    from numpy.ma import masked_where
-    return masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
+    return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
 
 def toa_sw(swdn_toa, swup_toa):
     """All-sky TOA net shortwave radiative flux into atmosphere."""
@@ -692,8 +652,7 @@ def toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr):
 
 def sfc_albedo(swup_sfc, swdn_sfc):
     """Surface albedo."""
-    from numpy.ma import masked_where
-    return masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
+    return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
 
 def sfc_sw(swup_sfc, swdn_sfc):
     """All-sky surface upward shortwave radiative flux."""
@@ -723,13 +682,11 @@ def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr,
 
 def sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net upward surface radiative plus enthalpy flux."""
-    from aospy.constants import L_v
     return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
 
 def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, 
                   lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net TOA and surface radiative and enthalpy flux into atmos."""
-    from aospy.constants import L_v
     return (swdn_toa - swup_toa - olr +
             swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + 
             shflx + L_v*evap)
@@ -756,17 +713,14 @@ def p_minus_e(precip, evap):
 
 def bowen_ratio(shflx, evap):
     """Bowen ratio: surface SH/LH."""
-    from aospy.constants import L_v
     return shflx/(L_v * evap)
 
 def evap_frac(evap, shflx):
     """Evaporative fraction: surface LH/(SH+LH)."""
-    from aospy.constants import L_v
     return L_v*evap / (L_v*evap + shflx)
 
 def msf(lats, levs, v):
     """Meridional mass streamfunction."""
-    import numpy as np
     # Compute half level boundaries and widths.
     p_top = 5.; p_bot = 1005.
     p_half = 0.5*(levs[1:] + levs[:-1])
@@ -784,8 +738,6 @@ def msf(lats, levs, v):
 
 def msf_max(lats, levs, v):
     """Maximum meridional mass streamfunction magnitude at each latitude."""
-    import numpy as np
-    from aospy.calcs import msf
     strmfunc = msf(lats, levs, v)
     pos_max = np.amax(strmfunc, axis=0)
     neg_max = np.amin(strmfunc, axis=0)
@@ -795,8 +747,6 @@ def msf_max(lats, levs, v):
 def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
         shflx, evap, snow_ls, snow_conv, sfc_area):
     """Total atmospheric northward energy flux."""
-    import numpy as np
-    from aospy.constants import L_f, L_v
     # Calculate energy balance at each grid point.
     loc = -1*(swdn_toa - swup_toa - olr +                   # TOA radiation
               swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc +   # sfc radiation
@@ -808,36 +758,23 @@ def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
     
 def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
     """Gross moist stability. Upper minus lower level MSE."""
-    import numpy as np
-    from aospy.calcs import mse
-    from aospy.constants import c_p
     m = mse(temp, hght, sphum)
     return (np.squeeze(m[np.where(level == lev_up)] -
                        m[np.where(level == lev_dn)])/c_p)
 
 def gms_each_level(temp, hght, sphum, level, lev_dn=925.):
-    import numpy as np
-    from aospy.calcs import mse
-    from aospy.constants import c_p
     m = mse(temp, hght, sphum)
     return (m - m[np.where(level == lev_dn)])/c_p
 
 def dry_static_stab(temp, hght, level, lev_dn=925.):
-    import numpy as np
-    from aospy.calcs import dse
-    from aospy.constants import c_p
     d = dse(temp, hght)
     return (d - d[np.where(level == lev_dn)])/c_p
 
 def moist_static_stab(temp, p, sphum, p0=1000., lev_dn=925.):
-    import numpy as np
     theta_e = equiv_pot_temp(temp, p, sphum, p0=p0)
     return (theta_e - theta_e[np.where(p == lev_dn)])
 
 def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
-    import numpy as np
-    from aospy.calcs import mse
-    from aospy.constants import c_p, L_v
     """Gross moist stability. Upper minus lower level MSE with thermodynamic
     scaling estimate for low level MSE."""
     m = mse(temp, hght, sphum).mean(axis=-1)
@@ -847,9 +784,6 @@ def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
     """
     Gross moist stability. Near surface MSE diff b/w ITCZ and the given latitude.
     """
-    import numpy as np
-    from aospy.calcs import mse
-    from aospy.constants import c_p
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
     m = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)), 
@@ -862,8 +796,6 @@ def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
     Gross moist stability. Near surface MSE diff b/w ITCZ and the given latitude
     neglecting the geopotential term.
     """
-    import numpy as np
-    from aospy.constants import c_p, L_v
     sphum = np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1))
     temp = np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1))
     # ITCZ defined as latitude with maximum zonal mean precip.
@@ -876,9 +808,6 @@ def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
     Gross moist stability. MSE diff b/w ITCZ aloft and near surface at the 
     given latitude.
     """
-    import numpy as np
-    from aospy.calcs import mse
-    from aospy.constants import c_p
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
     m_up = mse(np.squeeze(temp[np.where(level == lev_up)].mean(axis=-1)), 
@@ -895,8 +824,6 @@ def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     between ITCZ and local latitude, neglecting geopotential term and applying
     a thermodynamic scaling for the moisture term.
     """
-    import numpy as np
-    from aospy.constants import c_p, L_v
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
     # Need temperature change at 
@@ -919,8 +846,6 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
     terms by cos(lat) and a fixed fraction gamma to account for deviation of
     upper level MSE from the near surface ITCZ value.
     """
-    import numpy as np
-    from aospy.constants import c_p, L_v
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
     # Need temperature change at 
@@ -938,9 +863,8 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
 def prec_conv_frac(prec_conv, precip, prec_ls=False):
     """Fraction of precipitation coming from convection scheme."""
     # Mask where precip is zero to avoid dividing by zero.
-    from numpy.ma import masked_where
-    prec_conv = masked_where(precip == 0., prec_conv)
-    precip = masked_where(precip == 0., precip)
+    prec_conv = np.ma.masked_where(precip == 0., prec_conv)
+    precip = np.ma.masked_where(precip == 0., precip)
     if prec_ls:
         return prec_conv/(precip + prec_conv)
     else:
@@ -948,23 +872,19 @@ def prec_conv_frac(prec_conv, precip, prec_ls=False):
 
 def descent_tot(omega, mc):
     """Vertical motion from both convection and large-scale."""
-    from aospy.constants import grav
     return omega + grav*mc
 
 def ascent_ls(omega):
     """Large-scale vertically upward motion."""
     # Get positive values and replace negative ones with zero.
-    from numpy import where
-    return where(omega > 0., omega, 0)
+    return np.where(omega > 0., omega, 0)
 
 def vert_centroid(field, level, p_bot=850., p_top=150.):
     """
     Compute the vertical centroid of some vertically defined field.
     """
-    import numpy as np
-    from aospy import calc_levs_thick
     desired_levs = np.where((level <= p_bot) & (level >= p_top))
-    lev_thick = calc_levs_thick(level)/100.
+    lev_thick = Model.calc_levs_thick(level)/100.
     # Add axes for later broadcasting and truncate to desired vertical levels.
     level = level[desired_levs]; level = level[:,np.newaxis,np.newaxis]
     lev_thick = lev_thick[desired_levs]
@@ -983,7 +903,7 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
 
 def tht(variables, **kwargs):
     """Total atmospheric plus oceanic northward energy flux."""
-    import numpy as np
+    
     
     # Calculate energy balance at each grid point.
     loc = -1*(variables[0] - variables[1] - variables[2])             # TOA radiation
@@ -998,9 +918,6 @@ def tht(variables, **kwargs):
     
 def oht(variables, **kwargs):
     """Total oceanic northward energy flux as residual of total minus atmospheric flux."""
-    import numpy as np
-    from aospy.constants import L_f, L_v
-    
     # Calculate energy balance at each grid point.
     loc = (variables[0] - variables[1] + variables[2] - variables[3] +   # sfc radiation
            variables[4] +                                 # sfc SH flux
@@ -1018,9 +935,6 @@ def oht(variables, **kwargs):
 def moc_flux(variables, **kwargs):
     """Mass weighted column integrated meridional flux by time and 
     zonal mean flow."""
-    import numpy as np
-    from aospy.av_stat import levs_thick
-    from aospy.calcs import dse, mse
     # Specify upper bound of vertical integrals.
     p_top = kwargs.get('p_top', 0.)
     trop = np.where(nc.variables['level'][:] >= p_top)
@@ -1028,7 +942,7 @@ def moc_flux(variables, **kwargs):
     v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
-    lev_thick = np.squeeze(levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis]
     # Adjustment imposes that column integrated mass flux is zero.
     mass_adj = -((v_north*lev_thick).sum(axis=1) / 
@@ -1049,13 +963,12 @@ def moc_flux(variables, **kwargs):
     
 def moc_flux_raw(variables, **kwargs):
     """Mass weighted column integrated meridional flux by time and zonal mean flow, without applying column mass flux correction."""
-    from aospy.av_stat import levs_thick
     # Specify upper bound of vertical integrals.
     p_top = kwargs.get('p_top', 0.)
     trop = np.where(nc.variables['level'][:] >= p_top)
     # Take zonal mean and calculate grid level thicknesses.
     v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    lev_thick = np.squeeze(levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis]
     # Integrate the specified flux vertically and zonally.
     flux_type = kwargs.get('flux_type', 'mse')
@@ -1070,8 +983,6 @@ def moc_flux_raw(variables, **kwargs):
 
 def st_eddy_flux(variables, **kwargs):
     """Mass weighted column integrated meridional flux by stationary eddies."""
-    import numpy as np
-    from aospy.av_stat import levs_thick    
     p_top = kwargs.get('p_top', 0.)
     trop = np.where(nc.variables['level'][:] >= p_top)
     v = np.squeeze(variables[-1][:,trop])
@@ -1082,7 +993,7 @@ def st_eddy_flux(variables, **kwargs):
         m = np.squeeze(mse(variables[:3])[:,trop])
     elif flux_type == 'moisture':
         m = np.squeeze(variables[0][:,trop])*L_v
-    lev_thick = np.squeeze(levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
     flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) * 
             (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
@@ -1091,46 +1002,37 @@ def st_eddy_flux(variables, **kwargs):
             
 def moc_st_eddy_flux(variables, **kwargs):
     """Mass weighted column integrated flux by time mean flow."""
-    from aospy.calcs import moc_flux, st_eddy_flux
     return moc_flux(variables, **kwargs) + st_eddy_flux(variables, **kwargs)
 
 def trans_eddy_flux(variables, **kwargs):
     """Meridional flux by transient eddies."""
-    from aospy.calcs import aht, moc_st_eddy_flux
     return aht(variables[4:], **kwargs) - moc_st_eddy_flux(variables[:4], **kwargs)
 
 def eddy_flux(variables, **kwargs):
     """Meridional flux by stationary and transient eddies."""
-    from aospy.calcs import aht, moc_flux
     return aht(variables[4:], **kwargs) - moc_flux(variables[:4], **kwargs)
 
 def mse_flux(variables, **kwargs):
     """Column integrated moist static energy meridional flux."""
     flux_type = kwargs.get('flux_type', 'moc')
     if flux_type == 'moc':
-        from aospy.calcs import moc_flux
         return moc_flux(variables[:4], **kwargs)
     elif flux_type == 'st_eddy':
-        from aospy.calcs import st_eddy_flux
         return st_eddy_flux(variables[:4], **kwargs)
     elif flux_type == 'moc_st_eddy':
-        from aospy.calcs import moc_st_eddy_flux
         return moc_st_eddy_flux(variables[:4], **kwargs)
     elif flux_type =='trans_eddy':
-        from aospy.calcs import trans_eddy_flux
         return trans_eddy_fux(variables, **kwargs)
     elif flux_type == 'all':
-        from aospy.calcs import aht
         return aht(variables[4:], **kwargs)
     elif flux_type == 'eddy':
-        from aospy.calcs import eddy_flux
         return eddy_flux(variables, **kwargs)
     
 def mass_flux(variables, **kwargs):
     """Meridional mass flux by time and zonal mean flow."""
-    import numpy as np
+    
     # Apply mass flux correction.
-    lev_thick = levs_thick(nc)[np.newaxis,:,np.newaxis]/grav
+    lev_thick = Model.calc_levs_thick(nc)[np.newaxis,:,np.newaxis]/grav
     v_znl = variables[0].mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
@@ -1146,29 +1048,20 @@ def mass_flux(variables, **kwargs):
 
 def gms_moc(variables, **kwargs):
     """Gross moist stability."""
-    from aospy.calcs import moc_flux, msf_max
-    from aospy.constants import c_p
     return -moc_flux(variables, **kwargs)/msf_max([variables[-1]], **kwargs)/c_p
 
 def gms_msf(variables, **kwargs):
     """Gross moist stability."""
-    from aospy.calcs import moc_st_eddy_flux, msf_max
-    from aospy.constants import c_p
     return -(moc_st_eddy_flux(variables, **kwargs) / 
             (msf_max([variables[-1]], **kwargs)*c_p))
 
 def total_gms(variables, **kwargs):
     """Total (mean plus eddy) gross moist stability."""
-    from aospy.calcs import aht, msf_max
-    from aospy.constants import c_p
     return -(aht(variables[:-1], **kwargs) /
              msf_max([variables[-1]], **kwargs))/c_p
 
 def aht_no_snow(variables, **kwargs):
     """Total atmospheric northward energy flux."""
-    import numpy as np
-    from aospy.constants import L_v
-    
     # Calculate energy balance at each grid point.
     loc = -1*(variables[0] - variables[1] - variables[2] +             # TOA radiation
               variables[3] - variables[4] + variables[5] - variables[6] +   # sfc radiation
@@ -1185,8 +1078,6 @@ def aht_no_snow(variables, **kwargs):
 
 def hadley_bounds(lats, levs, vcomp):
     """Poleward extent of Hadley Cell."""
-    import numpy as np
-    from aospy.calcs import msf
     # Get meridional mass streamfunction at 500 hPa.
     p_ind = np.where(levs == 500.)
     sf = np.squeeze(msf(lats, levs, vcomp)[p_ind])
@@ -1202,7 +1093,7 @@ def hadley_bounds(lats, levs, vcomp):
 
 def had_bounds(strmfunc, lat, return_max=False):
     """Hadley cell poleward extent and center location."""
-    import numpy as np
+    
     # Get data max and min values and indices, such that min is north of max.
     z_max_ind, y_max_ind = np.where(strmfunc == strmfunc.max())
     z_max_ind = z_max_ind[0]; y_max_ind=y_max_ind[0]
@@ -1232,7 +1123,7 @@ def had_bounds(strmfunc, lat, return_max=False):
 
 def had_bounds500(strmfunc, lat):
     """Hadley cells extent based on 500 hPa streamfunction zero crossings."""
-    import numpy as np
+    
     # Find latitudes where streamfunction at 500 hPa changes sign.
     strmfunc = strmfunc[5]
     zero_cross = np.where(np.diff(np.sign(strmfunc)))[0]
@@ -1247,7 +1138,7 @@ def had_bounds500(strmfunc, lat):
 
 def thermal_equator(flux, lat):
     """Location of zero-crossing of energy flux."""
-    import numpy as np
+    
     # Find latitude indices where flux changes sign.
     zero_cross = np.where(np.diff(np.sign(flux)))[0]
     # Thermal equator is the zero crossing nearest the equator.
@@ -1258,7 +1149,6 @@ def thermal_equator(flux, lat):
 
 def itcz_pos(precip, lat, return_indices=False):
     """Calculate ITCZ location."""
-    import numpy as np
     # Find the latitude index with maximum precip and calculate dP/d(latitude)
     # for the adjacent grid latitudes.
     ind_max = precip.argmax()
@@ -1277,7 +1167,6 @@ def itcz_pos(precip, lat, return_indices=False):
 
 def itcz_loc(lats, precip):
     """Calculate ITCZ location."""
-    import numpy as np
     # Find the latitude index with maximum precip and calculate dP/d(latitude)
     # for the adjacent grid latitudes.
     ind_max = precip.argmax()
@@ -1295,7 +1184,6 @@ def prec_centroid(precip, lat, lat_max=20.):
     """
     Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
     """
-    import numpy as np
     # Interpolate zonal mean precip to a 0.1 degree latitude grid for 20S-20N
     trop = np.where(np.abs(lat) < lat_max)
     lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
@@ -1308,7 +1196,6 @@ def precip_centroid(lats, precip, lat_max=20.):
     """
     Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
     """
-    import numpy as np
     # Interpolate zonal mean P to 0.1 degree latitude grid over desired extent. 
     trop = np.where(np.abs(lats) < lat_max)
     precip = precip.mean(axis=-1)[trop]
@@ -1320,8 +1207,6 @@ def precip_centroid(lats, precip, lat_max=20.):
 
 def ang_mom(lats, ucomp):
     """Angular momentum per unit mass."""
-    import numpy as np
-    from aospy.constants import r_e, Omega
     cos_lat = np.cos(np.deg2rad(lats[np.newaxis,:,np.newaxis]))
     return (Omega*r_e*cos_lat + ucomp)*r_e*cos_lat
 
