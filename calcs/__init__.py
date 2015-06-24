@@ -1,3 +1,4 @@
+import scipy.stats
 import numpy as np
 
 from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
@@ -34,7 +35,7 @@ def pfull_from_phalf(phalf):
     """
     Compute data at full sigma levels from the values at half levels.
 
-    Could be the pressure array itself, but it could also be any other data 
+    Could be the pressure array itself, but it could also be any other data
     defined at half levels.
     """
     # 4D array assumed to be (time, p, lat, lon).
@@ -46,10 +47,10 @@ def pfull_from_phalf(phalf):
 
 def phalf_from_pfull(pfull, val_toa=0, val_sfc=0):
     """
-    Compute data at half sigma levels from the values at full levels, given the 
+    Compute data at half sigma levels from the values at full levels, given the
     specified top and bottom boundary conditions.
 
-    Could be the pressure array itself, but it could also be any other data 
+    Could be the pressure array itself, but it could also be any other data
     defined at pressure levels.
     """
     phalf = np.empty((pfull.shape[0] + 1, pfull.shape[1], pfull.shape[2]))
@@ -108,11 +109,11 @@ def dp_from_sigma(bk, pk, ps):
 
 # def dlon_from_latlon(lat, lon):
     # """Compute longitude spacing of grid cell centers."""
-    # return 
+    # return
 
 # def dlat_from_latlon(lat, lon):
     # """Compute latitude spacing of grid cell centers."""
-    # return 
+    # return
 
 ### General finite differencing.
 def fwd_diff(f, dx):
@@ -250,7 +251,7 @@ def weight_by_delta(integrand, delta):
     """
     Weight the integrand by delta, usually for subsequent integration.
 
-    delta array may be one dimension or three; in the latter it is assumed to 
+    delta array may be one dimension or three; in the latter it is assumed to
     be of shape (vertical, lat, lon).  integrand is assumed to be 3 or 4
     dimensions, with time 1st if 4-D.  Both are assumed to be numpy arrays.
     """
@@ -475,7 +476,7 @@ def qv(sphum, v):
 def covariance(array1, array2, axis=None, weights=None):
     """
     Average `covariance` along the specified axis of two arrays.
-    
+
     :param array1, array2: The two arrays to compute the covariance of.
     :type array1 array2: numpy.ndarray or numpy.ma.core.MaskedArray
     :param axis: Array axis number over which average is taken.
@@ -550,7 +551,7 @@ def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
 def equiv_pot_temp(temp, p, sphum, p0=1000.):
     """Equivalent potential temperature."""
     return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
-    
+
 ### Gross moist stability-related quantities
 
 # def dse_int_sigma(bk, pk, ps, hght, temp):
@@ -674,21 +675,21 @@ def sfc_rad(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc):
     """All-sky surface upward radiative flux."""
     return swup_sfc - swdn_sfc + lwup_sfc -lwdn_sfc
 
-def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr, 
+def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr,
                 lwup_sfc, lwup_sfc_clr, lwdn_sfc, lwdn_sfc_clr):
     """Cloudy-sky upward surface radiative flux."""
-    return (swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr + 
+    return (swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr +
             lwup_sfc - lwup_sfc_clr - lwdn_sfc + lwdn_sfc_clr)
 
 def sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net upward surface radiative plus enthalpy flux."""
     return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
 
-def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, 
+def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                   lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net TOA and surface radiative and enthalpy flux into atmos."""
     return (swdn_toa - swup_toa - olr +
-            swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + 
+            swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc +
             shflx + L_v*evap)
 
 # def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls, tdt_vdif):
@@ -755,7 +756,7 @@ def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
     # Calculate meridional heat transport.
     glb = np.average(loc, weights=sfc_area)
     return np.cumsum(np.sum(sfc_area*(glb - loc), axis=-1))
-    
+
 def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
     """Gross moist stability. Upper minus lower level MSE."""
     m = mse(temp, hght, sphum)
@@ -786,8 +787,8 @@ def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
-    m = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)), 
-            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)), 
+    m = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)),
+            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
             np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
     return (m[itcz_ind] - m)/c_p
 
@@ -805,16 +806,16 @@ def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
 
 def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
     """
-    Gross moist stability. MSE diff b/w ITCZ aloft and near surface at the 
+    Gross moist stability. MSE diff b/w ITCZ aloft and near surface at the
     given latitude.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
-    m_up = mse(np.squeeze(temp[np.where(level == lev_up)].mean(axis=-1)), 
-            np.squeeze(hght[np.where(level == lev_up)].mean(axis=-1)), 
+    m_up = mse(np.squeeze(temp[np.where(level == lev_up)].mean(axis=-1)),
+            np.squeeze(hght[np.where(level == lev_up)].mean(axis=-1)),
             np.squeeze(sphum[np.where(level == lev_up)].mean(axis=-1)))
-    m_sfc = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)), 
-            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)), 
+    m_sfc = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)),
+            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
             np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
     return (m_up[itcz_ind] - m_sfc)/c_p
 
@@ -826,7 +827,7 @@ def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
-    # Need temperature change at 
+    # Need temperature change at
     T_pert = np.squeeze(T_pert[np.where(level == lev_sfc)].mean(axis=-1))
     T_cont = np.squeeze(T_cont[np.where(level == lev_sfc)].mean(axis=-1))
     dT = T_pert - T_cont
@@ -834,7 +835,7 @@ def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     q_cont = np.squeeze(q_cont[np.where(level == lev_sfc)].mean(axis=-1))
     # GMS is difference between surface
     alpha = 0.07
-    return ((c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz - 
+    return ((c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
             (c_p + L_v*alpha*q_cont)*dT)/c_p
 
 def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
@@ -848,7 +849,7 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
-    # Need temperature change at 
+    # Need temperature change at
     T_pert = np.squeeze(T_pert[np.where(level == lev_sfc)].mean(axis=-1))
     T_cont = np.squeeze(T_cont[np.where(level == lev_sfc)].mean(axis=-1))
     dT = T_pert - T_cont
@@ -857,7 +858,7 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
     # GMS is difference between surface
     alpha = 0.07
     return (np.cos(np.deg2rad(lat))**2*gamma*
-            (c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz - 
+            (c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
             (c_p + L_v*alpha*q_cont)*dT)/c_p
 
 def prec_conv_frac(prec_conv, precip, prec_ls=False):
@@ -903,19 +904,19 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
 
 def tht(variables, **kwargs):
     """Total atmospheric plus oceanic northward energy flux."""
-    
-    
+
+
     # Calculate energy balance at each grid point.
     loc = -1*(variables[0] - variables[1] - variables[2])             # TOA radiation
     # Calculate meridional heat transport.
     len_dt = variables[0].shape[0]
     sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1), 
+    glb = np.average(loc.reshape(len_dt, -1),
                      weights=sfc_area.ravel(), axis=1)
     # AHT is meridionally integrated energy flux divergence.
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
     return np.cumsum(flux_div, axis=-1)
-    
+
 def oht(variables, **kwargs):
     """Total oceanic northward energy flux as residual of total minus atmospheric flux."""
     # Calculate energy balance at each grid point.
@@ -925,7 +926,7 @@ def oht(variables, **kwargs):
     # Calculate meridional heat transport.
     len_dt = variables[0].shape[0]
     sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1), 
+    glb = np.average(loc.reshape(len_dt, -1),
                      weights=sfc_area.ravel(), axis=1)
     # AHT is meridionally integrated energy flux divergence.
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
@@ -933,7 +934,7 @@ def oht(variables, **kwargs):
     #return tht(variables, **kwargs) - aht(variables, **kwargs)
 
 def moc_flux(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by time and 
+    """Mass weighted column integrated meridional flux by time and
     zonal mean flow."""
     # Specify upper bound of vertical integrals.
     p_top = kwargs.get('p_top', 0.)
@@ -945,7 +946,7 @@ def moc_flux(variables, **kwargs):
     lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis]
     # Adjustment imposes that column integrated mass flux is zero.
-    mass_adj = -((v_north*lev_thick).sum(axis=1) / 
+    mass_adj = -((v_north*lev_thick).sum(axis=1) /
                  (v_south*lev_thick).sum(axis=1))
     # Integrate the specified flux by the adjusted v vertically and zonally.
     flux_type = kwargs['flux_type']
@@ -958,9 +959,9 @@ def moc_flux(variables, **kwargs):
     elif flux_type == 'moisture':
         flux = L_v*(np.squeeze(variables[0][:,trop]).mean(axis=-1) *
                 (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) * 
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1))
-    
+
 def moc_flux_raw(variables, **kwargs):
     """Mass weighted column integrated meridional flux by time and zonal mean flow, without applying column mass flux correction."""
     # Specify upper bound of vertical integrals.
@@ -978,7 +979,7 @@ def moc_flux_raw(variables, **kwargs):
         flux = np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) * v_znl
     elif flux_type == 'moisture':
         flux = L_v*np.squeeze(variables[0][:,trop]).mean(axis=-1) * v_znl
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) * 
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1))
 
 def st_eddy_flux(variables, **kwargs):
@@ -995,11 +996,11 @@ def st_eddy_flux(variables, **kwargs):
         m = np.squeeze(variables[0][:,trop])*L_v
     lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
-    flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) * 
+    flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) *
             (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) * 
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1).mean(axis=-1))
-            
+
 def moc_st_eddy_flux(variables, **kwargs):
     """Mass weighted column integrated flux by time mean flow."""
     return moc_flux(variables, **kwargs) + st_eddy_flux(variables, **kwargs)
@@ -1027,23 +1028,23 @@ def mse_flux(variables, **kwargs):
         return aht(variables[4:], **kwargs)
     elif flux_type == 'eddy':
         return eddy_flux(variables, **kwargs)
-    
+
 def mass_flux(variables, **kwargs):
     """Meridional mass flux by time and zonal mean flow."""
-    
+
     # Apply mass flux correction.
     lev_thick = Model.calc_levs_thick(nc)[np.newaxis,:,np.newaxis]/grav
     v_znl = variables[0].mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
-    mass_adj = -((v_north*lev_thick).sum(axis=1) / 
+    mass_adj = -((v_north*lev_thick).sum(axis=1) /
                  (v_south*lev_thick).sum(axis=1))
     # Integrate vertically and pick level where magnitude maximized.
-    int_flux = ((v_north + v_south*mass_adj[:,np.newaxis,:]) * 
+    int_flux = ((v_north + v_south*mass_adj[:,np.newaxis,:]) *
                 lev_thick).cumsum(axis=1)
     flux_pos = np.amax(int_flux, axis=1)
-    flux_neg = np.amin(int_flux, axis=1) 
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) * 
+    flux_neg = np.amin(int_flux, axis=1)
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             np.where(flux_pos > - flux_neg, flux_pos, flux_neg))
 
 def gms_moc(variables, **kwargs):
@@ -1052,7 +1053,7 @@ def gms_moc(variables, **kwargs):
 
 def gms_msf(variables, **kwargs):
     """Gross moist stability."""
-    return -(moc_st_eddy_flux(variables, **kwargs) / 
+    return -(moc_st_eddy_flux(variables, **kwargs) /
             (msf_max([variables[-1]], **kwargs)*c_p))
 
 def total_gms(variables, **kwargs):
@@ -1070,7 +1071,7 @@ def aht_no_snow(variables, **kwargs):
     # Calculate meridional heat transport.
     len_dt = variables[0].shape[0]
     sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1), 
+    glb = np.average(loc.reshape(len_dt, -1),
                      weights=sfc_area.ravel(), axis=1)
     # AHT is meridionally integrated energy flux divergence.
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
@@ -1087,13 +1088,13 @@ def hadley_bounds(lats, levs, vcomp):
     # Hadley cell poleward boundaries are the zero crossings on either side.
     ind = [zero_cross[ind_cent + i] for i in range(-1,2)]
     # Linearly interpolate to true zero crossings.
-    return np.array([lats[ind[i]+1] - (lats[ind[i]+1] - lats[ind[i]]) / 
-                (sf[ind[i]+1] - sf[ind[i]])*sf[ind[i]+1] 
+    return np.array([lats[ind[i]+1] - (lats[ind[i]+1] - lats[ind[i]]) /
+                (sf[ind[i]+1] - sf[ind[i]])*sf[ind[i]+1]
                 for i in range(3)])
 
 def had_bounds(strmfunc, lat, return_max=False):
     """Hadley cell poleward extent and center location."""
-    
+
     # Get data max and min values and indices, such that min is north of max.
     z_max_ind, y_max_ind = np.where(strmfunc == strmfunc.max())
     z_max_ind = z_max_ind[0]; y_max_ind=y_max_ind[0]
@@ -1106,8 +1107,8 @@ def had_bounds(strmfunc, lat, return_max=False):
         return [z_min_ind, y_min_ind, strmfunc[z_min_ind, y_min_ind],
                 z_max_ind, y_max_ind, strmfunc[z_max_ind, y_max_ind]]
     # Find latitude where streamfunction at its level of maximum decreases
-    # to 10% of that maximum value. 
-    had_max = np.where(np.diff(np.sign(strmfunc[z_max_ind] - 
+    # to 10% of that maximum value.
+    had_max = np.where(np.diff(np.sign(strmfunc[z_max_ind] -
                                        0.1*strmfunc.max())))[0]
     had_min = np.where(np.diff(np.sign(strmfunc[z_min_ind] -
                                        0.1*strmfunc.min())))[0]
@@ -1123,7 +1124,7 @@ def had_bounds(strmfunc, lat, return_max=False):
 
 def had_bounds500(strmfunc, lat):
     """Hadley cells extent based on 500 hPa streamfunction zero crossings."""
-    
+
     # Find latitudes where streamfunction at 500 hPa changes sign.
     strmfunc = strmfunc[5]
     zero_cross = np.where(np.diff(np.sign(strmfunc)))[0]
@@ -1132,19 +1133,19 @@ def had_bounds500(strmfunc, lat):
     # Hadley cell poleward boundaries are the zero crossings on either side.
     ind = [zero_cross[ind_cent + i] for i in range(-1,2)]
     # Linearly interpolate to true zero crossings.
-    return np.array([lat[ind[i]+1] - (lat[ind[i]+1] - lat[ind[i]]) / 
-                    (strmfunc[ind[i]+1] - strmfunc[ind[i]])*strmfunc[ind[i]+1] 
+    return np.array([lat[ind[i]+1] - (lat[ind[i]+1] - lat[ind[i]]) /
+                    (strmfunc[ind[i]+1] - strmfunc[ind[i]])*strmfunc[ind[i]+1]
                     for i in range(3)])
 
 def thermal_equator(flux, lat):
     """Location of zero-crossing of energy flux."""
-    
+
     # Find latitude indices where flux changes sign.
     zero_cross = np.where(np.diff(np.sign(flux)))[0]
     # Thermal equator is the zero crossing nearest the equator.
     ind = zero_cross[np.argmin(np.abs(zero_cross - lat.size/2))]
     # Linearly interpolate to true zero crossing latitude.
-    return (lat[ind+1] - (lat[ind+1] - lat[ind]) / 
+    return (lat[ind+1] - (lat[ind+1] - lat[ind]) /
             (flux[ind+1] - flux[ind])*flux[ind+1])
 
 def itcz_pos(precip, lat, return_indices=False):
@@ -1161,7 +1162,7 @@ def itcz_pos(precip, lat, return_indices=False):
     # Find on which side of the maximum does dP/d(latitude) change sign.
     i = np.where(np.diff(np.sign(dP)))[0][0]
     # Linearly interpolate to determine the latitude of max precip.
-    zero_interp = phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) / 
+    zero_interp = phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) /
                             (dP_dphi[i+1] - dP_dphi[i]))
     return np.rad2deg(zero_interp)
 
@@ -1177,7 +1178,7 @@ def itcz_loc(lats, precip):
     # Find on which side of the maximum does dP/d(latitude) change sign.
     i = np.where(np.diff(np.sign(dP)))[0][0]
     # Linearly interpolate to determine the latitude of max precip.
-    return np.deg2rad(phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) / 
+    return np.deg2rad(phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) /
                                (dP_dphi[i+1] - dP_dphi[i])))
 
 def prec_centroid(precip, lat, lat_max=20.):
@@ -1196,7 +1197,7 @@ def precip_centroid(lats, precip, lat_max=20.):
     """
     Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
     """
-    # Interpolate zonal mean P to 0.1 degree latitude grid over desired extent. 
+    # Interpolate zonal mean P to 0.1 degree latitude grid over desired extent.
     trop = np.where(np.abs(lats) < lat_max)
     precip = precip.mean(axis=-1)[trop]
     lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
@@ -1234,3 +1235,31 @@ def trop_height(level, T):
                (Gamma_crit - Gamma[tp-1])/(Gamma[tp] - Gamma[tp-1])))
     # Convert from pressure^kappa to pressure.
     return pkap_tp**(1./kap)
+
+def pointwise_corr(x1, x2):
+    """Pointwise Pearson correlation coefficient in time of two arrays.
+
+    Assumes input arrays have shape (time, vert, lat, lon).
+    """
+    if not np.all(np.shape(x1) == np.shape(x2)):
+        raise ValueError("x1 and x2 must have same shapes")
+    orig_shape = np.shape(x1)
+    n_lon, n_lat, n_lev = x1.shape[-1], x1.shape[-2], x1.shape[-3]
+    n_pt = n_lon*n_lat*n_lev
+    # pearsonr only accepts 1d arrays.  Must flatten, compute, then reshape.
+    x1 = x1.reshape((-1, n_pt))
+    x2 = x2.reshape((-1, n_pt))
+    # pearsonr returns (corr, p_value).  Retain only corr via '[0]'.
+    corr = [scipy.stats.pearsonr(x1[:,i], x2[:,i])[0] for i in range(n_pt)]
+    # Reshape to original shape, but dropping the time dimension.
+    return np.reshape(corr, orig_shape[1:])
+
+def corr_cre_sw(swup_toa, swup_toa_clr, var2):
+    return pointwise_corr(cre_sw(swup_toa, swup_toa_clr), var2)
+
+def corr_cre_lw(olr, olr_clr, var2):
+    return pointwise_corr(cre_lw(olr, olr_clr), var2)
+
+def corr_cre_net(swup_toa, olr, swup_toa_clr, olr_clr, var2):
+    return pointwise_corr(cre_net(swup_toa, olr, swup_toa_clr, olr_clr), var2)
+

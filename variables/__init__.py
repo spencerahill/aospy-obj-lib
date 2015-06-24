@@ -1892,6 +1892,78 @@ toa_swup_cld = Var(
     func=calcs.toa_swup_cld,
     units=units.W_m2
 )
+cre_sw_precip_corr = Var(
+    name='cre_sw_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of SW CRE and precip',
+    vars=(swup_toa, swup_toa_clr, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.corr_cre_sw,
+    units=units.unitless
+)
+cre_lw_precip_corr = Var(
+    name='cre_lw_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of LW CRE and precip',
+    vars=(olr, olr_clr, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.corr_cre_lw,
+    units=units.unitless
+)
+cre_net_precip_corr = Var(
+    name='cre_net_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of net CRE and precip',
+    vars=(swup_toa, olr, swup_toa_clr, olr_clr, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.corr_cre_net,
+    units=units.unitless
+)
+evap_precip_corr = Var(
+    name='evap_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of evap and precip',
+    vars=(evap, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.pointwise_corr,
+    units=units.unitless
+)
+evap_precip_corr = Var(
+    name='evap_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of evap and precip',
+    vars=(evap, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.pointwise_corr,
+    units=units.unitless
+)
+t_surf_precip_corr = Var(
+    name='t_surf_precip_corr',
+    domain='atmos',
+    description='Pointwise temporal correlation of t_surf and precip',
+    vars=(t_surf, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.pointwise_corr,
+    units=units.unitless
+)
 vert_divg = Var(
     name='vert_divg',
     domain='atmos',
@@ -1970,5 +2042,8 @@ master_vars_list = [
     temp_horiz_advec_divg_sum, hght_horiz_advec_divg_sum,
     dse_horiz_advec_divg_sum, q_times_vert_divg, q_vert_flux_divg,
     mse_times_vert_divg, mse_vert_flux_divg, horiz_divg_vert_int_max,
-    vert_divg_vert_int_max, temp_vert_advec
+    vert_divg_vert_int_max, temp_vert_advec, t_surf_precip_corr,
+    evap_precip_corr, cre_net_precip_corr, cre_sw_precip_corr,
+    cre_lw_precip_corr
+    #, mse_flux_divg_precip_corr
 ]
