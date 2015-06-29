@@ -1,3 +1,4 @@
+"""Calcs submodule of aospy module."""
 import scipy.stats
 import numpy as np
 
@@ -550,6 +551,7 @@ def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
 
 def equiv_pot_temp(temp, p, sphum, p0=1000.):
     """Equivalent potential temperature."""
+
     return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
 
 ### Gross moist stability-related quantities
@@ -690,11 +692,7 @@ def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
     """All sky net TOA and surface radiative and enthalpy flux into atmos."""
     return (swdn_toa - swup_toa - olr +
             swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc +
-            shflx + L_v*evap)
-
-# def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls, tdt_vdif):
-#     """Net diabatic heating rate."""
-#     return tdt_lw + tdt_sw + tdt_conv + tdt_ls + tdt_vdif
+    return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
 
 def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls):
     """Net diabatic heating rate."""
@@ -904,8 +902,6 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
 
 def tht(variables, **kwargs):
     """Total atmospheric plus oceanic northward energy flux."""
-
-
     # Calculate energy balance at each grid point.
     loc = -1*(variables[0] - variables[1] - variables[2])             # TOA radiation
     # Calculate meridional heat transport.
@@ -1273,7 +1269,7 @@ def pointwise_lin_regr(x, y):
     orig_shape = np.shape(x)
     x, y = [flatten_spatial_dims(x) for x in (x, y)]
     n_pt = x.shape[-1]
-    # lingregress returns (slope, ...).  Retain only slope via '[0]'.
+    # linregress returns (slope, ...).  Retain only slope via '[0]'.
     slope = [scipy.stats.linregress(x[:,i], y[:,i])[0] for i in range(n_pt)]
     # Reshape to original shape, but dropping the time dimension.
     return np.reshape(slope, orig_shape[1:])

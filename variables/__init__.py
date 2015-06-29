@@ -1,10 +1,11 @@
-from aospy.utils import _load_user_data
+from aospy.calcs import calcs
 from aospy.constants import c_p, r_e
+from aospy.units import Units
+# from aospy.utils import _load_user_data
 from aospy.var import Var
 
-units = _load_user_data('units')
-calcs = _load_user_data('calcs')
-            
+# calcs = _load_user_data('calcs')
+
 alb_sfc = Var(
     name='alb_sfc',
     units='Surface albedo',
@@ -2088,3 +2089,8 @@ master_vars_list = [
     cre_lw_precip_corr, t_surf_precip_lin_regr, cre_net_precip_lin_regr,
     toa_rad_clr_precip_corr, toa_rad_clr_precip_lin_regr,
 ]
+
+class variables(object):
+    def __init__(self, vars_list):
+        for var in vars_list:
+            setattr(self, var.name, var)
