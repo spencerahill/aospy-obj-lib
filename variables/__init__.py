@@ -1940,16 +1940,16 @@ evap_precip_corr = Var(
     func=calcs.pointwise_corr,
     units=units.unitless
 )
-evap_precip_corr = Var(
-    name='evap_precip_corr',
+toa_rad_clr_precip_corr = Var(
+    name='toa_rad_clr_precip_corr',
     domain='atmos',
-    description='Pointwise temporal correlation of evap and precip',
-    vars=(evap, precip),
+    description='',
+    vars=(swdn_toa_clr, swup_toa_clr, olr_clr, precip),
     def_time=False,
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.pointwise_corr,
+    func=calcs.corr_toa_rad_clr,
     units=units.unitless
 )
 t_surf_precip_corr = Var(
@@ -1963,6 +1963,47 @@ t_surf_precip_corr = Var(
     def_lon=True,
     func=calcs.pointwise_corr,
     units=units.unitless
+)
+cre_net_precip_lin_regr = Var(
+    name='cre_net_precip_lin_regr',
+    domain='atmos',
+    description='',
+    vars=(swup_toa, olr, swup_toa_clr, olr_clr, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.lin_regr_cre_net,
+    units='',
+    plot_units='W m$^{-2}$ (mm day$^{-1}$)$^{-1}$',
+    plot_units_conv=1./24./3600.
+)
+toa_rad_clr_precip_lin_regr = Var(
+    name='toa_rad_clr_precip_lin_regr',
+    domain='atmos',
+    description='',
+    vars=(swdn_toa_clr, swup_toa_clr, olr_clr, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.lin_regr_toa_rad_clr,
+    units='',
+    plot_units='W m$^{-2}$ (mm day$^{-1}$)$^{-1}$',
+    plot_units_conv=1./24./3600.
+)
+t_surf_precip_lin_regr = Var(
+    name='t_surf_precip_lin_regr',
+    domain='atmos',
+    description=('Pointwise temporal least squares linear regression of '
+                 't_surf and precip'),
+    vars=(t_surf, precip),
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.pointwise_lin_regr,
+    units=units.kg_m2_s
 )
 vert_divg = Var(
     name='vert_divg',
@@ -2044,6 +2085,6 @@ master_vars_list = [
     mse_times_vert_divg, mse_vert_flux_divg, horiz_divg_vert_int_max,
     vert_divg_vert_int_max, temp_vert_advec, t_surf_precip_corr,
     evap_precip_corr, cre_net_precip_corr, cre_sw_precip_corr,
-    cre_lw_precip_corr
-    #, mse_flux_divg_precip_corr
+    cre_lw_precip_corr, t_surf_precip_lin_regr, cre_net_precip_lin_regr,
+    toa_rad_clr_precip_corr, toa_rad_clr_precip_lin_regr,
 ]
