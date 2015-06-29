@@ -1,10 +1,9 @@
-from aospy.calcs import calcs
 from aospy.constants import c_p, r_e
-from aospy.units import Units
-# from aospy.utils import _load_user_data
+from aospy.utils import _load_user_data
 from aospy.var import Var
 
-# calcs = _load_user_data('calcs')
+calcs = _load_user_data('calcs')
+units = _load_user_data('units')
 
 alb_sfc = Var(
     name='alb_sfc',

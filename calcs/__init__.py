@@ -690,9 +690,8 @@ def sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
 def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                   lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net TOA and surface radiative and enthalpy flux into atmos."""
-    return (swdn_toa - swup_toa - olr +
-            swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc +
-    return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
+    return (toa_rad(swdn_toa, swup_toa, olr) +
+            sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap))
 
 def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls):
     """Net diabatic heating rate."""
