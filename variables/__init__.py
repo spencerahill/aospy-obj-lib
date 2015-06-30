@@ -448,7 +448,7 @@ sphum = Var(
 )
 sst = Var(
     name='sst',
-    alt_names=('ts',),
+    alt_names=('ts', 'SST'),
     units=units.K,
     domain='ocean',
     description='Sea surface temperature.',

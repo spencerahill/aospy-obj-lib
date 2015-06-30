@@ -3,9 +3,9 @@ import scipy.stats
 import numpy as np
 
 from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
-from aospy.model import Model
+from aospy.utils import level_thickness
 
-### Utility functions for sigma coordinates. ###
+# Utility functions for sigma coordinates.
 def phalf_from_sigma(bk, pk, ps):
     """
     Compute pressure at sigma half levels from the sigma coordinate arrays and
@@ -868,21 +868,24 @@ def prec_conv_frac(prec_conv, precip, prec_ls=False):
     else:
         return prec_conv/precip
 
+
 def descent_tot(omega, mc):
     """Vertical motion from both convection and large-scale."""
     return omega + grav*mc
+
 
 def ascent_ls(omega):
     """Large-scale vertically upward motion."""
     # Get positive values and replace negative ones with zero.
     return np.where(omega > 0., omega, 0)
 
+
 def vert_centroid(field, level, p_bot=850., p_top=150.):
     """
     Compute the vertical centroid of some vertically defined field.
     """
     desired_levs = np.where((level <= p_bot) & (level >= p_top))
-    lev_thick = Model.calc_levs_thick(level)/100.
+    lev_thick = level_thickness(level)/100.
     # Add axes for later broadcasting and truncate to desired vertical levels.
     level = level[desired_levs]; level = level[:,np.newaxis,np.newaxis]
     lev_thick = lev_thick[desired_levs]
@@ -938,7 +941,7 @@ def moc_flux(variables, **kwargs):
     v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
-    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis]
     # Adjustment imposes that column integrated mass flux is zero.
     mass_adj = -((v_north*lev_thick).sum(axis=1) /
@@ -964,7 +967,7 @@ def moc_flux_raw(variables, **kwargs):
     trop = np.where(nc.variables['level'][:] >= p_top)
     # Take zonal mean and calculate grid level thicknesses.
     v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis]
     # Integrate the specified flux vertically and zonally.
     flux_type = kwargs.get('flux_type', 'mse')
@@ -989,7 +992,7 @@ def st_eddy_flux(variables, **kwargs):
         m = np.squeeze(mse(variables[:3])[:,trop])
     elif flux_type == 'moisture':
         m = np.squeeze(variables[0][:,trop])*L_v
-    lev_thick = np.squeeze(Model.calc_levs_thick(nc)[:,trop])/grav
+    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
     lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
     flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) *
             (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
@@ -1028,7 +1031,7 @@ def mass_flux(variables, **kwargs):
     """Meridional mass flux by time and zonal mean flow."""
 
     # Apply mass flux correction.
-    lev_thick = Model.calc_levs_thick(nc)[np.newaxis,:,np.newaxis]/grav
+    lev_thick = level_thickness(nc)[np.newaxis,:,np.newaxis]/grav
     v_znl = variables[0].mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
