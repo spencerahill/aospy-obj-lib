@@ -1,8 +1,6 @@
 """gfdl_models.py: aospy.Model objects for various models developed at GFDL"""
 from aospy.model import Model
-from aospy.utils import load_user_data
-
-runs = load_user_data('runs')
+from aospy_user import runs
 
 am2 = Model(
     name='am2',

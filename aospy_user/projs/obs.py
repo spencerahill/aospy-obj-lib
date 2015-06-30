@@ -1,10 +1,6 @@
 """Spencer Hill's aospy.Proj object for observational data."""
 from aospy.proj import Proj
-from aospy.utils import load_user_data
-
-regions = load_user_data('regions')
-models = load_user_data('models')
-variables = load_user_data('variables')
+from aospy_user import regions, models, variables
 
 
 obs = Proj(

@@ -1,9 +1,8 @@
+"""Collection of aospy.Var objects for use in my research."""
 from aospy.constants import c_p, r_e
-from aospy.utils import load_user_data
 from aospy.var import Var
+from aospy_user import calcs, units
 
-calcs = load_user_data('calcs')
-units = load_user_data('units')
 
 alb_sfc = Var(
     name='alb_sfc',
@@ -293,7 +292,7 @@ prec_conv = Var(
     alt_names=('prc',),
     units=units.kg_m2_s,
     domain='atmos',
-    description='Liquid precipitation reaching surface from convection scheme.',
+    description='Liquid precip reaching surface from convection scheme.',
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -304,7 +303,7 @@ prec_ls = Var(
     name='prec_ls',
     units=units.kg_m2_s,
     domain='atmos',
-    description='Liquid precipitation reaching surface from large scale ascent.',
+    description='Liquid precip reaching surface from large scale ascent.',
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -806,25 +805,28 @@ sfc_area = Var(
     def_lon=True,
     in_nc_grid=False
 )
-### Calculations involving one or more model-native variables.
-aht = Var(name='aht',
-          domain='atmos',
-          description='Total northward atmospheric heat transport.',
-          vars=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                shflx, evap, snow_ls, snow_conv, sfc_area),
-          def_time=True,
-          def_vert=False,
-          def_lat=True,
-          def_lon=False,
-          func=calcs.aht,
-          units='Watts',
-          plot_units='PW',
-          plot_units_conv=1e-15
+
+# Calculations involving one or more model-native variables.
+aht = Var(
+    name='aht',
+    domain='atmos',
+    description='Total northward atmospheric heat transport.',
+    vars=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc,
+          lwdn_sfc, shflx, evap, snow_ls, snow_conv, sfc_area),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.aht,
+    units='Watts',
+    plot_units='PW',
+    plot_units_conv=1e-15
 )
 albedo = Var(
     name='albedo',
     domain='atmos',
-    description='Column albedo: fraction of incoming SW at TOA reflectedback to space.',
+    description=('Column albedo: fraction of incoming SW at TOA reflected '
+                 'back to space.'),
     vars=(swdn_toa, swup_toa),
     def_time=True,
     def_vert=False,
