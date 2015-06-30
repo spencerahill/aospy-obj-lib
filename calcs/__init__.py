@@ -3,7 +3,7 @@ import scipy.stats
 import numpy as np
 
 from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
-from aospy.utils import level_thickness
+from aospy.utils import level_thickness, to_pascal, to_radians
 
 # Utility functions for sigma coordinates.
 def phalf_from_sigma(bk, pk, ps):
@@ -116,10 +116,13 @@ def dp_from_sigma(bk, pk, ps):
     # """Compute latitude spacing of grid cell centers."""
     # return
 
-### General finite differencing.
+
+# General finite differencing.
+
 def fwd_diff(f, dx):
     """1st order accurate forward differencing."""
     return (f[1:] - f[:-1]) / dx
+
 
 def cen_diff2(f, dx, dx_array=False):
     """2nd order accurate centered differencing."""
@@ -128,6 +131,7 @@ def cen_diff2(f, dx, dx_array=False):
     else:
         df_dx = (f[2:] - f[:-2]) / (2.*dx)
     return df_dx
+
 
 def cen_diff4(f, dx, dx_array=False):
     """4th order accurate centered differencing."""
@@ -138,25 +142,9 @@ def cen_diff4(f, dx, dx_array=False):
         return (4*d1 - d2) / 3.
     else:
         return (8*(f[3:-1] - f[1:-3]) - (f[4:] - f[:-4])) / (12.*dx)
-    return numer / denom
 
-### Derivatives in x, y, and p.
 
-def to_rad(field):
-    if np.max(np.abs(field)) > 2*np.pi:
-        return np.deg2rad(field)
-    else:
-        return field
-
-def to_pascal(field):
-    # For dp fields, this won't work if the input data is already Pascals and
-    # the largest level thickness is < 1200 Pa, i.e. 12 hPa.  This will almost
-    # never come up in practice for data interpolated to pressure levels, but
-    # could come up in sigma data if model has sufficiently high vertical
-    # resolution.
-    if np.max(np.abs(field)) < 1200.:
-        field *= 100.
-    return field
+# Derivatives in x, y, and p.
 
 def d_dx_from_latlon(field, lat, lon, radius):
     """Compute \partial(field)/\partial x using centered differencing."""
@@ -164,7 +152,7 @@ def d_dx_from_latlon(field, lat, lon, radius):
     dlon = lon[1] - lon[0]
     assert np.allclose(360. - (lon[-1] - lon[0]), dlon)
     assert np.allclose(lon[2:] - lon[1:-1], lon[1:-1] - lon[:-2])
-    lat, lon = to_rad(lat), to_rad(lon)
+    lat, lon = to_radians(lat), to_radians(lon)
     dlon = lon[1] - lon[0]
     prefactor = 1. / (radius*np.cos(lat))[:,np.newaxis]
     # Assume latitude and longitude are last two axes.
@@ -176,9 +164,10 @@ def d_dx_from_latlon(field, lat, lon, radius):
     # Transpose again to regain original axis order.
     return prefactor*df_dx.T
 
+
 def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     """Compute \partial(field)/\partial y using centered differencing."""
-    lat = to_rad(lat)
+    lat = to_radians(lat)
     dlat = lat[1:] - lat[:-1]
     # Assume latitude and longitude are last two axes.
     if field.ndim == 2:
