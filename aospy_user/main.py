@@ -62,16 +62,17 @@ def main(proj=None, model=None, run=None, ens_mem=None, var=None, yr_range=None,
 if __name__ == '__main__':
     proj = 'aero_3agcm'
     model = ['am2']
-    run = ['reyoi_cont']
+    run = ['amip']
     ens_mem = [None]
-    var = ['t_surf']
+    var = ['toa_rad_clr_precip_lin_regr', 'toa_rad_clr_precip_corr']
     yr_range = ['default']
     region = ['all']
     intvl_in = ['monthly']
-    intvl_out = ['jas']
+    intvl_out = [1,7]
     dtype_in_time = ['ts']
     dtype_in_vert = [False]
-    dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
+    # dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
+    dtype_out_time = ('',)
     dtype_out_vert = [False]
     level = [None]
     yr_chunk_len = False

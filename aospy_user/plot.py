@@ -1,55 +1,56 @@
 #! /usr/bin/env python
-import numpy as np
-import aospy
+import matplotlib
+import matplotlib.pyplot as plt
+import aospy.plotting
 
-def plot_mult():
+def plot():
     fig = aospy.plotting.Fig(
-        n_row=1,
+        n_row=2,
         n_col=1,
         n_ax='all',
         n_plot=1,
-        n_data=2,
+        n_data=1,
 
-        row_size=4,
+        row_size=1.7,
         col_size=5,
         subplot_lims={'left': 0.05, 'right': 0.95, 'wspace': 0.1,
                       'bottom': 0.12, 'top': 0.88, 'hspace': 0.15},
 
-        min_cntr=-3.5,
-        max_cntr=3.5,
-        num_cntr=13,
+        min_cntr=-1,
+        max_cntr=1,
+        num_cntr=20,
         contourf_extend='both', # 'auto' 'neither' 'min' 'max' 'both'
-        col_map='BrBG',
+        col_map='RdBu_r',
         do_colorbar='all',      # 'all' 'column' 'row' False True
-        cbar_ax_lim = (0.1, 0.08, 0.8, 0.03),
+        cbar_ax_lim = (0.1, 0.1, 0.8, 0.03),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
 
         proj='aero_3agcm',
         model='am2',
-        run='reyoi_cont',
+        run='amip',
         ens_mem=None,
-        var=['precip', 'evap'],
+        var='toa_rad_clr_precip_corr',
         intvl_in='monthly',
-        intvl_out='jas',
+        intvl_out=[1,7],
         dtype_in_time='ts',
         dtype_in_vert=False,
-        dtype_out_time='reg.av',
+        dtype_out_time='',
         dtype_out_vert=False,
         level=None,
-        region='sahel',
+        region=None,
         yr_range='default',
 
-        plot_type='scatter',
-        x_dim=False,
-        y_dim=False,
+        plot_type='map',
+        x_dim='lon',
+        y_dim='lat',
 
         ## Titles and labels
-        fig_title=False,
+        fig_title=r'$B_t$ v. $P$ correlation in AM2.1 1870-1999 AMIP simulation',
         ax_title=False,
         ax_left_label=False,
-        ax_right_label=False,
+        ax_right_label=['January', 'July'],
 
         ## Axis limits
         x_lim=False,
@@ -63,13 +64,11 @@ def plot_mult():
         y_label=False,
 
         lat_lim=(-45, 45),
-        # lat_lim=(-5, 35),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
         lon_lim=(-180, 180),
-        # lon_lim=(-40, 70),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -260,7 +259,9 @@ def plot_mult():
     return fig
     
 if __name__ == '__main__':
-    fig = plot_mult()
+    matplotlib.rcParams['font.family'] = 'sans-serif'
+    matplotlib.rcParams['font.sans-serif'] = 'Helvetica'
+    fig = plot()
 
 ####################################
 

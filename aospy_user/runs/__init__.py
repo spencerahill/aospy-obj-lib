@@ -1,3 +1,3 @@
 """Collection of aospy.Run objects created by Spencer Hill."""
-from aero_3agcm import *
-from obs import *
+from gfdl_runs import *
+from obs_runs import *

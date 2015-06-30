@@ -1,10 +1,10 @@
 """Spencer Hill's aospy.Proj object for main GFDL GCM research."""
 from aospy.proj import Proj
-from aospy.utils import _load_user_data
+from aospy.utils import load_user_data
 
-regions = _load_user_data('regions')
-models = _load_user_data('models')
-variables = _load_user_data('variables')
+regions = load_user_data('regions')
+models = load_user_data('models')
+variables = load_user_data('variables')
 
 a3gcm = Proj(
     'aero_3agcm',
