@@ -3,7 +3,7 @@ from aospy.proj import Proj
 from aospy_user import regions, models, variables
 
 
-a3gcm = Proj(
+aero_3agcm = Proj(
     'aero_3agcm',
     vars=variables.master_vars_list,
     direc_out='/archive/s1h/aero_3agcm/',
