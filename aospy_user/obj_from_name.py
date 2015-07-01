@@ -1,21 +1,31 @@
 """obj_from_name: Get aospy objects given their name string"""
-from aospy import Proj, Model, Run, Var, Region
+import aospy
 from aospy_user import projs, regions, variables
+
+
+def to_iterable(obj):
+    """Return the object if already iterable, otherwise return it as a list."""
+    try:
+        zip([], obj)
+    except TypeError:
+        return [obj]
+    else:
+        return obj
 
 
 def to_proj(proj):
     """Convert string of an aospy.Proj name to an aospy.Proj instance."""
     orig_type = type(proj)
-    if type(proj) is Proj:
+    if isinstance(proj, aospy.proj.Proj):
         return proj
 
-    elif type(proj) is str:
+    elif isinstance(proj, str):
         try:
             return getattr(projs, proj)
         except AttributeError:
             raise AttributeError('Not a recognized Proj name: %s' % proj)
 
-    elif type(proj) in (list, tuple):
+    elif isinstance(proj, (list, tuple)):
         proj = [to_proj(pr) for pr in proj]
         if orig_type is list:
             return proj
@@ -31,11 +41,11 @@ def to_model(model, proj):
     orig_type = type(model)
     proj = to_proj(proj)
 
-    if type(model) is Model:
+    if isinstance(model, aospy.model.Model):
         # model.proj = proj
         return model
 
-    elif type(model) is str:
+    elif isinstance(model, str):
         if model in ('all', ['all']):
             model = proj.models.values()
         elif model in ('default', ['default']):
@@ -45,9 +55,9 @@ def to_model(model, proj):
         # model.proj = proj
         return model
 
-    elif type(model) in (list, tuple):
+    elif isinstance(model, (list, tuple)):
         model = [to_model(mod, pr) for (mod, pr)
-                 in zip(model, proj)]
+                 in zip(model, to_iterable(proj))]
         if orig_type is tuple:
             model = tuple(model)
         return model
@@ -62,12 +72,12 @@ def to_run(run, model, proj):
     proj = to_proj(proj)
     model = to_model(model, proj)
 
-    if type(run) is Run:
+    if isinstance(run, aospy.run.Run):
         return run
         # run.model = model
         # run.proj = proj
 
-    elif type(run) is str:
+    elif isinstance(run, str):
         if run in ('default', ['default']):
             return model.default_runs.keys()
         else:
@@ -76,9 +86,9 @@ def to_run(run, model, proj):
             # run.proj = proj
             return run
 
-    elif type(run) in (list, tuple):
+    elif isinstance(run, (list, tuple)):
         run = [to_run(rn, mod, pr) for (rn, mod, pr)
-               in zip(run, model, proj)]
+               in zip(run, to_iterable(model), to_iterable(proj))]
         if orig_type is tuple:
             run = tuple(run)
         return run
@@ -89,29 +99,43 @@ def to_run(run, model, proj):
 
 def to_var(var):
     """Convert string of an aospy.var name to an aospy.var instance."""
-    if type(var) is Var:
+    if isinstance(var, aospy.var.Var):
         return var
-    elif type(var) is str:
+
+    elif isinstance(var, str):
         try:
             var = getattr(variables, var)
         except AttributeError:
             raise AttributeError('Not a recognized Var name: %s' % var)
-    elif type(var) in (list, tuple):
-        var_out = [to_var(v) for v in var]
-        if type(var) is tuple:
-            var_out = tuple(var_out)
+        return var
 
-    return var_out
+    elif isinstance(var, (list, tuple)):
+        var_out = [to_var(v) for v in var]
+        if isinstance(var, tuple):
+            var_out = tuple(var_out)
+        return var_out
+
+    else:
+        raise TypeError
 
 
 def to_region(region, proj=False):
     """Convert string of an aospy.Region name to an aospy.Region instance."""
-    if type(region) is Region:
+    print region, proj
+    if isinstance(region, aospy.region.Region):
         return region
-    elif type(region) is str:
-        if proj and region in ('all', ['all']):
-            region = proj.regions
+
+    elif isinstance(region, str):
+        if proj and (region in ('all', ['all'])):
+            return proj.regions
         else:
             return getattr(regions, region)
-    else:
+
+    elif isinstance(region, (list, tuple)):
+        region_out = [to_region(r, proj=proj) for r in region]
+        if isinstance(region, tuple):
+            region_out = tuple(region_out)
         return region
+
+    else:
+        raise TypeError

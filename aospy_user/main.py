@@ -3,8 +3,7 @@
 import itertools
 
 import aospy
-
-from .obj_from_name import to_proj, to_model, to_region
+import aospy_user
 
 
 def main(proj=None, model=None, run=None, ens_mem=None, var=None,
@@ -15,19 +14,23 @@ def main(proj=None, model=None, run=None, ens_mem=None, var=None,
     """Main script for interfacing with aospy."""
 
     # Instantiate objects and load default/all models, runs, and regions.
-    proj = to_proj(proj)
-    model = to_model(model, proj)
-    region = to_region(region)
+    proj = aospy_user.to_proj(proj)
+    model = aospy_user.to_model(model, proj)
+    var = aospy_user.to_var(var)
+    region = aospy_user.to_region(region, proj=proj)
+    proj, model, var, region = [aospy_user.to_iterable(obj)
+                                for obj in (proj, model, var, region)]
 
     # Iterate through given parameter combos, saving resulting calculations.
     print '\n\tVariable time averages and statistics:'
     calcs = []
     data = []
     for mod in model:
-        runs = to_run(run, mod, proj)
+        runs = aospy_user.to_run(run, mod, proj)
+        mod = aospy_user.to_iterable(mod)
 
         for params in itertools.product(
-                [proj], [mod], runs, ens_mem, var, yr_range, [region],
+                proj, mod, runs, ens_mem, var, yr_range, region,
                 intvl_in, intvl_out, dtype_in_time, dtype_in_vert,
                 [dtype_out_time], dtype_out_vert, level
         ):
