@@ -1,9 +1,8 @@
+"""aospy Model objects corresponding to observational & renalayses data."""
 from aospy.model import Model
-from aospy.utils import load_user_data
+from aospy_user import runs
 
-runs = load_user_data('runs')
-
-
+# Precipitation
 cru = Model(
     name='cru',
     description='Univ. East Anglia Climate Research Unit obs',
@@ -48,19 +47,6 @@ gpcp = Model(
     runs=[runs.gpcp_v2p2],
     default_runs=[runs.gpcp_v2p2]
 )
-ceres = Model(
-    name='ceres',
-    nc_grid_paths=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/'
-                   'CERES-EBAF/atmos/mon/v20140402/'
-                   'rsut_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',),
-    nc_dur=14,
-    nc_start_yr=2000,
-    nc_start_month=3,
-    nc_end_yr=2013,
-    default_yr_range=(2000, 2013),
-    runs=[runs.ceres_ebaf, runs.ceres_ebaf_sfc],
-    default_runs=[runs.ceres_ebaf]
-)
 cmap = Model(
     name='cmap',
     description='CPC Merged Analysis of Precipitation',
@@ -99,6 +85,23 @@ udel = Model(
     runs=[runs.udel_v201, runs.udel_v301],
     default_runs=[runs.udel_v301]
 )
+
+# Radiation
+ceres = Model(
+    name='ceres',
+    nc_grid_paths=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/'
+                   'CERES-EBAF/atmos/mon/v20140402/'
+                   'rsut_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',),
+    nc_dur=14,
+    nc_start_yr=2000,
+    nc_start_month=3,
+    nc_end_yr=2013,
+    default_yr_range=(2000, 2013),
+    runs=[runs.ceres_ebaf, runs.ceres_ebaf_sfc],
+    default_runs=[runs.ceres_ebaf]
+)
+
+# Reanalyses
 era = Model(
     name='era',
     description='ERA reanalyses',
@@ -169,6 +172,8 @@ jra = Model(
     default_yr_range=(1979, 2013),
     runs=[runs.jra25]
 )
+
+# Evapotranspiration
 landflux = Model(
     name='landflux-eval',
     description='LandFlux-EVAL evapotranspiration data, 1989-2005',
@@ -196,4 +201,45 @@ landflux95 = Model(
     default_yr_range=(1989, 1995),
     runs=[runs.lfe95_all, runs.lfe95_diag, runs.lfe95_lsm, runs.lfe95_rean],
     default_runs=[runs.lfe95_all]
+)
+
+# SST
+hadisst = Model(
+    name='hadisst',
+    description='HadISST: Hadley Centre SST and sea ice obs datasets',
+    nc_grid_paths=('/archive/s1h/obs/HadISST/HadISST_sst.nc',),
+    nc_dur=1,
+    nc_start_yr=2005,
+    nc_start_month=1,
+    nc_end_yr=2005,
+    nc_end_month=12,
+    default_yr_range=(2005, 2005),
+    runs=[runs.hadisst1],
+    default_runs=[runs.hadisst1]
+)
+hurrell = Model(
+    name='hurrell',
+    description='Hurrell SST observational dataset',
+    nc_grid_paths=('/archive/s1h/obs/Hurrell/sst.climo.1981-2000.data.nc',),
+    nc_dur=1,
+    nc_start_yr=2000,
+    nc_start_month=1,
+    nc_end_yr=2000,
+    nc_end_month=12,
+    default_yr_range=(2000, 2000),
+    runs=[runs.hurrell],
+    default_runs=[runs.hurrell]
+)
+reynolds_oi = Model(
+    name='reynolds_oi',
+    description='Reynolds OI SST observational dataset',
+    nc_grid_paths=('/archive/s1h/obs/ReynoldsOI/reyoi_sst.data.nc',),
+    nc_dur=19,
+    nc_start_yr=1981,
+    nc_start_month=11,
+    nc_end_yr=1999,
+    nc_end_month=1,
+    default_yr_range=(1982, 1998),
+    runs=[runs.reynolds_oi],
+    default_runs=[runs.reynolds_oi]
 )

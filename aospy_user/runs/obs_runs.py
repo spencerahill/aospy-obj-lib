@@ -177,7 +177,7 @@ cmap_enhanced = Run(
               'pentad': 'precip.pentad.mean.nc'}
 )
 
-# U_Del runs
+# U. Delaware
 udel_v201 = Run(
     name='v201',
     description='U. Delaware version 2.01',
@@ -263,7 +263,7 @@ era_i = Run(
     )
 
 # MERRA
-merra_run = Run(
+merra = Run(
     name='merra',
     description='',
     direc_nc=('/archive/pcmdi/repo/ana4MIPs/NASA-GMAO/MERRA/atmos/mon/'
@@ -509,4 +509,47 @@ lfe95_rean = Run(
     nc_dir_struc='one_dir',
     nc_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.reanalyses.nc',
               'annual': 'LandFluxEVAL.merged.89-95.yearly.reanlayses.nc'}
+)
+
+# SST datasets
+hadisst1 = Run(
+    name='hadisst1',
+    description='HadISST1 product; SST data only',
+    direc_nc='/archive/s1h/obs/HadISST',
+    nc_dur=1,
+    nc_start_yr=2005,
+    nc_start_month=1,
+    nc_end_yr=2005,
+    nc_end_month=12,
+    default_yr_range=(2005, 2005),
+    nc_dir_struc='one_dir',
+    nc_files={'monthly': '/archive/s1h/obs/HadISST/HadISST_sst.nc'}
+)
+hurrell = Run(
+    name='hurrell',
+    description='Hurrell SST product',
+    direc_nc='/archive/s1h/obs/Hurrell',
+    nc_dur=1,
+    nc_start_yr=2000,
+    nc_start_month=1,
+    nc_end_yr=2000,
+    nc_end_month=12,
+    default_yr_range=(2000, 2000),
+    nc_dir_struc='one_dir',
+    nc_files={
+        'monthly': '/archive/s1h/obs/Hurrell/sst.climo.1981-2000.data.nc'
+    }
+)
+reynolds_oi = Run(
+    name='reynolds_oi',
+    description='Reynolds OI SST observational dataset',
+    direc_nc='/archive/s1h/obs/ReynoldsOI',
+    nc_dur=19,
+    nc_start_yr=1981,
+    nc_start_month=11,
+    nc_end_yr=1999,
+    nc_end_month=1,
+    default_yr_range=(1982, 1998),
+    nc_dir_struc='one_dir',
+    nc_files={'monthly': '/archive/s1h/obs/ReynoldsOI/reyoi_sst.data.nc'}
 )

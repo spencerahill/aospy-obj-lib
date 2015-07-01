@@ -10,7 +10,8 @@ obs = Proj(
     models=(
         models.cru, models.prec_l, models.gpcp, models.ceres, models.trmm,
         models.cmap, models.udel, models.merra, models.era, models.jra,
-        models.cfsr, models.landflux, models.landflux95
+        models.cfsr, models.landflux, models.landflux95, models.hadisst,
+        models.hurrell, models.reynolds_oi
     ),
     default_models=(
         models.cru, models.prec_l, models.gpcp,
