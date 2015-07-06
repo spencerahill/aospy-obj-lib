@@ -94,151 +94,22 @@ def plot(proj, model, run, ens_mem, var, region):
         time_ticklabels=False,
         time_label=False,
 
-        # do_cont_cntrs=True,
-        # cont_run=([['reyoi_cont']] + [['hurrell_cont']] + ,
-        #             [['cont']] + [['ming0']]),
-        # cntrs_color='0.85',
-        # cont_cntr_levs=False,
-        # cont_cntr_levs=range(-60, 61, 10), # omega; cre_net/sw/lw; shflx,
-        # cont_cntr_levs=range(-30, 31, 10), # ucomp,
-        # cont_cntr_levs=range(-30, 31, 3), # vort, pv,
-        # cont_cntr_levs=range(-20, 21, 4), # p-e,
-        # cont_cntr_levs=range(-10, 51, 10), # gms_each_level,
-        # cont_cntr_levs=range(-4, 5, 1), # vcomp,
-        # cont_cntr_levs=list(np.arange(-2, 2.1,0.5)),
-        # cont_cntr_levs=list(np.arange(-2, 2.51, 0.5)), # tdt_conv/ls,
-        # cont_cntr_levs=list(np.arange(0.5, 6.6, 1)), # mc,
-        # cont_cntr_levs=range(1, 20, 3), # sphum,
-        # cont_cntr_levs=range(1, 12, 2), # evap,
-        # cont_cntr_levs=range(2,26,3), # precip,
-        # cont_cntr_levs=range(5, 36, 5), # cld_amt,
-        # cont_cntr_levs=range(10, 101, 20), # rh,
-        # cont_cntr_levs=range(210,311,20), # temp,
-        # cont_cntr_levs=range(200,331,5), # t_surf,
-        # cont_cntr_levs=range(200, 361, 10), # equiv_pot_temp; virt_pot_temp; MSE,
-        # cont_cntr_levs=range(990,1041,3), # slp,
-        # cont_cntr_levs=range(200, 301, 20), # temp,
-        # cont_cntr_levs=[[range(200,331,5)],[range(10,101,10)]],
-        # cont_cntr_labels: 'True', '%d' for integer, '%0.1f' for decimal,
-        # cont_cntr_labels='%d',
-
-        ## Latitude plot parameters.
-        # x_data=[['lat']],
-        # lat_bounds=[-90,90],
-        # lat_ticks=range(-90,91,30),
-        # lat_ticks=list(np.sin(np.deg2rd(np.arange(-90., 91., 10.)))),
-        # lat_labels=[r'90$^\circ$S', '', '', '', '', '', '30$^\circ$S', '', '', 'EQ', ,
-                   # '', '', '30$^\circ$N', '', '', '', '', '', '90$^\circ$N']
-        # lat_labels=[r'90$^\circ$S', '60$^\circ$S', '30$^\circ$S', 'EQ',,
-        #               '30$^\circ$N', '60$^\circ$N', '90$^\circ$N'],
-
-        ## Longitude plot parameters.
-        # x_data=[['lon']],
-        # lon_bounds=(-90,60),
-        # lat_avg_range=(10, 20),
-        # lon_ticks=range(Fig.lon_bounds[0], Fig.lon_bounds[1]+1, 30),
-        # lon_ticks=False,
-
-        # def make_lon_ticklabels(lon_ticks, circ=True):,
-        #     lon_labels=[],
-        #     c=r'$^\circ$' if circ else '',
-        #     for tick in lon_ticks:,
-        #         if tick < 0:,
-        #             lon_labels.append(r'%d%sW' % (abs(tick), c)),
-        #         elif tick > 0:,
-        #             lon_labels.append(r'%d%sE' % (abs(tick), c)),
-        #         else:,
-        #             lon_labels.append(r"0%s" % c),
-        #     return lon_labels,
-
-        # lon_labels=make_lon_ticklabels(lon_ticks),
-        # lon_labels=[str(x) for x in lon_ticks],
-        # lon_labels=False,
-
-        ## Zonal-seasonal and zonal-1d plot parameters
-        # do_itcz=False,
-        # had_bnds_type='500hPa',
-        # plot_had_bnds=[False, False, False],
-        # mask_hadley=True,
-        # lat_type='reg',
-
-        ## Vert plot parameters.
-        # z_data=[['level']],
-        # lev_type='linear',             # 'linear' 'exp',
-        # lev_bounds=[1000, 100],
-        # lev_ticks=range(1000, 99, -100),
-        # lev_ticklabel=['1000', '', '800', '', '600', '', '400', '', '200', ''],
-        # lev_label='hPa',
-
-        # do_vert_centroid=(100, 1000),
-        # centroid_xpos=0,
-        # centroid_xpos=[[xlim[0]]*4 + [xlim[0] + 5]*2],
-        # do_plot_avg=False,
-        # do_plot_shading=True,
-
-        ## Time-1D plot paramters
-        # time_lim='ann_cycle',          # 'ann_cycle',
-        # time_ticks=False,
-        # time_ticklabels=False,
-
-        ## Map plot parameters.
         map_proj='cyl',                # 'moll',
         map_res='c',
-        # left_lon=0,
         shiftgrid_start=False,
         shiftgrid_cyclic=360.0,
         latlon_rect=(-18, 40, 10, 20),
 
-        ## Quiver (i.e. arrow) plot overlayed on maps.
         do_quiver=False,
-        # level_quiv=level,
-        # xvar_quiv='ucomp',
-        # yvar_quiv='vcomp',
-        # xrun_quiv=cont_run,
-        # yrun_quiv=xrun_quiv,
-        # scalar_quiv=None,
-        # quiv_skip=False,
-        # quiv_kwargs={'color': 'red', 'edgecolors': 'red'},
-        # do_quiv_key=True,
-        # scale_quiv_key=10,
-        # label_quiv_key=str(scale_quiv_key) + r' g kg$^{-1}$ m s$^{-1}$',
 
-        ## Line plot parameters.
         line_color='k',
         linestyle='-',
 
-        ## Scatter plot parameters
         marker_size=10,
         marker_color='k',
         marker_shape='.',
-        # do_best_fit_line=[True] + [[True, False]]*3,
-        # print_best_fit_slope=[True] + [[True, False]]*3,
-        # print_corr_coeff=[True] + [[True, False]]*3,
 
-        ## Statistical masking parameters.
-        # do_stat_mask='ttest'             # False 'ttest',
-        # do_stat_mask=[[False], ['ttest']],
-        # stat_mask_cntrs=[0, 0.05] # Mark where significant.,
-        # stat_mask_cntrs=[0.05, 1] # Mark where insignificant.,
-        # stat_mask_hatch=['///'] # ['...'] ['XXX'],
-        # stat_mask_hatch='mask',
-        # stat_mask_color='b', # 2015-02-27: not yet working,
-
-        ## Transformations to apply to data.
         do_subtract_mean=False,
-        # do_zasym=False,
-        # do_norm_cont=False,
-        # do_normalize=False,
-        # norm_region='sahel',
-        # norm_var='precip,' # False
-        # norm_run=cont_run, # runs
-
-        ## 1d plot parameters
-        # colors=['brown', 'orange', 'cyan', 'blue', 'gray'],
-        # linestyles='-', # [':', '-', '--']
-        # linewidths=[1.5],
-        # do_legend=True,             # 'first', True
-        # legend_labels='models',
     )
 
     fig.create_fig()
