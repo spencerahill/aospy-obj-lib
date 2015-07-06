@@ -42,7 +42,6 @@ def to_model(model, proj):
     proj = to_proj(proj)
 
     if isinstance(model, aospy.model.Model):
-        # model.proj = proj
         return model
 
     elif isinstance(model, str):
@@ -52,7 +51,6 @@ def to_model(model, proj):
             model = proj.default_models.values()
         else:
             model = proj.models[model]
-        # model.proj = proj
         return model
 
     elif isinstance(model, (list, tuple)):
@@ -68,27 +66,31 @@ def to_model(model, proj):
 
 def to_run(run, model, proj):
     """Convert string matching an aospy.run name to an aospy.run instance."""
+    print run, model, proj
     orig_type = type(run)
     proj = to_proj(proj)
     model = to_model(model, proj)
 
     if isinstance(run, aospy.run.Run):
         return run
-        # run.model = model
-        # run.proj = proj
 
     elif isinstance(run, str):
         if run in ('default', ['default']):
             return model.default_runs.keys()
         else:
             run = model.runs[run]
-            # run.model = model
-            # run.proj = proj
             return run
+
+    elif isinstance(run, dict):
+        # Assume run(s) is/are key(s), not value(s).
+        vals = run.values()
+        keys = to_run(run.keys(), model, proj)
+        return dict(zip(keys, vals))
 
     elif isinstance(run, (list, tuple)):
         run = [to_run(rn, mod, pr) for (rn, mod, pr)
-               in zip(run, to_iterable(model), to_iterable(proj))]
+               in zip(run, aospy.io.to_dup_list(model, len(run)),
+                      aospy.io.to_dup_list(proj, len(run)))]
         if orig_type is tuple:
             run = tuple(run)
         return run
@@ -121,8 +123,10 @@ def to_var(var):
 
 def to_region(region, proj=False):
     """Convert string of an aospy.Region name to an aospy.Region instance."""
-    print region, proj
     if isinstance(region, aospy.region.Region):
+        return region
+
+    elif isinstance(region, bool) or region is None:
         return region
 
     elif isinstance(region, str):
