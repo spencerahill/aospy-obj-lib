@@ -7,8 +7,7 @@ import netCDF4
 import numpy as np
 import scipy.interpolate
 
-from aospy.region import regions
-from aospy.var import variables
+from aospy_user import regions, variables
 
 def pivot_index(longitudes):
     """Get index where longitudes change sign."""

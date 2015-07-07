@@ -45,9 +45,9 @@ def to_model(model, proj):
         return model
 
     elif isinstance(model, str):
-        if model in ('all', ['all']):
+        if model == 'all':
             model = proj.models.values()
-        elif model in ('default', ['default']):
+        elif model == 'default':
             model = proj.default_models.values()
         else:
             model = proj.models[model]
@@ -55,7 +55,7 @@ def to_model(model, proj):
 
     elif isinstance(model, (list, tuple)):
         model = [to_model(mod, pr) for (mod, pr)
-                 in zip(model, to_iterable(proj))]
+                 in zip(model, aospy.io.to_dup_list(proj, len(model)))]
         if orig_type is tuple:
             model = tuple(model)
         return model
@@ -66,7 +66,6 @@ def to_model(model, proj):
 
 def to_run(run, model, proj):
     """Convert string matching an aospy.run name to an aospy.run instance."""
-    print run, model, proj
     orig_type = type(run)
     proj = to_proj(proj)
     model = to_model(model, proj)
@@ -75,8 +74,10 @@ def to_run(run, model, proj):
         return run
 
     elif isinstance(run, str):
-        if run in ('default', ['default']):
-            return model.default_runs.keys()
+        if run == 'default':
+            return model.default_runs.values()
+        elif run == 'all':
+            return model.runs
         else:
             run = model.runs[run]
             return run
@@ -102,23 +103,23 @@ def to_run(run, model, proj):
 def to_var(var):
     """Convert string of an aospy.var name to an aospy.var instance."""
     if isinstance(var, aospy.var.Var):
-        return var
+        var_out = var
 
     elif isinstance(var, str):
         try:
-            var = getattr(variables, var)
+            var_out = getattr(variables, var)
         except AttributeError:
             raise AttributeError('Not a recognized Var name: %s' % var)
-        return var
 
     elif isinstance(var, (list, tuple)):
         var_out = [to_var(v) for v in var]
         if isinstance(var, tuple):
             var_out = tuple(var_out)
-        return var_out
 
     else:
         raise TypeError
+
+    return var_out
 
 
 def to_region(region, proj=False):
@@ -130,7 +131,7 @@ def to_region(region, proj=False):
         return region
 
     elif isinstance(region, str):
-        if proj and (region in ('all', ['all'])):
+        if proj and region == 'all':
             return proj.regions
         else:
             return getattr(regions, region)
@@ -139,7 +140,7 @@ def to_region(region, proj=False):
         region_out = [to_region(r, proj=proj) for r in region]
         if isinstance(region, tuple):
             region_out = tuple(region_out)
-        return region
+        return region_out
 
     else:
         raise TypeError

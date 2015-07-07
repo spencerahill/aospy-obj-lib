@@ -21,6 +21,27 @@ def main(proj=None, model=None, run=None, ens_mem=None, var=None,
     proj, model, var, region = [aospy_user.to_iterable(obj)
                                 for obj in (proj, model, var, region)]
 
+    print '\nProject:', proj
+    print 'Models:', model
+    print 'Runs:', run
+    print 'Ensemble members:', ens_mem
+    print 'Variables:', var
+    print 'Year ranges:', yr_range
+    print 'Geographical regions:', region
+    print 'Time interval of input data:', intvl_in
+    print 'Time intervals for averaging:', intvl_out
+    print 'Input data time type:', dtype_in_time
+    print 'Input data vertical type:', dtype_in_vert
+    print 'Output data time types:', dtype_out_time
+    print 'Output data vert types:', dtype_out_vert
+    print 'Vertical levels:', level
+    print 'Year chunks:', yr_chunk_len
+    print 'Compute this data:', compute
+    print 'Print this data:', print_table
+
+    if not raw_input("\nProceed using these parameters? ").lower() == 'y':
+        raise IOError('\nExecution cancelled by user.')
+
     # Iterate through given parameter combos, saving resulting calculations.
     print '\n\tVariable time averages and statistics:'
     calcs = []
@@ -57,45 +78,24 @@ def main(proj=None, model=None, run=None, ens_mem=None, var=None,
 
 if __name__ == '__main__':
     proj = 'aero_3agcm'
-    model = ['am2']
-    run = ['amip']
+    model = 'hiram_mz'
+    run = 'default'
     ens_mem = [None]
-    var = ['toa_rad_clr_precip_lin_regr', 'toa_rad_clr_precip_corr']
+    var = ['precip']
     yr_range = ['default']
     region = ['all']
     intvl_in = ['monthly']
-    intvl_out = [1, 7]
+    intvl_out = ['jas']
     dtype_in_time = ['ts']
     dtype_in_vert = [False]
-    # dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    dtype_out_time = ('',)
+    dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
+    # dtype_out_time = ('',)
     dtype_out_vert = [False]
     level = [None]
     yr_chunk_len = False
     compute = True
     verbose = True
     print_table = False
-
-    print '\nProject:', proj
-    print 'Models:', model
-    print 'Runs:', run
-    print 'Ensemble members:', ens_mem
-    print 'Variables:', var
-    print 'Year ranges:', yr_range
-    print 'Geographical regions:', region
-    print 'Time interval of input data:', intvl_in
-    print 'Time intervals for averaging:', intvl_out
-    print 'Input data time type:', dtype_in_time
-    print 'Input data vertical type:', dtype_in_vert
-    print 'Output data time types:', dtype_out_time
-    print 'Output data vert types:', dtype_out_vert
-    print 'Vertical levels:', level
-    print 'Year chunks:', yr_chunk_len
-    print 'Compute this data:', compute
-    print 'Print this data:', print_table
-
-    if not raw_input("\nProceed using these parameters? ").lower() == 'y':
-        raise IOError('\nExecution cancelled by user.')
 
     try:
         if compute:

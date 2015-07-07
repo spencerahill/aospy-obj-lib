@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 import aospy
 import aospy_user
+from aospy_user import projs as p
+from aospy_user import models as m
+from aospy_user import runs as r
+from aospy_user import variables as v
 
 
 def plot(proj, model, run, ens_mem, var, region):
@@ -16,30 +20,30 @@ def plot(proj, model, run, ens_mem, var, region):
         var=var,
         region=region,
 
-        n_row=1,
+        n_row=4,
         n_col=1,
         n_ax='all',
         n_plot=1,
         n_data=1,
 
         row_size=1.7,
-        col_size=5,
+        col_size=4,
         subplot_lims={'left': 0.05, 'right': 0.95, 'wspace': 0.1,
-                      'bottom': 0.12, 'top': 0.88, 'hspace': 0.15},
+                      'bottom': 0.09, 'top': 0.95, 'hspace': 0.2},
 
-        min_cntr=-7.5,
-        max_cntr=7.5,
-        num_cntr=15,
-        contourf_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
-        col_map='RdBu_r',
+        min_cntr=-130,
+        max_cntr=130,
+        num_cntr=13,
+        contourf_extend='neither',  # 'auto' 'neither' 'min' 'max' 'both'
+        col_map='default',
         do_colorbar='all',      # 'all' 'column' 'row' False True
-        cbar_ax_lim=(0.1, 0.1, 0.8, 0.03),
-        cbar_ticks=False,
+        cbar_ax_lim=(0.1, 0.06, 0.8, 0.02),
+        cbar_ticks=range(-120,121,20),
         cbar_ticklabels=False,
         cbar_label='units',
 
         intvl_in='monthly',
-        intvl_out=['jas'],
+        intvl_out='jas',
         dtype_in_time='ts',
         dtype_in_vert=False,
         dtype_out_time='av',
@@ -52,10 +56,9 @@ def plot(proj, model, run, ens_mem, var, region):
         y_dim='lat',
 
         # Titles and labels
-        fig_title=(r'$B_t$ v. $P$ correlation in AM2.1 1870-1999 '
-                   'AMIP simulation'),
+        fig_title=r'',
         ax_title=False,
-        ax_left_label=False,
+        ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
         ax_right_label=False,
 
         # Axis limits
@@ -69,12 +72,12 @@ def plot(proj, model, run, ens_mem, var, region):
         y_ticklabels=False,
         y_label=False,
 
-        lat_lim=(-45, 45),
+        lat_lim=(-5, 35),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        lon_lim=(-180, 180),
+        lon_lim=(-43, 65),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -133,10 +136,13 @@ def main(proj, model, run, ens_mem, var, region):
     return plot(proj, model, run, ens_mem, var, region)
 
 if __name__ == '__main__':
-    proj = 'aero_3agcm'
-    model = 'am2'
-    run = {('reyoi+2K', 'reyoi_cont'): '-'}
+    proj = p.aero_3agcm
+    model = [m.am2, m.am3, m.hiram, m.hiram_c48]
+    run = [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'},
+           {(r.am3_hp2k, r.am3_hc): '-'},
+           {(r.hiram_gtm, r.hiram_cont): '-'},
+           {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
     ens_mem = False
-    var = 'precip'
+    var = v.precip
     region = False
     fig = main(proj, model, run, ens_mem, var, region)
