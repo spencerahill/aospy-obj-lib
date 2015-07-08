@@ -878,22 +878,22 @@ bowen_ratio = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.bowen_ratio,
-    units='',
-    plot_units='',
-    plot_units_conv=1.
+    units=units.unitless
 )
 column_energy = Var(
     name='column_energy',
+    math_str=r'$F_\mathrm{net}$',
     domain='atmos',
     description='Net energy flux into atmosphere at surface and at TOA.',
-    variables=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-          shflx, evap),
+    variables=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+               lwup_sfc, lwdn_sfc, shflx, evap),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
     func=calcs.column_energy,
-    units=units.W_m2
+    units=units.W_m2,
+    colormap='RdBu_r'
 )
 cre_lw = Var(
     name='cre_lw',
@@ -1310,6 +1310,7 @@ hght_horiz_advec_divg_sum = Var(
 )
 horiz_divg = Var(
     name='horiz_divg',
+    math_str=r'$\nabla\cdot\mathbf{v}$',
     domain='atmos',
     description='',
     variables=(ucomp, vcomp, lat, lon, r_e),
@@ -1363,6 +1364,7 @@ moist_static_stab = Var(
 mse = Var(
     name='mse',
     domain='atmos',
+    math_str=r'$h$',
     description='Moist static energy.',
     variables=(temp, hght, sphum),
     def_time=True,
@@ -1374,6 +1376,7 @@ mse = Var(
 )
 mse_horiz_advec = Var(
     name='mse_horiz_advec',
+    math_str=r'$\mathbf{v}\cdot\nabla h$',
     domain='atmos',
     description='Horizontal advection of moist static energy.',
     variables=(temp, hght, sphum, ucomp, vcomp, lat, lon, r_e),
@@ -1387,6 +1390,7 @@ mse_horiz_advec = Var(
 )
 mse_times_horiz_divg = Var(
     name='mse_times_horiz_divg',
+    math_str=r'$h\nabla\cdot\mathbf{v}$',
     domain='atmos',
     description='Horizontal mass flux divergence times moist static energy.',
     variables=(temp, hght, sphum, ucomp, vcomp, lat, lon, r_e, 'dp'),
@@ -1400,6 +1404,7 @@ mse_times_horiz_divg = Var(
 )
 mse_horiz_flux_divg = Var(
     name='mse_horiz_flux_divg',
+    math_str=r'$\nabla\cdot(h\mathbf{v})$',
     domain='atmos',
     description='Horizontal flux divergence of moist static energy.',
     variables=(temp, hght, sphum, ucomp, vcomp, lat, lon, r_e),
@@ -1413,6 +1418,7 @@ mse_horiz_flux_divg = Var(
 )
 mse_horiz_advec_divg_sum = Var(
     name='mse_horiz_advec_divg_sum',
+    math_str=r'$h\nabla\cdot\mathbf{v}+\mathbf{v}\cdot\nabla h$',
     domain='atmos',
     description='Sum of MSE horizontal divergence and advection.',
     variables=(temp, hght, sphum, ucomp, vcomp, lat, lon, r_e, 'dp'),
@@ -1439,6 +1445,7 @@ mse_vert_flux_divg = Var(
 )
 mse_vert_advec = Var(
     name='mse_vert_advec',
+    math_str=r'$h\frac{\partial\omega}{\partial p}$',
     domain='atmos',
     description='Moist static energy times vertical divergence.',
     variables=(temp, hght, sphum, omega, 'p'),
@@ -1854,6 +1861,7 @@ tdt_sw_cld = Var(
 )
 toa_rad = Var(
     name='toa_rad',
+    math_str=r'$R_\mathrm{toa}$',
     domain='atmos',
     description='Net top-of-atmosphere radiative flux, signed positive downwards.',
     variables=(swdn_toa, swup_toa, olr),
@@ -1862,7 +1870,8 @@ toa_rad = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.toa_rad,
-    units=units.W_m2
+    units=units.W_m2,
+    colormap='RdBu_r'
 )
 toa_rad_clr = Var(
     name='toa_rad_clr',
