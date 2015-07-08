@@ -3,84 +3,10 @@ import scipy.stats
 import numpy as np
 
 from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
-from aospy.utils import level_thickness, to_pascal, to_radians
-
-# Utility functions for sigma coordinates.
-def phalf_from_sigma(bk, pk, ps):
-    """
-    Compute pressure at sigma half levels from the sigma coordinate arrays and
-    the surface pressure.
-
-    Assume pk, bk, and ps are in Pa, unitless, and Pa, respectively.  Assume
-    pk[-1] and bk[-1] are at surface where pressure equals ps and pk[0] and
-    bk[0] are at top of atmosphere where pressure equals zero.  pk and bk are
-    1-d arrays; ps has last two dimensions (lat, lon) but may also have time as
-    first dimension.  Assume pk and bk include both endpoints, i.e. the surface
-    and TOA, such that the number of sigma layers is one less than the length
-    of either pk or bk.
-    """
-    # 3D ps array assumed to be (time, lat, lon).
-    if ps.ndim in (3, 4):
-        bk = bk[np.newaxis,:,np.newaxis,np.newaxis]
-        pk = pk[np.newaxis,:,np.newaxis,np.newaxis]
-        if ps.ndim == 3:
-            ps = ps[:,np.newaxis,:,:]
-    # 2D ps array assumed to be (lat, lon).
-    elif ps.ndim == 2:
-        bk = bk[:,np.newaxis,np.newaxis]
-        pk = pk[:,np.newaxis,np.newaxis]
-        ps = ps[np.newaxis,:,:]
-    return np.squeeze(pk + ps*bk)
-
-def pfull_from_phalf(phalf):
-    """
-    Compute data at full sigma levels from the values at half levels.
-
-    Could be the pressure array itself, but it could also be any other data
-    defined at half levels.
-    """
-    # 4D array assumed to be (time, p, lat, lon).
-    if phalf.ndim == 4:
-        return 0.5*(phalf[:,1:] + phalf[:,:-1])
-    # Anything else assumed to have p as first dimension.
-    else:
-        return 0.5*(phalf[1:] + phalf[:-1])
-
-def phalf_from_pfull(pfull, val_toa=0, val_sfc=0):
-    """
-    Compute data at half sigma levels from the values at full levels, given the
-    specified top and bottom boundary conditions.
-
-    Could be the pressure array itself, but it could also be any other data
-    defined at pressure levels.
-    """
-    phalf = np.empty((pfull.shape[0] + 1, pfull.shape[1], pfull.shape[2]))
-    phalf[0] = val_toa
-    phalf[-1] = val_sfc
-    phalf[1:-1] = 0.5*(pfull[:-1] + pfull[1:])
-    return phalf
-
-def pfull_from_sigma(bk, pk, ps):
-    """
-    Compute pressure at full sigma levels from the sigma coordinate arrays and
-    surface pressure.
-    """
-    phalf = phalf_from_sigma(bk, pk, ps)
-    return pfull_from_phalf(phalf)
-
-def dp_from_phalf(phalf):
-    """Compute pressure-depth of vertical levels from level edge pressures."""
-    # If 4D, assume dimensions (time, p, lat, lon).
-    if phalf.ndim == 4:
-        return phalf[:,1:] - phalf[:,:-1]
-    # Otherwise assume first dimension is p.
-    else:
-        return phalf[1:] - phalf[:-1]
-
-def dp_from_sigma(bk, pk, ps):
-    """Compute sigma layer pressure thickness."""
-    phalf = phalf_from_sigma(bk, pk, ps)
-    return dp_from_phalf(phalf)
+from aospy.utils import (level_thickness, to_pascal, to_radians,
+                         phalf_from_sigma, pfull_from_phalf, phalf_from_pfull,
+                         dp_from_phalf, dp_from_sigma, int_dp_g, integrate,
+                         weight_by_delta)
 
 ### x, dx from longitude, y, dy from latitude
 
@@ -237,26 +163,6 @@ def d_dp_from_p(field, p):
 
 ### Integrals in x, y, and p.
 
-def weight_by_delta(integrand, delta):
-    """
-    Weight the integrand by delta, usually for subsequent integration.
-
-    delta array may be one dimension or three; in the latter it is assumed to
-    be of shape (vertical, lat, lon).  integrand is assumed to be 3 or 4
-    dimensions, with time 1st if 4-D.  Both are assumed to be numpy arrays.
-    """
-    try:
-        intdel = integrand*delta
-    except ValueError:
-        delta = delta[np.newaxis,:,np.newaxis, np.newaxis]
-        intdel = integrand*delta
-    return intdel
-
-def integrate(integrand, delta, axis):
-    """Integrate the array along the given axis using the given delta array."""
-    prod = weight_by_delta(integrand, delta)
-    return np.ma.sum(prod, axis=axis)
-
 # def int_dlon(integrand, lat, lon, start=0., end=360.):
     # """Integrate in longitude."""
     # # Assume pressure is 3rd to last axis.
@@ -273,11 +179,6 @@ def integrate(integrand, delta, axis):
     # """Integrate in latitude."""
     # return
 
-def int_dp_g(integrand, dp, start=0., end=None):
-    """Integrate vertically in pressure."""
-    # Assume pressure is 3rd to last axis.
-    dp = to_pascal(dp)
-    return integrate(integrand, dp, -3) / grav
 
 ### Horizontal & vertical advection, divergence, and flux divergence functions.
 
