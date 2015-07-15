@@ -1,4 +1,9 @@
-"""Calcs submodule of aospy module."""
+"""My library of functions for use in aospy.
+
+Except for helper functions, all assume input variables with the first axis
+denoting time and the subsequent axes either (pressure, lat, lon) or, if not
+vertically defined, (lat, lon).
+"""
 import scipy.stats
 import numpy as np
 
@@ -613,36 +618,40 @@ def msf(lats, levs, v):
     p_top = 5.; p_bot = 1005.
     p_half = 0.5*(levs[1:] + levs[:-1])
     p_half = np.insert(np.append(p_half, p_top), 0, p_bot)
-    dp = to_pascal(p_half[:-1] - p_half[1:])
+    dp = to_pascal(p_half[:-1] - p_half[1:])[np.newaxis, ::-1, np.newaxis]
+    geom_factor = (2.*np.pi*r_e/grav *
+                   np.cos(np.deg2rad(lats))[np.newaxis, np.newaxis, :])
     # Integrate from TOA down to surface.
-    strmfunc = 2.*np.pi*r_e/grav*(np.cos(np.deg2rad(lats))[np.newaxis,:] *
-                                  np.cumsum((v.mean(axis=-1) *
-                                  dp[:,np.newaxis])[::-1], axis=0))[::-1]
+    msf_ = geom_factor * np.cumsum(v.mean(axis=-1) * dp, axis=1)[::-1]
     # Average the values calculated at half levels; flip sign by convention.
-    strmfunc[:-1] = -0.5*(strmfunc[1:] + strmfunc[:-1])
+    msf_[:,:-1] = -0.5*(msf_[:,1:] + msf_[:,:-1])
     # Uppermost level goes to 0 hPa (so divide by 2); surface value is zero.
-    strmfunc[-1]*=0.5; strmfunc[0] = 0.
-    return strmfunc
+    msf_[:,-1]*=0.5; msf_[:,0] = 0.
+    return msf_
 
 def msf_max(lats, levs, v):
     """Maximum meridional mass streamfunction magnitude at each latitude."""
     strmfunc = msf(lats, levs, v)
-    pos_max = np.amax(strmfunc, axis=0)
-    neg_max = np.amin(strmfunc, axis=0)
+    pos_max = np.amax(strmfunc, axis=1)
+    neg_max = np.amin(strmfunc, axis=1)
     return np.where(pos_max > -neg_max, pos_max, neg_max)
-    #return strmfunc[:,4]
 
 def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
         shflx, evap, snow_ls, snow_conv, sfc_area):
     """Total atmospheric northward energy flux."""
     # Calculate energy balance at each grid point.
-    loc = -1*(swdn_toa - swup_toa - olr +                   # TOA radiation
-              swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc +   # sfc radiation
-              shflx +                                       # sfc SH flux
-              L_f*(snow_ls + snow_conv) + L_v*evap)         # column LH flux
+    local = (column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                           lwup_sfc, lwdn_sfc, shflx, evap) +
+             L_f*(snow_ls + snow_conv))
     # Calculate meridional heat transport.
-    glb = np.average(loc, weights=sfc_area)
-    return np.cumsum(np.sum(sfc_area*(glb - loc), axis=-1))
+    local_flat = local.reshape((local.shape[0],-1))
+    global_mean = np.ma.average(loc_flat, weights=sfc_area.ravel(), axis=1)
+    zonal_integral = np.sum(
+        sfc_area * (local_flat - global_mean[:,np.newaxis,np.newaxis]),
+        axis=-1
+    )
+    return np.cumsum(zonal_integral, axis=-1)
+
 
 def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
     """Gross moist stability. Upper minus lower level MSE."""
@@ -658,9 +667,12 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
     d = dse(temp, hght)
     return (d - d[np.where(level == lev_dn)])/c_p
 
-def moist_static_stab(temp, p, sphum, p0=1000., lev_dn=925.):
-    theta_e = equiv_pot_temp(temp, p, sphum, p0=p0)
-    return (theta_e - theta_e[np.where(p == lev_dn)])
+def moist_static_stab(temp, hght, sphum, p):
+    mse_ = mse(temp, hght, sphum)
+    return d_dp_from_p(mse_, p)
+# def moist_static_stab(temp, p, sphum, p0=1000., lev_dn=925.):
+#     theta_e = equiv_pot_temp(temp, p, sphum, p0=p0)
+#     return (theta_e - theta_e[np.where(p == lev_dn)])
 
 def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
     """Gross moist stability. Upper minus lower level MSE with thermodynamic
