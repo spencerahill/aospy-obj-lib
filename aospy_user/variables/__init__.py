@@ -670,7 +670,8 @@ temp = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
+    in_nc_grid=False,
+    colormap='RdBu_r'
 )
 tot_cld_amt = Var(
     name='tot_cld_amt',
@@ -1348,17 +1349,30 @@ horiz_divg_vert_int_max = Var(
     func=calcs.horiz_divg_vert_int_max,
     units=units.kg_m2_s_mass
 )
+# moist_static_stab = Var(
+#     name='moist_static_stab',
+#     domain='atmos',
+#     description='',
+#     variables=('temp', 'p', 'sphum'),
+#     def_time=True,
+#     def_vert=True,
+#     def_lat=True,
+#     def_lon=True,
+#     func=calcs.moist_static_stab,
+#     units=units.K,
+#     colormap='RdBu_r'
+# )
 moist_static_stab = Var(
     name='moist_static_stab',
     domain='atmos',
-    description='',
-    variables=('temp', 'p', 'sphum'),
+    description='Moist static stability, \partial MSE/\partial p',
+    variables=(temp, hght, sphum, 'p'),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.moist_static_stab,
-    units=units.K,
+    units=r'J kg$^{-1}$ Pa$^{-1}$',
     colormap='RdBu_r'
 )
 mse = Var(
