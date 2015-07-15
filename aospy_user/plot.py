@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 """Script that interfaces w/ aospy.plotting to create multi-panel plots."""
 import matplotlib
-import matplotlib.pyplot as plt
 
 import aospy
 import aospy_user
@@ -20,49 +19,53 @@ def plot(proj, model, run, ens_mem, var, region):
         var=var,
         region=region,
 
-        n_row=4,
+        n_row=1,
         n_col=1,
         n_ax='all',
         n_plot=1,
-        n_data=1,
+        n_data=2,
 
-        row_size=1.7,
-        col_size=4,
+        row_size=5,
+        col_size=5,
         subplot_lims={'left': 0.05, 'right': 0.95, 'wspace': 0.1,
-                      'bottom': 0.09, 'top': 0.95, 'hspace': 0.2},
+                      'bottom': 0.1, 'top': 0.95, 'hspace': 0.1},
 
-        min_cntr=-130,
-        max_cntr=130,
-        num_cntr=13,
-        contourf_extend='neither',  # 'auto' 'neither' 'min' 'max' 'both'
+        min_cntr=200,
+        max_cntr=300,
+        num_cntr=20,
+        contourf_extend='min',  # 'auto' 'neither' 'min' 'max' 'both'
         col_map='default',
-        do_colorbar='all',      # 'all' 'column' 'row' False True
-        cbar_ax_lim=(0.1, 0.06, 0.8, 0.02),
-        cbar_ticks=range(-120,121,20),
+        do_colorbar=False,      # 'all' 'column' 'row' False True
+        cbar_ax_lim=(0.1, 0.05, 0.8, 0.02),
+        # cbar_ticks=range(-180, 181, 40),
+        cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
 
         intvl_in='monthly',
         intvl_out='jas',
         dtype_in_time='ts',
-        dtype_in_vert=False,
-        dtype_out_time='av',
+        dtype_in_vert='pressure',
+        dtype_out_time='reg.av',
         dtype_out_vert=False,
-        level=None,
+        level=False,
         yr_range='default',
 
-        plot_type='map',
-        x_dim='lon',
-        y_dim='lat',
+        plot_type='line',
+        x_dim='x',
+        y_dim='p',
 
         # Titles and labels
-        fig_title=r'',
-        ax_title=False,
-        ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
+        fig_title=False,
+        # ax_title=['3 hr, model levels', 'Monthly, $p$ levels', '', ''],
+        # ax_left_label = [r'$\{\omega\partial h/\partial p\}$', '',
+        #                  r'$\{\mathbf{v}\cdot\nabla h\}$', ''],
+        # ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
+        ax_left_label=False,
         ax_right_label=False,
 
         # Axis limits
-        x_lim=False,
+        x_lim=(-2,2),
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
@@ -72,12 +75,14 @@ def plot(proj, model, run, ens_mem, var, region):
         y_ticklabels=False,
         y_label=False,
 
-        lat_lim=(-5, 35),
+        # lat_lim=(-5, 35),
+        lat_lim=(-30,50),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        lon_lim=(-43, 65),
+        # lon_lim=(-43, 65),
+        lon_lim=(-180, 180),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -105,44 +110,53 @@ def plot(proj, model, run, ens_mem, var, region):
 
         do_quiver=False,
 
-        line_color='k',
+        line_color='r',
         linestyle='-',
 
+        marker_shape=None,
         marker_size=10,
         marker_color='k',
-        marker_shape='.',
 
         do_subtract_mean=False,
     )
 
     fig.create_fig()
     fig.make_plots()
-    plt.show()
+    matplotlib.pyplot.show()
     return fig
 
-
-def main(proj, model, run, ens_mem, var, region):
-    matplotlib.rcParams['font.family'] = 'sans-serif'
-    matplotlib.rcParams['font.sans-serif'] = 'Helvetica'
-
+class MainParams(object):
+    """Interface to main routine."""
+    pass
+        
+def main(params):
     # Instantiate objects and load default/all models, runs, and regions.
-    proj = aospy_user.to_proj(proj)
-    model = aospy_user.to_model(model, proj)
-    run = aospy_user.to_run(run, model, proj)
-    var = aospy_user.to_var(var)
-    region = aospy_user.to_region(region, proj=proj)
+    proj = aospy_user.to_proj(params.proj)
+    model = aospy_user.to_model(params.model, proj)
+    run = aospy_user.to_run(params.run, model, proj)
+    var = aospy_user.to_var(params.var)
+    region = aospy_user.to_region(params.region, proj=proj)
     proj, model, var, region = [aospy_user.to_iterable(obj)
                                 for obj in (proj, model, var, region)]
-    return plot(proj, model, run, ens_mem, var, region)
+    return plot(proj, model, run, params.ens_mem, var, region)
 
 if __name__ == '__main__':
-    proj = p.aero_3agcm
-    model = [m.am2, m.am3, m.hiram, m.hiram_c48]
-    run = [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'},
-           {(r.am3_hp2k, r.am3_hc): '-'},
-           {(r.hiram_gtm, r.hiram_cont): '-'},
-           {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
-    ens_mem = False
-    var = v.precip
-    region = False
-    fig = main(proj, model, run, ens_mem, var, region)
+    params = MainParams()
+    params.proj = p.aero_3agcm
+    # params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
+    params.model = m.am2
+    params.run = r.am2_reyoi_p2
+    # params.run = [r.am2_reyoi_cont, r.am3_hc, r.hiram_cont, r.hiram_c48_0]
+    # params.run = [r.am2_reyoi_p2, r.am3_hp2k, r.hiram_gtm, r.hiram_c48_0_p2K]
+    # params.run = [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'},
+    #        {(r.am3_hp2k, r.am3_hc): '-'},
+    #        {(r.hiram_gtm, r.hiram_cont): '-'},
+    #        {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
+    params.ens_mem = False
+    params.var = v.moist_static_stab
+    params.region = 'sahel'
+
+    matplotlib.rcParams['font.family'] = 'sans-serif'
+    matplotlib.rcParams['font.sans-serif'] = 'Helvetica'
+    
+    fig = main(params)
