@@ -8,17 +8,12 @@ from aospy_user import projs as p
 from aospy_user import models as m
 from aospy_user import runs as r
 from aospy_user import variables as v
+from aospy_user import regions as reg
 
 
-def plot(proj, model, run, ens_mem, var, region):
+def plot(plot_params):
     fig = aospy.plotting.Fig(
-        proj=proj,
-        model=model,
-        run=run,
-        ens_mem=ens_mem,
-        var=var,
-        region=region,
-
+        plot_params,
         n_row=1,
         n_col=1,
         n_ax='all',
@@ -37,7 +32,6 @@ def plot(proj, model, run, ens_mem, var, region):
         col_map='default',
         do_colorbar=False,      # 'all' 'column' 'row' False True
         cbar_ax_lim=(0.1, 0.05, 0.8, 0.02),
-        # cbar_ticks=range(-180, 181, 40),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
@@ -65,7 +59,7 @@ def plot(proj, model, run, ens_mem, var, region):
         ax_right_label=False,
 
         # Axis limits
-        x_lim=(-2,2),
+        x_lim=(-2, 2),
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
@@ -75,14 +69,12 @@ def plot(proj, model, run, ens_mem, var, region):
         y_ticklabels=False,
         y_label=False,
 
-        # lat_lim=(-5, 35),
-        lat_lim=(-30,50),
+        lat_lim=(-5, 35),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        # lon_lim=(-43, 65),
-        lon_lim=(-180, 180),
+        lon_lim=(-43, 65),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -125,10 +117,17 @@ def plot(proj, model, run, ens_mem, var, region):
     matplotlib.pyplot.show()
     return fig
 
+
 class MainParams(object):
     """Interface to main routine."""
     pass
-        
+
+
+class PlotParams(object):
+    """Interface to plot routine."""
+    pass
+
+
 def main(params):
     # Instantiate objects and load default/all models, runs, and regions.
     proj = aospy_user.to_proj(params.proj)
@@ -138,7 +137,14 @@ def main(params):
     region = aospy_user.to_region(params.region, proj=proj)
     proj, model, var, region = [aospy_user.to_iterable(obj)
                                 for obj in (proj, model, var, region)]
-    return plot(proj, model, run, params.ens_mem, var, region)
+    plot_params = PlotParams()
+    plot_params.proj = proj
+    plot_params.model = model
+    plot_params.run = run
+    plot_params.ens_mem = params.ens_mem
+    plot_params.var = var
+    plot_params.region = region
+    return plot(plot_params)
 
 if __name__ == '__main__':
     params = MainParams()
@@ -154,9 +160,9 @@ if __name__ == '__main__':
     #        {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
     params.ens_mem = False
     params.var = v.moist_static_stab
-    params.region = 'sahel'
+    params.region = reg.sahel
 
     matplotlib.rcParams['font.family'] = 'sans-serif'
     matplotlib.rcParams['font.sans-serif'] = 'Helvetica'
-    
+
     fig = main(params)
