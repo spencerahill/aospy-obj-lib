@@ -13,7 +13,7 @@ from aospy.utils import (level_thickness, to_pascal, to_radians,
                          dp_from_phalf, dp_from_sigma, int_dp_g, integrate,
                          weight_by_delta)
 
-### x, dx from longitude, y, dy from latitude
+# x, dx from longitude, y, dy from latitude
 
 # def x_from_latlon(lat, lon, radius):
 #     """Create array of x-distances based on arrays of lons and lats."""
@@ -130,6 +130,7 @@ def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     df_dy = np.rollaxis(df_dy, 0, 2)
     return prefactor*df_dy.T
 
+
 def d_dp_from_p(field, p):
     """Derivative in pressure of a given field."""
     # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
@@ -150,6 +151,7 @@ def d_dp_from_p(field, p):
     # Transpose again to regain original axis order.
     return df_dp.T
 
+
 # def add_ps_value_to_field(field, p, ps, field_at_ps):
 #     """Add value at surface pressure to pressure-defined data.
 #
@@ -168,6 +170,7 @@ def d_dp_from_p(field, p):
 
 ### Integrals in x, y, and p.
 
+
 # def int_dlon(integrand, lat, lon, start=0., end=360.):
     # """Integrate in longitude."""
     # # Assume pressure is 3rd to last axis.
@@ -179,6 +182,7 @@ def d_dp_from_p(field, p):
     # except IndexError:
         # integrand = integrand[:,inds]
     # return integrate(integrand, dlon, -3)
+
 
 # def int_dlat(integrand, lat, lon, start=-90., end=-90.):
     # """Integrate in latitude."""
@@ -193,15 +197,18 @@ def horiz_advec(field, u, v, lat, lon, radius):
     df_dy = d_dy_from_latlon(field, lat, lon, radius, vec_field=False)
     return u*df_dx + v*df_dy
 
+
 def vert_advec(field, omega, p):
     """Vertical advection of the given field."""
     return omega*d_dp_from_p(field, p)
+
 
 def horiz_divg(u, v, lat, lon, radius):
     """Flow horizontal divergence."""
     du_dx = d_dx_from_latlon(u, lat, lon, radius)
     dv_dy = d_dy_from_latlon(v, lat, lon, radius, vec_field=True)
     return du_dx + dv_dy
+
 
 def horiz_divg_from_windspharm(u, v):
     """Horizontal divergence computed using the windspharm package.
@@ -229,9 +236,11 @@ def horiz_divg_from_windspharm(u, v):
     w = VectorWind(u, v)
     return w.divergence()
 
+
 def vert_divg(omega, p):
     """Flow vertical divergence."""
     return d_dp_from_p(omega, p)
+
 
 def field_vert_int_bal(field, dp):
     """Impose vertical balance to the field, i.e. column integral = 0.
@@ -244,15 +253,18 @@ def field_vert_int_bal(field, dp):
     neg_int = int_dp_g(neg, dp)[:,np.newaxis,:,:]
     return pos - (pos_int/neg_int)*neg
 
+
 def horiz_divg_mass_bal(u, v, lat, lon, radius, dp):
     """Horizontal divergence with column mass-balance correction applied."""
     div = horiz_divg(u, v, lat, lon, radius)
     return field_vert_int_bal(div, dp)
 
+
 def vert_divg_mass_bal(omega, p, dp):
     """Vertical divergence with column mass-balance correction applied."""
     div = vert_divg(omega, p)
     return field_vert_int_bal(div, dp)
+
 
 def divg_3d(u, v, omega, lat, lon, p):
     """Total (3-D) divergence.  Should equal 0 by continuity."""
@@ -260,17 +272,21 @@ def divg_3d(u, v, omega, lat, lon, p):
     vert = vert_divg(omega, p)
     return horiz + vert
 
+
 def field_times_horiz_divg(field, u, v, lat, lon, radius):
     """Scalar field times horizontal convergence."""
     return field*horiz_divg(u, v, lat, lon, radius)
+
 
 def field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp):
     """Scalar field times horizontal convergence."""
     return field*horiz_divg_mass_bal(u, v, lat, lon, radius, dp)
 
+
 def field_times_vert_divg_mass_bal(field, omega, p, dp):
     """Scalar field times vertical convergence."""
     return field*vert_divg_mass_bal(omega, p, dp)
+
 
 def field_horiz_flux_divg(field, u, v, lat, lon, radius):
     """Horizontal flux divergence of given scalar field."""
@@ -278,13 +294,16 @@ def field_horiz_flux_divg(field, u, v, lat, lon, radius):
     dfv_dy = d_dy_from_latlon(v*field, lat, lon, radius, vec_field=True)
     return dfu_dx + dfv_dy
 
+
 def field_vert_flux_divg(field, omega, p):
     """Vertical flux divergence of a scalar field."""
     return d_dp_from_p(omega*field, p)
 
+
 def field_horiz_advec_divg_sum(field, u, v, lat, lon, radius, dp):
     return (field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp)
             + horiz_advec(field, u, v, lat, lon, radius))
+
 
 def field_vert_advec_divg_sum(field, omega, p, dp):
     return (field_times_vert_divg_mass_bal(field, omega, p, dp) +
@@ -292,14 +311,17 @@ def field_vert_advec_divg_sum(field, omega, p, dp):
 
 ### Advection, divergence etc. applied to specific fields.
 
+
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, lat, lon, radius):
     """Horizontal flux convergence of moist static energy."""
     return field_horiz_flux_divg(mse(temp, hght, sphum),
                                  u, v, lat, lon, radius)
 
+
 def mse_horiz_advec(temp, hght, sphum, u, v, lat, lon, radius):
     """Horizontal advection of moist static energy."""
     return horiz_advec(mse(temp, hght, sphum), u, v, lat, lon, radius)
+
 
 def mse_times_horiz_divg(temp, hght, sphum, u, v, lat, lon, radius, dp):
     """Horizontal divergence of moist static energy."""
@@ -307,28 +329,35 @@ def mse_times_horiz_divg(temp, hght, sphum, u, v, lat, lon, radius, dp):
         mse(temp, hght, sphum), u, v, lat, lon, radius, dp
     )
 
+
 def mse_horiz_advec_divg_sum(T, gz, q, u, v, lat, lon, rad, dp):
     return field_horiz_advec_divg_sum(mse(T, gz, q), u, v, lat, lon, rad, dp)
+
 
 def mse_vert_flux_divg(T, gz, q, omega, p):
     """Vertical divergence times moist static energy."""
     return field_vert_flux_divg(mse(T, gz, q), omega, p)
 
+
 def mse_vert_advec(temp, hght, sphum, omega, p):
     """Vertical advection of moist static energy."""
     return vert_advec(mse(temp, hght, sphum), omega, p)
+
 
 def mse_times_vert_divg(T, gz, q, omega, p, dp):
     """Vertical divergence times moist static energy."""
     return field_times_vert_divg_mass_bal(mse(T, gz, q), omega, p, dp)
 
+
 def dse_horiz_flux_divg(temp, hght, u, v, lat, lon, radius):
     """Horizontal flux convergence of moist static energy."""
     return field_horiz_flux_divg(dse(temp, hght), u, v, lat, lon, radius)
 
+
 def dse_horiz_advec(temp, hght, u, v, lat, lon, radius):
     """Horizontal advection of moist static energy."""
     return horiz_advec(dse(temp, hght), u, v, lat, lon, radius)
+
 
 def dse_times_horiz_divg(temp, hght, u, v, lat, lon, radius, dp):
     """Horizontal divergence of moist static energy."""
@@ -336,42 +365,52 @@ def dse_times_horiz_divg(temp, hght, u, v, lat, lon, radius, dp):
         dse(temp, hght), u, v, lat, lon, radius, dp
     )
 
+
 def dse_horiz_advec_divg_sum(T, gz, u, v, lat, lon, rad, dp):
     return field_horiz_advec_divg_sum(dse(T, gz), u, v, lat, lon, rad, dp)
+
 
 def dse_vert_advec(temp, hght, omega, p):
     """Vertical advection of moist static energy."""
     return vert_advec(dse(temp, hght), omega, p)
 
+
 def q_horiz_flux_divg(q, u, v, lat, lon, radius):
     """Horizontal flux convergence of specific humidity."""
     return field_horiz_flux_divg(q, u, v, lat, lon, radius)
+
 
 def q_horiz_advec(q, u, v, lat, lon, radius):
     """Horizontal advection of specific humidity."""
     return horiz_advec(q, u, v, lat, lon, radius)
 
+
 def q_times_horiz_divg(q, u, v, lat, lon, radius, dp):
     """Horizontal divergence of specific humidity."""
     return field_times_horiz_divg_mass_bal(q, u, v, lat, lon, radius, dp)
+
 
 def q_vert_advec(q, omega, p):
     """Vertical advection of specific humidity."""
     return vert_advec(q, omega, p)
 
+
 def qu(sphum, u):
     """"Zonal moisture flux."""
     return sphum*u
 
+
 def qv(sphum, v):
     """Meridional moisture flux."""
     return sphum*v
+
 
 ### Eddy computations.
 
 def covariance(array1, array2, axis=None, weights=None):
     """
     Average `covariance` along the specified axis of two arrays.
+
 
     :param array1, array2: The two arrays to compute the covariance of.
     :type array1 array2: numpy.ndarray or numpy.ma.core.MaskedArray
@@ -382,6 +421,7 @@ def covariance(array1, array2, axis=None, weights=None):
     """
     prod = np.ma.multiply(array1, array2)
     return np.ma.average(prod, axis=axis, weights=weights)
+
 
 def eddy_component(array, axis=None, weights=None):
     """Compute the deviation from the average along the specified axis.
@@ -395,6 +435,7 @@ def eddy_component(array, axis=None, weights=None):
     """
     avg = np.ma.average(array, axis=axis, weights=weights)
     return np.ma.subtract(array, avg)
+
 
 def eddy_covar_avg(array1, array2, axis=None, weights=None):
     """Compute the average eddy covariance of two fields.
@@ -410,15 +451,18 @@ def eddy_covar_avg(array1, array2, axis=None, weights=None):
     cov2 = eddy_component(array2, axis=axis, weights=weights)
     return covariance(cov1, cov2, axis=axis, weights=weights)
 
+
 ### Thermodynamic functions.
 
 def mse(temp, hght, sphum):
     """Moist static energy, in Joules per kilogram."""
     return dse(temp, hght) + L_v*sphum
 
+
 def fmse(temp, hght, sphum, ice_wat):
     """Frozen moist static energy, in Joules per kilogram."""
     return mse(temp, hght, sphum) - L_f*ice_wat
+
 
 def dse(temp, hght):
     """Dry static energy, in Joules per kilogram."""
@@ -432,9 +476,11 @@ def dse(temp, hght):
             ds = c_p*temp + grav*0.5*(hght[:,:,:-1] + hght[:,:,1:])
     return ds
 
+
 def pot_temp(temp, p, p0=1000.):
     """Potential temperature."""
     return temp*(p0/p[:,np.newaxis,np.newaxis])**kappa
+
 
 def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
     """Virtual potential temperature, approximating the mixing ratios as
@@ -444,10 +490,12 @@ def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
     return ((temp*(p0/p[:,np.newaxis,np.newaxis])**kappa) *
             (1. + 0.61*sphum - liq_wat))
 
+
 def equiv_pot_temp(temp, p, sphum, p0=1000.):
     """Equivalent potential temperature."""
 
     return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
+
 
 ### Gross moist stability-related quantities
 
@@ -459,6 +507,7 @@ def equiv_pot_temp(temp, p, sphum, p0=1000.):
 #     hght = 0.5*(hght[1:] + hght[:-1])
 #     dry = dse(temp, hght)
 #     return np.sum(dry*dp_g, axis=0)
+
 
 def field_vert_int_max(field, dp):
     """Maximum magnitude of integral of a field from surface up."""
@@ -473,14 +522,17 @@ def field_vert_int_max(field, dp):
     # Flip sign because integrating from p_sfc up, i.e. with dp negative.
     return -1*np.where(pos_max > -neg_max, pos_max, neg_max)
 
+
 def horiz_divg_vert_int_max(u, v, lat, lon, radius, dp):
     """Maximum magnitude of integral from surface up of horizontal divergence."""
     return field_vert_int_max(horiz_divg_mass_bal(u, v, lat, lon, radius, dp),
                               dp)
 
+
 def vert_divg_vert_int_max(omega, p, dp):
     """Maximum magnitude of integral from surface up of vertical divergence."""
     return field_vert_int_max(vert_divg_mass_bal(omega, p, dp), dp)
+
 
 def gms_like_ratio(weights, tracer, dp):
     """Compute ratio of integrals in the style of gross moist stability."""
@@ -491,32 +543,39 @@ def gms_like_ratio(weights, tracer, dp):
     numerator = np.sum(weight_by_delta(weights*tracer, dp), axis=-3) / grav
     return numerator / denominator
 
+
 def gross_moist_strat(sphum, u, v, lat, lon, radius, dp):
     """Gross moisture stratification, in horizontal divergence form."""
     divg = horiz_divg(u, v, lat, lon, radius)
     return L_v*gms_like_ratio(divg, sphum, dp)
+
 
 def gross_dry_stab(temp, hght, u, v, lat, lon, radius, dp):
     """Gross dry stability, in horizontal divergence form."""
     divg = horiz_divg(u, v, lat, lon, radius)
     return -gms_like_ratio(divg, dse(temp, hght), dp)
 
+
 def gross_moist_stab(temp, hght, sphum, u, v, lat, lon, radius, dp):
     """Gross moist stability, in horizontal divergence form."""
     divg = horiz_divg(u, v, lat, lon, radius)
     return -gms_like_ratio(divg, mse(temp, hght, sphum), dp)
 
+
 def albedo(swdn_toa, swup_toa):
     """Net column albedo, i.e. fraction of insolation reflected back."""
     return np.ma.masked_where(swdn_toa == 0., swup_toa/swdn_toa)
+
 
 def sfc_albedo(swdn_sfc, swup_sfc):
     """Net surface albedo, i.e. fraction of SW at surface reflected back."""
     return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
 
+
 def toa_sw(swdn_toa, swup_toa):
     """All-sky TOA net shortwave radiative flux into atmosphere."""
     return swdn_toa - swup_toa
+
 
 def cre_sw(swup_toa, swup_toa_clr):
     """Cloudy-sky TOA net shortwave radiative flux into atmosphere."""
@@ -525,17 +584,21 @@ def cre_sw(swup_toa, swup_toa_clr):
 #     """Cloudy-sky TOA net shortwave radiative flux into atmosphere."""
 #     return swdn_toa - swup_toa - swdn_toa_clr + swup_toa_clr
 
+
 def toa_swup_cld(swup_toa, swup_toa_clr):
     """Cloudy-sky TOA upwelling shortwave radiative flux."""
     return swup_toa - swup_toa_clr
+
 
 def cre_lw(olr, olr_clr):
     """Cloudy-sky OLR (outgoing longwave radiation, i.e. upwelling longwave radiative flux at TOA."""
     return -1*olr + olr_clr
 
+
 def toa_rad(swdn_toa, swup_toa, olr):
     """All-sky TOA downward radiative flux."""
     return swdn_toa - swup_toa - olr
+
 
 def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
     """Cloudy-sky TOA downward radiative flux."""
@@ -544,33 +607,41 @@ def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
 #     """Cloudy-sky TOA downward radiative flux."""
 #     return swdn_toa - swup_toa - olr - swdn_toa_clr + swup_toa_clr + olr_clr
 
+
 def toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr):
     """Clear-sky TOA downward radiative flux."""
     return swdn_toa_clr - swup_toa_clr - olr_clr
+
 
 def sfc_albedo(swup_sfc, swdn_sfc):
     """Surface albedo."""
     return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
 
+
 def sfc_sw(swup_sfc, swdn_sfc):
     """All-sky surface upward shortwave radiative flux."""
     return swup_sfc - swdn_sfc
+
 
 def sfc_sw_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr):
     """Cloudy-sky surface upward shortwave radiative flux."""
     return swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr
 
+
 def sfc_lw(lwup_sfc, lwdn_sfc):
     """All-sky surface net longwave radiative flux into atmosphere."""
     return lwup_sfc - lwdn_sfc
+
 
 def sfc_lw_cld(lwup_sfc, lwup_sfc_clr, lwdn_sfc, lwdn_sfc_clr):
     """Cloudy-sky surface net longwave radiative flux into atmosphere."""
     return lwup_sfc - lwup_sfc_clr - lwdn_sfc + lwdn_sfc_clr
 
+
 def sfc_rad(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc):
     """All-sky surface upward radiative flux."""
     return swup_sfc - swdn_sfc + lwup_sfc -lwdn_sfc
+
 
 def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr,
                 lwup_sfc, lwup_sfc_clr, lwdn_sfc, lwdn_sfc_clr):
@@ -578,9 +649,11 @@ def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr,
     return (swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr +
             lwup_sfc - lwup_sfc_clr - lwdn_sfc + lwdn_sfc_clr)
 
+
 def sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
     """All sky net upward surface radiative plus enthalpy flux."""
     return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
+
 
 def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                   lwup_sfc, lwdn_sfc, shflx, evap):
@@ -588,29 +661,36 @@ def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
     return (toa_rad(swdn_toa, swup_toa, olr) +
             sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap))
 
+
 def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls):
     """Net diabatic heating rate."""
     return tdt_lw + tdt_sw + tdt_conv + tdt_ls
+
 
 def tdt_lw_cld(tdt_lw, tdt_lw_clr):
     """Cloudy-sky temperature tendency from longwave radiation."""
     return tdt_lw - tdt_lw_clr
 
+
 def tdt_sw_cld(tdt_sw, tdt_sw_clr):
     """Cloudy-sky temperature tendency from shortwave radiation."""
     return tdt_sw - tdt_sw_clr
+
 
 def p_minus_e(precip, evap):
     """Precipitation minus evaporation."""
     return precip - evap
 
+
 def bowen_ratio(shflx, evap):
     """Bowen ratio: surface SH/LH."""
     return shflx/(L_v * evap)
 
+
 def evap_frac(evap, shflx):
     """Evaporative fraction: surface LH/(SH+LH)."""
     return L_v*evap / (L_v*evap + shflx)
+
 
 def msf(lats, levs, v):
     """Meridional mass streamfunction."""
@@ -629,12 +709,14 @@ def msf(lats, levs, v):
     msf_[:,-1]*=0.5; msf_[:,0] = 0.
     return msf_
 
+
 def msf_max(lats, levs, v):
     """Maximum meridional mass streamfunction magnitude at each latitude."""
     strmfunc = msf(lats, levs, v)
     pos_max = np.amax(strmfunc, axis=1)
     neg_max = np.amin(strmfunc, axis=1)
     return np.where(pos_max > -neg_max, pos_max, neg_max)
+
 
 def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
         shflx, evap, snow_ls, snow_conv, sfc_area):
@@ -659,13 +741,16 @@ def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
     return (np.squeeze(m[np.where(level == lev_up)] -
                        m[np.where(level == lev_dn)])/c_p)
 
+
 def gms_each_level(temp, hght, sphum, level, lev_dn=925.):
     m = mse(temp, hght, sphum)
     return (m - m[np.where(level == lev_dn)])/c_p
 
+
 def dry_static_stab(temp, hght, level, lev_dn=925.):
     d = dse(temp, hght)
     return (d - d[np.where(level == lev_dn)])/c_p
+
 
 def moist_static_stab(temp, hght, sphum, p):
     mse_ = mse(temp, hght, sphum)
@@ -674,11 +759,13 @@ def moist_static_stab(temp, hght, sphum, p):
 #     theta_e = equiv_pot_temp(temp, p, sphum, p0=p0)
 #     return (theta_e - theta_e[np.where(p == lev_dn)])
 
+
 def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
     """Gross moist stability. Upper minus lower level MSE with thermodynamic
     scaling estimate for low level MSE."""
     m = mse(temp, hght, sphum).mean(axis=-1)
     return (m[np.where(level == lev_up)] - m[np.where(level == lev_dn)])/c_p
+
 
 def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
     """
@@ -691,6 +778,7 @@ def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
             np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
     return (m[itcz_ind] - m)/c_p
 
+
 def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
     """
     Gross moist stability. Near surface MSE diff b/w ITCZ and the given latitude
@@ -702,6 +790,7 @@ def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
     itcz_ind = np.argmax(np.mean(precip, axis=-1))
     # GMS is difference between surface values
     return temp[itcz_ind] - temp + L_v*(sphum[itcz_ind] - sphum)/c_p
+
 
 def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
     """
@@ -717,6 +806,7 @@ def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
             np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
             np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
     return (m_up[itcz_ind] - m_sfc)/c_p
+
 
 def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     """
@@ -736,6 +826,7 @@ def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     alpha = 0.07
     return ((c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
             (c_p + L_v*alpha*q_cont)*dT)/c_p
+
 
 def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
                     lev_sfc=925., gamma=1.):
@@ -759,6 +850,7 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
     return (np.cos(np.deg2rad(lat))**2*gamma*
             (c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
             (c_p + L_v*alpha*q_cont)*dT)/c_p
+
 
 def prec_conv_frac(prec_conv, precip, prec_ls=False):
     """Fraction of precipitation coming from convection scheme."""
@@ -801,6 +893,7 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
     return (np.sum(field*level*lev_thick, axis=0) /
             np.sum(field*lev_thick, axis=0))
 
+
 ###############################
 # Functions below this line haven't been converted to new argument format.
 
@@ -817,6 +910,7 @@ def tht(variables, **kwargs):
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
     return np.cumsum(flux_div, axis=-1)
 
+
 def oht(variables, **kwargs):
     """Total oceanic northward energy flux as residual of total minus atmospheric flux."""
     # Calculate energy balance at each grid point.
@@ -832,6 +926,7 @@ def oht(variables, **kwargs):
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
     return np.cumsum(flux_div, axis=-1)
     #return tht(variables, **kwargs) - aht(variables, **kwargs)
+
 
 def moc_flux(variables, **kwargs):
     """Mass weighted column integrated meridional flux by time and
@@ -862,6 +957,7 @@ def moc_flux(variables, **kwargs):
     return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1))
 
+
 def moc_flux_raw(variables, **kwargs):
     """Mass weighted column integrated meridional flux by time and zonal mean flow, without applying column mass flux correction."""
     # Specify upper bound of vertical integrals.
@@ -882,6 +978,7 @@ def moc_flux_raw(variables, **kwargs):
     return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1))
 
+
 def st_eddy_flux(variables, **kwargs):
     """Mass weighted column integrated meridional flux by stationary eddies."""
     p_top = kwargs.get('p_top', 0.)
@@ -901,17 +998,21 @@ def st_eddy_flux(variables, **kwargs):
     return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             (flux*lev_thick).sum(axis=1).mean(axis=-1))
 
+
 def moc_st_eddy_flux(variables, **kwargs):
     """Mass weighted column integrated flux by time mean flow."""
     return moc_flux(variables, **kwargs) + st_eddy_flux(variables, **kwargs)
+
 
 def trans_eddy_flux(variables, **kwargs):
     """Meridional flux by transient eddies."""
     return aht(variables[4:], **kwargs) - moc_st_eddy_flux(variables[:4], **kwargs)
 
+
 def eddy_flux(variables, **kwargs):
     """Meridional flux by stationary and transient eddies."""
     return aht(variables[4:], **kwargs) - moc_flux(variables[:4], **kwargs)
+
 
 def mse_flux(variables, **kwargs):
     """Column integrated moist static energy meridional flux."""
@@ -928,6 +1029,7 @@ def mse_flux(variables, **kwargs):
         return aht(variables[4:], **kwargs)
     elif flux_type == 'eddy':
         return eddy_flux(variables, **kwargs)
+
 
 def mass_flux(variables, **kwargs):
     """Meridional mass flux by time and zonal mean flow."""
@@ -947,19 +1049,23 @@ def mass_flux(variables, **kwargs):
     return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
             np.where(flux_pos > - flux_neg, flux_pos, flux_neg))
 
+
 def gms_moc(variables, **kwargs):
     """Gross moist stability."""
     return -moc_flux(variables, **kwargs)/msf_max([variables[-1]], **kwargs)/c_p
+
 
 def gms_msf(variables, **kwargs):
     """Gross moist stability."""
     return -(moc_st_eddy_flux(variables, **kwargs) /
             (msf_max([variables[-1]], **kwargs)*c_p))
 
+
 def total_gms(variables, **kwargs):
     """Total (mean plus eddy) gross moist stability."""
     return -(aht(variables[:-1], **kwargs) /
              msf_max([variables[-1]], **kwargs))/c_p
+
 
 def aht_no_snow(variables, **kwargs):
     """Total atmospheric northward energy flux."""
@@ -977,6 +1083,7 @@ def aht_no_snow(variables, **kwargs):
     flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
     return np.cumsum(flux_div, axis=-1)
 
+
 def hadley_bounds(lats, levs, vcomp):
     """Poleward extent of Hadley Cell."""
     # Get meridional mass streamfunction at 500 hPa.
@@ -991,6 +1098,7 @@ def hadley_bounds(lats, levs, vcomp):
     return np.array([lats[ind[i]+1] - (lats[ind[i]+1] - lats[ind[i]]) /
                 (sf[ind[i]+1] - sf[ind[i]])*sf[ind[i]+1]
                 for i in range(3)])
+
 
 def had_bounds(strmfunc, lat, return_max=False):
     """Hadley cell poleward extent and center location."""
@@ -1022,6 +1130,7 @@ def had_bounds(strmfunc, lat, return_max=False):
     had_center = zero_cross[0] + y_max_ind
     return np.array([lat[had_lims[0]], lat[had_center], lat[had_lims[1]]])
 
+
 def had_bounds500(strmfunc, lat):
     """Hadley cells extent based on 500 hPa streamfunction zero crossings."""
 
@@ -1037,6 +1146,7 @@ def had_bounds500(strmfunc, lat):
                     (strmfunc[ind[i]+1] - strmfunc[ind[i]])*strmfunc[ind[i]+1]
                     for i in range(3)])
 
+
 def thermal_equator(flux, lat):
     """Location of zero-crossing of energy flux."""
 
@@ -1047,6 +1157,7 @@ def thermal_equator(flux, lat):
     # Linearly interpolate to true zero crossing latitude.
     return (lat[ind+1] - (lat[ind+1] - lat[ind]) /
             (flux[ind+1] - flux[ind])*flux[ind+1])
+
 
 def itcz_pos(precip, lat, return_indices=False):
     """Calculate ITCZ location."""
@@ -1066,6 +1177,7 @@ def itcz_pos(precip, lat, return_indices=False):
                             (dP_dphi[i+1] - dP_dphi[i]))
     return np.rad2deg(zero_interp)
 
+
 def itcz_loc(lats, precip):
     """Calculate ITCZ location."""
     # Find the latitude index with maximum precip and calculate dP/d(latitude)
@@ -1081,6 +1193,7 @@ def itcz_loc(lats, precip):
     return np.deg2rad(phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) /
                                (dP_dphi[i+1] - dP_dphi[i])))
 
+
 def prec_centroid(precip, lat, lat_max=20.):
     """
     Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
@@ -1092,6 +1205,7 @@ def prec_centroid(precip, lat, lat_max=20.):
     # Integrate area-weighted precip and find median.
     prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))))
     return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]))]
+
 
 def precip_centroid(lats, precip, lat_max=20.):
     """
@@ -1106,10 +1220,12 @@ def precip_centroid(lats, precip, lat_max=20.):
     prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))), axis=0)
     return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]), axis=0)]
 
+
 def ang_mom(lats, ucomp):
     """Angular momentum per unit mass."""
     cos_lat = np.cos(np.deg2rad(lats[np.newaxis,:,np.newaxis]))
     return (Omega*r_e*cos_lat + ucomp)*r_e*cos_lat
+
 
 def trop_height(level, T):
     """
@@ -1136,6 +1252,7 @@ def trop_height(level, T):
     # Convert from pressure^kappa to pressure.
     return pkap_tp**(1./kap)
 
+
 def flatten_spatial_dims(data):
     """Flatten all spatial dimensions of an input array.
 
@@ -1144,6 +1261,7 @@ def flatten_spatial_dims(data):
     n_lon, n_lat, n_lev = data.shape[-1], data.shape[-2], data.shape[-3]
     n_pt = n_lon*n_lat*n_lev
     return data.reshape((-1, n_pt))
+
 
 def pointwise_corr(x, y):
     """Pointwise Pearson correlation coefficient in time of two arrays.
@@ -1160,6 +1278,7 @@ def pointwise_corr(x, y):
     corr = [scipy.stats.pearsonr(x[:,i], y[:,i])[0] for i in range(n_pt)]
     # Reshape to original shape, but dropping the time dimension.
     return np.reshape(corr, orig_shape[1:])
+
 
 def pointwise_lin_regr(x, y):
     """Pointwise least squares linear regression in time of two arrays.
@@ -1178,24 +1297,30 @@ def pointwise_lin_regr(x, y):
     # Reshape to original shape, but dropping the time dimension.
     return np.reshape(slope, orig_shape[1:])
 
+
 def corr_cre_sw(swup_toa, swup_toa_clr, var2):
     return pointwise_corr(cre_sw(swup_toa, swup_toa_clr), var2)
+
 
 def corr_cre_lw(olr, olr_clr, var2):
     return pointwise_corr(cre_lw(olr, olr_clr), var2)
 
+
 def corr_cre_net(swup_toa, olr, swup_toa_clr, olr_clr, var2):
     return pointwise_corr(cre_net(swup_toa, olr, swup_toa_clr, olr_clr), var2)
+
 
 def corr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
     return pointwise_corr(
         toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr), var2
     )
 
+
 def lin_regr_cre_net(swup_toa, olr, swup_toa_clr, olr_clr, var2):
     return pointwise_lin_regr(
         var2, cre_net(swup_toa, olr, swup_toa_clr, olr_clr)
     )
+
 
 def lin_regr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
     return pointwise_lin_regr(
