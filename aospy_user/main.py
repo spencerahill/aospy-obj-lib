@@ -6,9 +6,38 @@ import aospy
 import aospy_user
 
 
+class MainParams(object):
+    """Interface to main routine."""
+    pass
+
+
 class CalcParams(object):
     """Interface to Calc class."""
     pass
+
+    def print_params(self):
+        print '\nProject:', self.proj
+        print 'Models:', self.model
+        print 'Runs:', self.run
+        print 'Ensemble members:', self.ens_mem
+        print 'Variables:', self.var
+        print 'Year ranges:', self.yr_range
+        print 'Geographical regions:', self.region
+        print 'Time interval of input data:', self.intvl_in
+        print 'Time intervals for averaging:', self.intvl_out
+        print 'Input data time type:', self.dtype_in_time
+        print 'Input data vertical type:', self.dtype_in_vert
+        print 'Output data time types:', self.dtype_out_time
+        print 'Output data vert types:', self.dtype_out_vert
+        print 'Vertical levels:', self.level
+        print 'Year chunks:', self.yr_chunk_len
+        print 'Compute this data:', self.compute
+        print 'Print this data:', self.print_table
+
+
+def prompt_user_verify():
+    if not raw_input("\nProceed using these parameters? ").lower() == 'y':
+        raise IOError('\nExecution cancelled by user.')
 
 
 def main(main_params):
@@ -23,6 +52,8 @@ def main(main_params):
     cp.proj, cp.model, cp.var, cp.region = [
         aospy_user.to_iterable(obj) for obj in (proj, model, var, region)
     ]
+    cp.region = aospy.utils.dict_name_keys(cp.region)
+    print cp.region
     cp.run = main_params.run
     cp.ens_mem = main_params.ens_mem
     cp.yr_range = main_params.yr_range
@@ -38,26 +69,8 @@ def main(main_params):
     cp.verbose = main_params.verbose
     cp.print_table = main_params.print_table
 
-    print '\nProject:', cp.proj
-    print 'Models:', cp.model
-    print 'Runs:', cp.run
-    print 'Ensemble members:', cp.ens_mem
-    print 'Variables:', cp.var
-    print 'Year ranges:', cp.yr_range
-    print 'Geographical regions:', region
-    print 'Time interval of input data:', cp.intvl_in
-    print 'Time intervals for averaging:', cp.intvl_out
-    print 'Input data time type:', cp.dtype_in_time
-    print 'Input data vertical type:', cp.dtype_in_vert
-    print 'Output data time types:', cp.dtype_out_time
-    print 'Output data vert types:', cp.dtype_out_vert
-    print 'Vertical levels:', cp.level
-    print 'Year chunks:', cp.yr_chunk_len
-    print 'Compute this data:', cp.compute
-    print 'Print this data:', cp.print_table
-
-    if not raw_input("\nProceed using these parameters? ").lower() == 'y':
-        raise IOError('\nExecution cancelled by user.')
+    cp.print_params()
+    prompt_user_verify()
 
     # Iterate through given parameter combos, saving resulting calculations.
     print '\n\tVariable time averages and statistics:'
@@ -79,39 +92,37 @@ def main(main_params):
                 calcs.append(calc)
 
             if cp.print_table:
-                dat = calc.load(
-                    cp.dtype_out_time[0], dtype_out_vert=params[-2],
-                    region=params[6][0], plot_units=True
-                )
-                print dat
-                data.append(dat)
+                for reg in cp.region.values():
+                    dat = calc.load(
+                        cp.dtype_out_time[0], dtype_out_vert=params[-2],
+                        region=reg, plot_units=True
+                    )
+                    print dat
+                    data.append(dat)
     print "Calculations finished."
     return calcs, data
 
 
-class MainParams(object):
-    """Interface to main routine."""
-    pass
-
 if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
-    mp.model = 'default'
+    mp.model = 'am2'
     mp.run = 'default'
     mp.ens_mem = [None]
-    mp.var = ['precip']
-    mp.yr_range = ['default']
-    mp.region = ['all']
-    mp.intvl_in = ['monthly']
+    mp.var = ['mse_horiz_advec']
+    mp.yr_range = [(1983, 1984)]
+    mp.region = 'sahel'
+    mp.intvl_in = ['3hr']
     mp.intvl_out = ['jas']
-    mp.dtype_in_time = ['ts']
-    mp.dtype_in_vert = [False]
-    mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = [False]
+    mp.dtype_in_time = ['inst']
+    mp.dtype_in_vert = ['sigma']
+    mp.dtype_out_time = ('reg.av',)
+    # mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
+    mp.dtype_out_vert = ['vert_int']
     mp.level = [None]
     mp.yr_chunk_len = False
-    mp.compute = True
+    mp.compute = False
     mp.verbose = True
-    mp.print_table = False
+    mp.print_table = True
 
     calc, data = main(mp)
