@@ -14,14 +14,14 @@ from aospy_user import regions as reg
 def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
-        n_row=1,
-        n_col=1,
+        n_row=2,
+        n_col=2,
         n_ax='all',
         n_plot=1,
-        n_data=2,
+        n_data=1,
 
-        row_size=5,
-        col_size=5,
+        row_size=4,
+        col_size=3,
         subplot_lims={'left': 0.05, 'right': 0.95, 'wspace': 0.1,
                       'bottom': 0.1, 'top': 0.95, 'hspace': 0.1},
 
@@ -59,7 +59,7 @@ def plot(plot_params):
         ax_right_label=False,
 
         # Axis limits
-        x_lim=(-2, 2),
+        x_lim=[(-60, 5), (-1, 1), (-20, 20), (-0.2, 0.2)],
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
@@ -128,6 +128,13 @@ class PlotParams(object):
     pass
 
 
+class AxParamParser(object):
+    """Container designating that the contents correspond to an Ax."""
+    def __init__(self, params):
+        self.params = params
+        self.n_param = len(params)
+
+
 def main(params):
     # Instantiate objects and load default/all models, runs, and regions.
     proj = aospy_user.to_proj(params.proj)
@@ -149,18 +156,19 @@ def main(params):
 if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
-    # params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
     params.model = m.am2
-    params.run = r.am2_reyoi_p2
+    params.run = ([r.am2_reyoi_cont]*2 +
+                  [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}]*2)
+    # params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
     # params.run = [r.am2_reyoi_cont, r.am3_hc, r.hiram_cont, r.hiram_c48_0]
     # params.run = [r.am2_reyoi_p2, r.am3_hp2k, r.hiram_gtm, r.hiram_c48_0_p2K]
     # params.run = [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'},
-    #        {(r.am3_hp2k, r.am3_hc): '-'},
-    #        {(r.hiram_gtm, r.hiram_cont): '-'},
-    #        {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
+    #               {(r.am3_hp2k, r.am3_hc): '-'},
+    #               {(r.hiram_gtm, r.hiram_cont): '-'},
+    #               {(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}]
     params.ens_mem = False
-    params.var = v.moist_static_stab
-    params.region = reg.sahel
+    params.var = [v.omega, v.moist_static_stab]*2
+    params.region = reg.sahel_north
 
     matplotlib.rcParams['font.family'] = 'sans-serif'
     matplotlib.rcParams['font.sans-serif'] = 'Helvetica'

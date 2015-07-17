@@ -106,19 +106,19 @@ def main(main_params):
 if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
-    mp.model = 'am2'
+    mp.model = 'default'
     mp.run = 'default'
     mp.ens_mem = [None]
-    mp.var = ['mse_horiz_advec']
-    mp.yr_range = [(1983, 1984)]
-    mp.region = 'sahel'
-    mp.intvl_in = ['3hr']
+    mp.var = ['t_surf']
+    mp.yr_range = ['default']
+    mp.region = 'sahel_south'
+    mp.intvl_in = ['monthly']
     mp.intvl_out = ['jas']
-    mp.dtype_in_time = ['inst']
-    mp.dtype_in_vert = ['sigma']
+    mp.dtype_in_time = ['ts']
+    mp.dtype_in_vert = [False]
     mp.dtype_out_time = ('reg.av',)
     # mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = ['vert_int']
+    mp.dtype_out_vert = [False]
     mp.level = [None]
     mp.yr_chunk_len = False
     mp.compute = False

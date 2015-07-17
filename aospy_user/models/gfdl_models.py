@@ -7,11 +7,11 @@ am2 = Model(
     nc_grid_paths=(
         ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos/atmos.static.nc'),
-        # ['/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
-         # 'atmos/ts/monthly/1yr/atmos.' + str(n) + '01-' + str(n) +
-         # '12.ucomp.nc' for n in range(1982, 2013)],
-        ('/archive/yim/siena_201203/m45_am2p14_1990/gfdl.ncrc2-intel-prod/'
-         'pp/atmos/ts/monthly/16yr/atmos.198301-199812.temp.nc'),
+        ['/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
+         'atmos/ts/monthly/1yr/atmos.' + str(n) + '01-' + str(n) +
+         '12.ucomp.nc' for n in range(1982, 2013)],
+        # ('/archive/yim/siena_201203/m45_am2p14_1990/gfdl.ncrc2-intel-prod/'
+        #  'pp/atmos/ts/monthly/16yr/atmos.198301-199812.temp.nc'),
         ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos_level/atmos_level.static.nc'),
         ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
