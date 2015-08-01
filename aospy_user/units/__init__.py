@@ -1,24 +1,24 @@
 from aospy.units import Units
-from aospy.constants import c_p, day2sec, sec2day
+from aospy.constants import c_p, seconds_in_day
 
 unitless = Units(units='')
 K = Units(units='K')
-s=Units(
+s = Units(
     units=r's',
     plot=r'day',
-    plot_conv=sec2day
+    plot_conv=1. / seconds_in_day
 )
-s1=Units(
+s1 = Units(
     units=r's$^{-1}$',
     plot=r'day$^{-1}$',
-    plot_conv=day2sec,
+    plot_conv=seconds_in_day,
 )
-K_s1=Units(
+K_s1 = Units(
     units=r'K s$^{-1}$',
     vert_int_plot=r'W m$^{-2}$',
     vert_int_plot_conv=c_p
 )
-m_s=Units(
+m_s = Units(
     units=r'm s$^{-1}$',
     vert_int=r'kg m$^{-1}$ s$^{-1}$'
 )
@@ -29,11 +29,11 @@ m_s2 = Units(
 kg_m2_s = Units(
     units=r'kg m$^{-2}$ s$^{-1}$',
     plot=r'mm day$^{-1}$',
-    plot_conv=day2sec
+    plot_conv=seconds_in_day
 )
 kg_m2_s_mass = Units(           # For vertical integrals of divergence.
     units=r'kg m$^{-2}$ s$^{-1}$',
-    plot=r'10$^{-2}$ kg m$^{-2}$ s',    
+    plot=r'10$^{-2}$ kg m$^{-2}$ s',
     plot_conv=1e2
 )
 W_m2 = Units(
@@ -51,16 +51,16 @@ J_kg1 = Units(
 J_kg1_s1 = Units(
     units=r'J kg$^{-1}$ s$^{-1}$',
     plot='K day$^{-1}',
-    plot_conv=day2sec/c_p,
+    plot_conv=seconds_in_day / c_p,
     vert_int='W m$^{-2}$',
     vert_int_plot='W m$^{-2}$',
     vert_int_plot_conv=1
 )
-Pa=Units(
+Pa = Units(
     units=r'Pa',
     plot=r'hPa',
     plot_conv=1e-2
 )
-hPa=Units(
+hPa = Units(
     units=r'hPa',
 )
