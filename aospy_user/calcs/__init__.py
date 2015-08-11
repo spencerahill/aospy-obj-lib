@@ -7,7 +7,9 @@ vertically defined, (lat, lon).
 import scipy.stats
 import numpy as np
 
-from aospy.constants import c_p, grav, kappa, L_f, L_v, r_e, Omega
+from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
+                             T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
+                             E_0v, E_0s, s_0v, s_0s)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
                          phalf_from_sigma, pfull_from_phalf, phalf_from_pfull,
                          dp_from_phalf, dp_from_sigma, int_dp_g, integrate,
@@ -168,7 +170,7 @@ def d_dp_from_p(field, p):
 #     p_bot = np.ma.where(p < ps)
 #     return
 
-### Integrals in x, y, and p.
+## Integrals in x, y, and p.
 
 
 # def int_dlon(integrand, lat, lon, start=0., end=360.):
@@ -189,7 +191,41 @@ def d_dp_from_p(field, p):
     # return
 
 
-### Horizontal & vertical advection, divergence, and flux divergence functions.
+# Trenberth mass balance & energy budget quantities
+def column_total_mass(ps):
+    """Total mass of atmospheric column (from Trenberth 1991)"""
+    return ps / grav
+
+
+def column_dry_air_mass(ps, wvp):
+    """Total mass of dry air in an atmospheric column (from Trenberth 1991)"""
+    return ps / grav - wvp
+
+
+def column_dry_air_mass_tendency(q, u, v, lat, lon, radius, dp):
+    """Time tendency of column dry air mass.  Trenberth 1991, Eq. (3)"""
+    dry_air = 1 - q
+    dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, lat, lon, radius)
+    return -1*int_dp_g(dry_air_flux_divg, dp)
+
+
+def global_integral(field, sfc_area, dp):
+    """Mass-weighted global integral of the given field."""
+    vert_int = int_dp_g(field, dp)
+    vert_int_flat = np.reshape(vert_int, (vert_int.shape[0], -1))
+    # Assume first axis is time.
+    return np.ma.sum(vert_int_flat*sfc_area.ravel(), axis=1)
+
+
+def field_zero_global_mean(field, sfc_area, dp):
+    """Subtract the global mean value from the given field."""
+    ones = np.ones(np.shape(field))
+    global_mean = (global_integral(field, sfc_area, dp) /
+                   global_integral(ones, sfc_area, dp))
+    return field - global_mean[:,np.newaxis,np.newaxis,np.newaxis]
+
+
+# Horizontal & vertical advection, divergence, and flux divergence functions.
 
 def horiz_advec(field, u, v, lat, lon, radius):
     """Horizontal advection of the given field."""
@@ -202,6 +238,11 @@ def vert_advec(field, omega, p):
     """Vertical advection of the given field."""
     return omega*d_dp_from_p(field, p)
 
+
+def vert_advec_omega_zero_mean(field, omega, sfc_area, p, dp):
+    """Vertical advection, with omega adjusted to equal 0 in global mean."""
+    omega_adj = field_zero_global_mean(omega, sfc_area, dp)
+    return omega_adj*d_dp_from_p(field, p)
 
 def horiz_divg(u, v, lat, lon, radius):
     """Flow horizontal divergence."""
@@ -266,7 +307,7 @@ def vert_divg_mass_bal(omega, p, dp):
     return field_vert_int_bal(div, dp)
 
 
-def divg_3d(u, v, omega, lat, lon, p):
+def divg_3d(u, v, omega, lat, lon, radius, p):
     """Total (3-D) divergence.  Should equal 0 by continuity."""
     horiz = horiz_divg(u, v, lat, lon, radius)
     vert = vert_divg(omega, p)
@@ -274,17 +315,17 @@ def divg_3d(u, v, omega, lat, lon, p):
 
 
 def field_times_horiz_divg(field, u, v, lat, lon, radius):
-    """Scalar field times horizontal convergence."""
+    """Scalar field times horizontal divergence."""
     return field*horiz_divg(u, v, lat, lon, radius)
 
 
 def field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp):
-    """Scalar field times horizontal convergence."""
+    """Scalar field times horizontal divergence."""
     return field*horiz_divg_mass_bal(u, v, lat, lon, radius, dp)
 
 
 def field_times_vert_divg_mass_bal(field, omega, p, dp):
-    """Scalar field times vertical convergence."""
+    """Scalar field times vertical divergence."""
     return field*vert_divg_mass_bal(omega, p, dp)
 
 
@@ -305,11 +346,12 @@ def field_horiz_advec_divg_sum(field, u, v, lat, lon, radius, dp):
             + horiz_advec(field, u, v, lat, lon, radius))
 
 
-def field_vert_advec_divg_sum(field, omega, p, dp):
-    return (field_times_vert_divg_mass_bal(field, omega, p, dp) +
-            vert_advec(field, omega, p, dp))
+def field_horiz_vert_advec_sum(field, u, v, omega, lat, lon, p, radius):
+    return (horiz_advec(field, u, v, lat, lon, radius) +
+            vert_advec(field, omega, p))
 
-### Advection, divergence etc. applied to specific fields.
+
+# Advection, divergence etc. applied to specific fields.
 
 
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, lat, lon, radius):
@@ -347,6 +389,59 @@ def mse_vert_advec(temp, hght, sphum, omega, p):
 def mse_times_vert_divg(T, gz, q, omega, p, dp):
     """Vertical divergence times moist static energy."""
     return field_times_vert_divg_mass_bal(mse(T, gz, q), omega, p, dp)
+
+
+def mse_horiz_vert_advec_sum(temp, hght, sphum, u, v, omega, lat, lon, p,
+                             radius):
+    mse_ = mse(temp, hght, sphum)
+    return field_horiz_vert_advec_sum(mse_, u, v, omega, lat, lon, p, radius)
+
+
+def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega, lat, lon,
+                              p, dp, radius, swdn_toa, swup_toa, olr, swup_sfc,
+                              swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
+    """Residual in vertically integrated MSE budget."""
+    mse_ = mse(temp, hght, sphum)
+    transport = field_horiz_vert_advec_sum(
+        mse_, ucomp, vcomp, omega, lat, lon, p, radius
+    )
+    trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
+    f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                          lwup_sfc, lwdn_sfc, shflx, evap)
+    return f_net - trans_vert_int
+
+
+def fmse_budget_advec_residual(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
+                               lat, lon, p, dp, radius, swdn_toa, swup_toa,
+                               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                               shflx, evap):
+    """Residual in vertically integrated MSE budget."""
+    fmse_ = fmse(temp, hght, sphum, ice_wat)
+    transport = field_horiz_vert_advec_sum(
+        fmse_, ucomp, vcomp, omega, lat, lon, p, radius
+    )
+    trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
+    f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                          lwup_sfc, lwdn_sfc, shflx, evap)
+    return f_net - trans_vert_int
+
+def q_budget_advec_residual(sphum, ucomp, vcomp, omega, lat, lon, p, dp,
+                            radius, evap, precip):
+    """Residual in vertically integrated MSE budget."""
+    transport = field_horiz_vert_advec_sum(
+        sphum, ucomp, vcomp, omega, lat, lon, p, radius
+    )
+    trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
+    e_minus_p = evap - precip
+    return e_minus_p - trans_vert_int
+
+def q_budget_horiz_flux_divg_residual(sphum, ucomp, vcomp, lat, lon, dp,
+                                      radius, evap, precip):
+    """Residual in vertically integrated MSE budget."""
+    transport = field_horiz_flux_divg(sphum, ucomp, vcomp, lat, lon, radius)
+    trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
+    e_minus_p = evap - precip
+    return e_minus_p - trans_vert_int
 
 
 def dse_horiz_flux_divg(temp, hght, u, v, lat, lon, radius):
@@ -454,16 +549,6 @@ def eddy_covar_avg(array1, array2, axis=None, weights=None):
 
 ### Thermodynamic functions.
 
-def mse(temp, hght, sphum):
-    """Moist static energy, in Joules per kilogram."""
-    return dse(temp, hght) + L_v*sphum
-
-
-def fmse(temp, hght, sphum, ice_wat):
-    """Frozen moist static energy, in Joules per kilogram."""
-    return mse(temp, hght, sphum) - L_f*ice_wat
-
-
 def dse(temp, hght):
     """Dry static energy, in Joules per kilogram."""
     try:
@@ -475,6 +560,48 @@ def dse(temp, hght):
         except ValueError:
             ds = c_p*temp + grav*0.5*(hght[:,:,:-1] + hght[:,:,1:])
     return ds
+
+
+def mse(temp, hght, sphum):
+    """Moist static energy, in Joules per kilogram."""
+    return dse(temp, hght) + L_v*sphum
+
+
+def fmse(temp, hght, sphum, ice_wat):
+    """Frozen moist static energy, in Joules per kilogram."""
+    return mse(temp, hght, sphum) - L_f*ice_wat
+
+
+def mixing_ratio_from_specific_mass(mass):
+    return mass / (1 - mass)
+
+
+def specific_mass_dry_air(q_v, q_l, q_s):
+    """Specific mass of dry air from the specific masses of water phases."""
+    return 1. - q_v - q_l - q_s
+
+
+def specific_gas_constant_moist_air(q_v, q_l, q_s):
+    q_a = specific_mass_dry_air(q_v, q_l, q_s)
+    return q_a*R_a + q_v*R_v
+
+
+def heat_capacity_moist_air_constant_volume(q_v, q_l, q_s):
+    q_a = specific_mass_dry_air(q_v, q_l, q_s)
+    return c_va*q_a + c_vv*q_v + c_vl*q_l + c_vs*q_s
+
+
+def mse_romps(T, q_v, q_s, z):
+    """Moist static energy defined in Romps 2015, JAS."""
+    return
+
+
+def specific_entropy_dry_air(T, p):
+    return c_p*np.log(T/T_trip) - R_d*np.log(p / p_trip)
+
+
+def specific_entropy_water_vapor(T, p, ):
+    return c_pv*np.log(T/T_trip) - R_d*np.log(p / p_trip)
 
 
 def pot_temp(temp, p, p0=1000.):

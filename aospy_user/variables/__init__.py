@@ -264,9 +264,7 @@ olr_clr = Var(
 omega = Var(
     name='omega',
     alt_names=('wap',),
-    units=r'Pa s$^{-1}$',
-    plot_units=r'hPa day$^{-1}$',
-    plot_units_conv=24.*3600./100.,
+    units=units.Pa_s,
     domain='atmos',
     description='Pressure vertical velocity.',
     def_time=True,
@@ -437,9 +435,7 @@ soil_moisture = Var(
 sphum = Var(
     name='sphum',
     alt_names=('hus',),
-    units='kg/kg',
-    plot_units='g/kg',
-    plot_units_conv=1e3,
+    units=units.specific_mass,
     domain='atmos',
     description='Specific humidity.',
     def_time=True,
@@ -731,9 +727,7 @@ vort = Var(
 wvp = Var(
     name='wvp',
     alt_names=('WVP', 'prw'),
-    units=r'kg m$^{-2}$',
-    plot_units=r'kg m$^{-2}$',
-    plot_units_conv=1,
+    units=units.kg_m2,
     domain='atmos',
     description='Water vapor path',
     def_time=True,
@@ -1111,6 +1105,27 @@ fmse = Var(
     func=calcs.fmse,
     units=units.J_kg1
 )
+fmse_budget_advec_residual = Var(
+    name='fmse_budget_advec_residual',
+    domain='atmos',
+    description=(
+        'Residual in vertically integrated frozen MSE budget, with frozen '
+        'MSE transport computed as sum of horizontal and vertical advection '
+        'terms.'
+    ),
+    variables=(
+        temp, hght, sphum, ice_wat, ucomp, vcomp, omega, lat, lon, 'p', 'dp',
+        r_e, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+        shflx, evap
+    ),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.fmse_budget_advec_residual,
+    units=units.W_m2,
+    colormap='RdBu'
+)
 gms_change_est = Var(
     name='gms_change_est',
     domain='atmos',
@@ -1484,6 +1499,41 @@ mse_times_vert_divg = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+mse_horiz_vert_advec_sum = Var(
+    name='mse_horiz_vert_advec_sum',
+    domain='atmos',
+    description=('MSE transport computed as sum of horizontal and '
+                 'vertical advection terms.'),
+    variables=(temp, hght, sphum, ucomp, vcomp, omega, lat, lon, 'p', r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_horiz_vert_advec_sum,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+
+mse_budget_advec_residual = Var(
+    name='mse_budget_advec_residual',
+    domain='atmos',
+    description=(
+        'Residual in vertically integrated MSE budget, with MSE transport '
+        'computed as sum of horizontal and vertical advection terms.'
+    ),
+    variables=(
+        temp, hght, sphum, ucomp, vcomp, omega, lat, lon, 'p', 'dp', r_e,
+        swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+        evap
+    ),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_budget_advec_residual,
+    units=units.W_m2,
+    colormap='RdBu'
+)
 msf = Var(
     name='msf',
     domain='atmos',
@@ -1512,6 +1562,18 @@ mass_flux = Var(
     units=r'kg s$^{-1}$',
     plot_units=r'10$^{10}$ kg s$^{-1}$',
     plot_units_conv=1e-10,
+)
+omega_zero_global_mean = Var(
+    name='omega_zero_global_mean',
+    domain='atmos',
+    description=('Omega with global mean value subtracted away.'),
+    variables=(omega, sfc_area, 'dp'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.field_zero_global_mean,
+    units=units.Pa_s
 )
 p_minus_e = Var(
     name='p-e',
@@ -1630,6 +1692,19 @@ q_vert_advec = Var(
     units=units.s1,
     colormap='BrBG_r'
 )
+q_vert_advec_omega_zero_mean = Var(
+    name='q_vert_advec_omega_zero_mean',
+    domain='atmos',
+    description='Vertical advection of specific humidity w/ adjusted omega.',
+    variables=(sphum, omega, sfc_area, 'p', 'dp'),
+    def_time=True,
+    def_vert='pfull',
+    def_lat=True,
+    def_lon=True,
+    func=calcs.vert_advec_omega_zero_mean,
+    units=units.s1,
+    colormap='BrBG_r'
+)
 q_times_vert_divg = Var(
     name='q_times_vert_divg',
     domain='atmos',
@@ -1641,6 +1716,38 @@ q_times_vert_divg = Var(
     def_lon=True,
     func=calcs.field_times_vert_divg_mass_bal,
     units=units.s1,
+    colormap='BrBG_r'
+)
+q_horiz_vert_advec_sum = Var(
+    name='q_horiz_vert_advec_sum',
+    domain='atmos',
+    description=('Moisture transport computed as sum of horizontal and '
+                 'vertical advection terms.'),
+    variables=(sphum, ucomp, vcomp, omega, lat, lon, 'p', r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.field_horiz_vert_advec_sum,
+    units=units.kg_m2_s,
+    colormap='BrBG_r'
+)
+q_budget_advec_residual = Var(
+    name='q_budget_advec_residual',
+    domain='atmos',
+    description=(
+        'Residual in vertically integrated moisture budget, with moisture '
+        'transport computed as sum of horizontal and vertical advection '
+        'terms.'
+    ),
+    variables=(sphum, ucomp, vcomp, omega, lat, lon, 'p', 'dp',
+               r_e, evap, precip),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.q_budget_advec_residual,
+    units=units.kg_m2_s,
     colormap='BrBG_r'
 )
 qu = Var(
@@ -2108,28 +2215,31 @@ master_vars_list = [
     tdt_lw_clr, tdt_sw, tdt_sw_clr, tdt_vdif, temp, tot_cld_amt, ucomp, vcomp,
     vort, wvp, lat, lon, level, pk, bk, sfc_area, aht, albedo, sfc_albedo,
     ang_mom, bowen_ratio, column_energy, cre_net, cre_lw, cre_sw, descent_tot,
-    equiv_pot_temp, esf, evap_frac, fmse, gms_change_est,
-    gms_change_est2, gms_h01, gms_h01est, gms_h01est2, gms_moc, gms_msf,
-    gms_up_low, gms_each_level, gross_dry_stab, gross_moist_stab,
-    dry_static_stab, total_gms, dse, horiz_divg, moist_static_stab,
-    gross_moist_strat, mse, mse_horiz_advec, mse_times_horiz_divg,
-    mse_vert_advec, msf, mass_flux, p_minus_e, pot_temp, prec_conv_frac,
-    sfc_albedo, sfc_energy, sfc_lw, sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw,
-    sfc_sw_cld, tdt_diab, tdt_lw_cld, tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw,
-    toa_swup_cld, vert_divg, virt_pot_temp, divg_mass_bal, horiz_divg_mass_bal,
-    vert_divg_mass_bal, mse_horiz_flux_divg, q_horiz_advec, q_vert_advec,
-    q_times_horiz_divg, q_horiz_flux_divg, qu, qv, du_dx, dv_dy,
-    dse_horiz_flux_divg, dse_times_horiz_divg, dse_horiz_advec,
-    temp_horiz_flux_divg, temp_times_horiz_divg, temp_horiz_advec,
-    hght_horiz_flux_divg, hght_times_horiz_divg, hght_horiz_advec,
-    mse_horiz_advec_divg_sum, q_horiz_advec_divg_sum,
-    temp_horiz_advec_divg_sum, hght_horiz_advec_divg_sum,
-    dse_horiz_advec_divg_sum, q_times_vert_divg, q_vert_flux_divg,
-    mse_times_vert_divg, mse_vert_flux_divg, horiz_divg_vert_int_max,
-    vert_divg_vert_int_max, temp_vert_advec, t_surf_precip_corr,
-    evap_precip_corr, cre_net_precip_corr, cre_sw_precip_corr,
-    cre_lw_precip_corr, t_surf_precip_lin_regr, cre_net_precip_lin_regr,
-    toa_rad_clr_precip_corr, toa_rad_clr_precip_lin_regr,
+    equiv_pot_temp, esf, evap_frac, fmse, gms_change_est, gms_change_est2,
+    gms_h01, gms_h01est, gms_h01est2, gms_moc, gms_msf, gms_up_low,
+    gms_each_level, gross_dry_stab, gross_moist_stab, dry_static_stab,
+    total_gms, dse, horiz_divg, moist_static_stab, gross_moist_strat, mse,
+    mse_horiz_advec, mse_times_horiz_divg, mse_vert_advec, msf, mass_flux,
+    p_minus_e, pot_temp, prec_conv_frac, sfc_albedo, sfc_energy, sfc_lw,
+    sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw, sfc_sw_cld, tdt_diab, tdt_lw_cld,
+    tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw, toa_swup_cld, vert_divg,
+    virt_pot_temp, divg_mass_bal, horiz_divg_mass_bal, vert_divg_mass_bal,
+    mse_horiz_flux_divg, q_horiz_advec, q_vert_advec, q_times_horiz_divg,
+    q_horiz_flux_divg, qu, qv, du_dx, dv_dy, dse_horiz_flux_divg,
+    dse_times_horiz_divg, dse_horiz_advec, temp_horiz_flux_divg,
+    temp_times_horiz_divg, temp_horiz_advec, hght_horiz_flux_divg,
+    hght_times_horiz_divg, hght_horiz_advec, mse_horiz_advec_divg_sum,
+    q_horiz_advec_divg_sum, temp_horiz_advec_divg_sum,
+    hght_horiz_advec_divg_sum, dse_horiz_advec_divg_sum, q_times_vert_divg,
+    q_vert_flux_divg, mse_times_vert_divg, mse_vert_flux_divg,
+    horiz_divg_vert_int_max, vert_divg_vert_int_max, temp_vert_advec,
+    t_surf_precip_corr, evap_precip_corr, cre_net_precip_corr,
+    cre_sw_precip_corr, cre_lw_precip_corr, t_surf_precip_lin_regr,
+    cre_net_precip_lin_regr, toa_rad_clr_precip_corr,
+    toa_rad_clr_precip_lin_regr, mse_budget_advec_residual,
+    fmse_budget_advec_residual, q_budget_advec_residual,
+    q_horiz_vert_advec_sum, mse_horiz_vert_advec_sum, omega_zero_global_mean,
+    q_vert_advec_omega_zero_mean
 ]
 
 
