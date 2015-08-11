@@ -2,6 +2,13 @@ from aospy.units import Units
 from aospy.constants import c_p, seconds_in_day
 
 unitless = Units(units='')
+specific_mass = Units(
+    units='',
+    plot=r'g kg$^{-1}$',
+    plot_conv=1e3,
+    vert_int_plot='kg m$^{-2}$',
+    vert_int_plot_conv=1.
+)
 K = Units(units='K')
 s = Units(
     units=r's',
@@ -25,6 +32,9 @@ m_s = Units(
 m_s2 = Units(
     units=r'm s$^{-2}$',
     vert_int=r'kg m$^{-1}$ s$^{-2}$'
+)
+kg_m2 = Units(
+     units=r'kg m$^{-2}$',
 )
 kg_m2_s = Units(
     units=r'kg m$^{-2}$ s$^{-1}$',
@@ -63,4 +73,9 @@ Pa = Units(
 )
 hPa = Units(
     units=r'hPa',
+)
+Pa_s = Units(
+    units=r'Pa s$^{-1}$',
+    plot=r'hPa day$^{-1}$',
+    plot_conv=24.*3600./100.
 )
