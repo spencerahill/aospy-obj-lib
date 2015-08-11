@@ -64,7 +64,8 @@ am3 = Model(
         runs.am3_hp2k, runs.am3_hp4k, runs.am3_hp6k, runs.am3_hp8k,
         runs.am3_hp10k, runs.am3_hm1k, runs.am3_hm2k, runs.am3_hm4k,
         runs.am3_hm6k, runs.am3_hm8k, runs.am3_hm10k, runs.am3_hm15k,
-        runs.am3_amip, runs.am3_hwpwp_p2k
+        runs.am3_amip, runs.am3_hwpwp_p2k, runs.am3_hc_static_veg,
+        runs.am3_hc_static_veg_p4k, runs.am3_hc_static_veg_10kyr
     ],
     default_runs=[runs.am3_hc, runs.am3_hp2k]
 )

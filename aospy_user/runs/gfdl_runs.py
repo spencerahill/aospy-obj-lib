@@ -544,8 +544,13 @@ am3_gtm = Run(
 )
 am3_gmtm = Run(
     name='gas_mtm',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies minus their annual tropical mean from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_gas_m_trop_mean/gfdl.ncrc2-intel-prod/pp'
+    description=('1981-2000 HadISST climatological annual cycle of SSTs and '
+                 'sea ice repeated annually, overlaid with annual cycle of '
+                 'equilibrium SST anomalies minus their annual tropical mean '
+                 'from a PI-to-PD WMGG and ozone simulation of AM2.1 with a '
+                 'mixed layer ocean.  PD atmospheric composition.'),
+    direc_nc=('/archive/yim/fms/siena_201211/c48L48_am3p10_gas_m_trop_mean/'
+              'gfdl.ncrc2-intel-prod/pp')
 )
 am3_amip = Run(
     name='amip',
@@ -705,6 +710,38 @@ am3_hwpwp_p2k = Run(
              'gfdl.ncrc2-intel-prod-openmp/pp',
     nc_dur=1,
     nc_start_yr=1980,
+    nc_end_yr=2010,
+    default_yr_range=(1981, 2010)
+)
+am3_hc_static_veg = Run(
+    name='hurrell_static_veg_cont',
+    description=('Climatological SST annual cycle from Hurrell dataset '
+                 'repeated annually, with static year 2000 vegetation'),
+    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg/'
+              'gfdl.ncrc2-intel-prod-openmp/pp'),
+    nc_dur=30,
+    nc_start_yr=1981,
+    nc_end_yr=2010,
+    default_yr_range=(1981, 2010)
+)
+am3_hc_static_veg_p4k = Run(
+    name='hurrell_static_veg+4K',
+    description='Hurrell climatological SSTs w/ uniform +4K and static veg',
+    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg+4K/'
+              'gfdl.ncrc2-intel-prod-openmp/pp'),
+    nc_dur=30,
+    nc_start_yr=1981,
+    nc_end_yr=2010,
+    default_yr_range=(1981, 2010)
+)
+am3_hc_static_veg_10kyr = Run(
+    name='hurrell_static_veg_10kyr',
+    description=('Hurrell climatological SSTs w/ 10 ka obliquity and '
+                 'precession and static year 2000 vegetation'),
+    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg_10kyr_obliq_prec/'
+              'gfdl.ncrc2-intel-prod-openmp/pp'),
+    nc_dur=30,
+    nc_start_yr=1981,
     nc_end_yr=2010,
     default_yr_range=(1981, 2010)
 )
