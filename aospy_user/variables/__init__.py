@@ -83,6 +83,18 @@ high_cld_amt = Var(
     def_lon=True,
     in_nc_grid=False
 )
+lai = Var(
+    name='lai',
+    alt_names=('LAI',),
+    units=units.unitless,
+    domain='land',
+    description='Leaf area index.',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
 low_cld_amt = Var(
     name='low_cld_amt',
     units='Cloud fraction',
