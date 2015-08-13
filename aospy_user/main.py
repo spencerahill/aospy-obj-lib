@@ -53,7 +53,6 @@ def main(main_params):
         aospy_user.to_iterable(obj) for obj in (proj, model, var, region)
     ]
     cp.region = aospy.utils.dict_name_keys(cp.region)
-    print cp.region
     cp.run = main_params.run
     cp.ens_mem = main_params.ens_mem
     cp.yr_range = main_params.yr_range
@@ -81,9 +80,10 @@ def main(main_params):
         mod = aospy_user.to_iterable(mod)
 
         for params in itertools.product(
-                cp.proj, mod, runs, cp.ens_mem, cp.var, cp.yr_range, cp.region,
-                cp.intvl_in, cp.intvl_out,  cp.dtype_in_time, cp.dtype_in_vert,
-                [cp.dtype_out_time], cp.dtype_out_vert, cp.level
+                cp.proj, mod, runs, cp.ens_mem, cp.var, cp.yr_range,
+                [cp.region], cp.intvl_in, cp.intvl_out, cp.dtype_in_time,
+                cp.dtype_in_vert, [cp.dtype_out_time], cp.dtype_out_vert,
+                cp.level
         ):
             calc = aospy.Calc(*params, verbose=cp.verbose,
                               yr_chunk_len=cp.yr_chunk_len)
@@ -106,23 +106,24 @@ def main(main_params):
 if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
-    mp.model = 'default'
-    mp.run = 'default'
+    mp.model = ['am2']
+    mp.run = ['reyoi_cont']
     mp.ens_mem = [None]
-    mp.var = ['t_surf']
-    mp.yr_range = ['default']
-    mp.region = 'sahel_south'
+    mp.var = ['q_horiz_advec_upwind',
+              'mse_vert_advec_upwind', 'mse_horiz_advec_upwind',
+              'q_total_advec_upwind', 'mse_total_advec_upwind']
+    mp.yr_range = [(1983, 1983)]
+    mp.region = 'all'
     mp.intvl_in = ['monthly']
-    mp.intvl_out = ['jas']
+    mp.intvl_out = ['ann']
     mp.dtype_in_time = ['ts']
-    mp.dtype_in_vert = [False]
-    mp.dtype_out_time = ('reg.av',)
-    # mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = [False]
+    mp.dtype_in_vert = ['pressure']
+    mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
+    mp.dtype_out_vert = ['vert_int']
     mp.level = [None]
     mp.yr_chunk_len = False
-    mp.compute = False
+    mp.compute = True
     mp.verbose = True
-    mp.print_table = True
+    mp.print_table = False
 
     calc, data = main(mp)

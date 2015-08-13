@@ -14,19 +14,19 @@ from aospy_user import regions as reg
 def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
-        n_row=1,
-        n_col=1,
+        n_row=3,
+        n_col=2,
         n_ax='all',
         n_plot=1,
         n_data=1,
 
-        row_size=3,
-        col_size=3,
-        subplot_lims={'left': 0.05, 'right': 0.95, 'wspace': 0.1,
-                      'bottom': 0.1, 'top': 0.95, 'hspace': 0.1},
+        row_size=4,
+        col_size=7,
+        subplot_lims={'left': 0.1, 'right': 0.9, 'wspace': 0.1,
+                      'bottom': 0.05, 'top': 0.93, 'hspace': 0.1},
 
-        min_cntr=-37.5,
-        max_cntr=37.5,
+        min_cntr=-75,
+        max_cntr=75,
         num_cntr=15,
         contourf_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
         col_map='default',
@@ -38,32 +38,29 @@ def plot(plot_params):
 
         # intvl_in=['monthly', '3hr'],#, '3hr'],#, '3hr'],
         intvl_in='monthly',
-        intvl_out='jas',
+        intvl_out='ann',
         # dtype_in_time=['ts', 'inst'],#, 'inst'],# 'inst'],
         dtype_in_time='ts',
         # dtype_in_vert=[False, 'sigma'],#, 'sigma'],# 'sigma'],
-        dtype_in_vert='pressure',
-        dtype_out_time='reg.av',
-        # dtype_out_vert=[False, 'vert_int'],#, 'vert_int'],# 'vert_int'],
-        dtype_out_vert=False,
+        dtype_in_vert=[False] + ['pressure']*5,
+        dtype_out_time='av',
+        dtype_out_vert=[False] + ['vert_int']*5,
+        # dtype_out_vert=False,
         level=False,
-        # yr_range=(1983, 1983),
-        yr_range='default',
-        plot_type='line',
-        x_dim='x',
-        y_dim='p',
+        yr_range=(1983, 1983),
+        # yr_range='default',
+        plot_type='map',
+        x_dim='lon',
+        y_dim='lat',
 
         # Titles and labels
-        fig_title=False,
+        fig_title=r'AM2.1 Sahel JAS',
         # ax_title=['3 hr, model levels', 'Monthly, $p$ levels', '', ''],
-        # ax_left_label = [r'$\{\omega\partial h/\partial p\}$', '',
-        #                  r'$\{\mathbf{v}\cdot\nabla h\}$', ''],
-        # ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
-        ax_left_label=False,
+        # ax_left_label=False,
         ax_right_label=False,
 
         # Axis limits
-        # x_lim=[(-4, 4), (-2, 2)],
+        # x_lim=(-2,2),
         x_lim=False,
         x_ticks=False,
         x_ticklabels=False,
@@ -74,14 +71,14 @@ def plot(plot_params):
         y_ticklabels=False,
         y_label=False,
 
-        lat_lim=(-5, 35),
-        # lat_lim=(-30,30),
+        # lat_lim=(-5, 35),
+        lat_lim=(-90,90),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        lon_lim=(-43, 65),
-        # lon_lim=(-180,180),
+        # lon_lim=(-43, 65),
+        lon_lim=(-180,180),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -109,8 +106,8 @@ def plot(plot_params):
 
         do_quiver=False,
 
-        line_color='r',
-        linestyle='-',
+        line_color=False,#[['k', 'r', 'k']],
+        linestyle=False,#[['-', '-', '--']],
 
         marker_shape=None,
         marker_size=10,
@@ -156,8 +153,16 @@ if __name__ == '__main__':
     params.proj = p.aero_3agcm
     params.model = m.am2
     params.run = r.am2_reyoi_cont
+    # params.run = [[r.am2_reyoi_cont, r.am2_reyoi_p2,
+    #                {(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}]]
     params.ens_mem = False
-    params.var = v.mse_horiz_advec
-    params.region = reg.sahel
+    params.var = [v.column_energy, v.mse_total_advec_upwind,
+                  v.mse_horiz_advec, v.mse_horiz_advec_upwind,
+                  v.mse_vert_advec, v.mse_vert_advec_upwind]
+    # params.var = [v.p_minus_e, v.q_total_advec_upwind,
+    #               v.q_horiz_advec, v.q_horiz_advec_upwind,
+    #               v.q_vert_advec, v.q_vert_advec_upwind]
+
+    params.region = False#reg.sahel
 
     fig = main(params)
