@@ -1546,6 +1546,48 @@ mse_budget_advec_residual = Var(
     units=units.W_m2,
     colormap='RdBu'
 )
+mse_horiz_advec_upwind = Var(
+    name='mse_horiz_advec_upwind',
+    domain='atmos',
+    description=('Horizontal advection of moist static energy using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(temp, hght, sphum, ucomp, vcomp, lat, lon, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_horiz_advec_upwind,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+mse_vert_advec_upwind = Var(
+    name='mse_vert_advec_upwind',
+    domain='atmos',
+    description=('Vertical advection of moist static energy using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(temp, hght, sphum, omega, 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_vert_advec_upwind,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+mse_total_advec_upwind = Var(
+    name='mse_total_advec_upwind',
+    domain='atmos',
+    description=('Total advection of moist static energy using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(temp, hght, sphum, ucomp, vcomp, omega, lat, lon, 'p', r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_total_advec_upwind,
+    units=units.W_m2,
+    colormap='RdBu'
+)
 msf = Var(
     name='msf',
     domain='atmos',
@@ -1636,6 +1678,48 @@ q_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.q_horiz_advec,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_horiz_advec_upwind = Var(
+    name='q_horiz_advec_upwind',
+    domain='atmos',
+    description=('Horizontal advection of specific humidity using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(sphum, ucomp, vcomp, lat, lon, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_advec_upwind,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_vert_advec_upwind = Var(
+    name='q_vert_advec_upwind',
+    domain='atmos',
+    description=('Vertical advection of specific humidity using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(sphum, omega, 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.vert_advec_upwind,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_total_advec_upwind = Var(
+    name='q_total_advec_upwind',
+    domain='atmos',
+    description=('Total advection of specific humidity using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(sphum, ucomp, vcomp, omega, lat, lon, 'p', r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.total_advec_upwind,
     units=units.s1,
     colormap='BrBG_r'
 )
@@ -2251,7 +2335,9 @@ master_vars_list = [
     toa_rad_clr_precip_lin_regr, mse_budget_advec_residual,
     fmse_budget_advec_residual, q_budget_advec_residual,
     q_horiz_vert_advec_sum, mse_horiz_vert_advec_sum, omega_zero_global_mean,
-    q_vert_advec_omega_zero_mean
+    q_vert_advec_omega_zero_mean, q_horiz_advec_upwind, q_vert_advec_upwind,
+    q_total_advec_upwind, mse_horiz_advec_upwind, mse_vert_advec_upwind,
+    mse_total_advec_upwind
 ]
 
 

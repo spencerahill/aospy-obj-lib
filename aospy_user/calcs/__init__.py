@@ -15,60 +15,30 @@ from aospy.utils import (level_thickness, to_pascal, to_radians,
                          dp_from_phalf, dp_from_sigma, int_dp_g, integrate,
                          weight_by_delta)
 
-# x, dx from longitude, y, dy from latitude
-
-# def x_from_latlon(lat, lon, radius):
-#     """Create array of x-distances based on arrays of lons and lats."""
-#     rad = radius*np.abs(np.cos(np.deg2rad(lat)))[np.newaxis,:]
-#     return np.squeeze(rad*np.deg2rad(lon[:,np.newaxis]))
-
-# def y_from_latlon(lat, lon, radius):
-#     """Create an array of y-distances from an array of lats."""
-#     return radius*np.tile(np.sin(np.deg2rad(lat))[:,np.newaxis], len(lon)).T
-
-# def dx_from_latlon(lat, lon, radius):
-#     """Compute zonal spacing of grid cell centers."""
-#     x = x_from_latlon(lon, lat, radius)
-#     dx = np.empty(x.shape)
-#     dx[:,:-1] = np.diff(x, n=1, axis=-1)
-#     # Assume lon has smallest value in 1st index.
-#     assert np.argmin(x) == 0
-#     dx[:,-1] = (x[:,0] + radius*2*np.pi) - x[:,-1]
-#     return dx
-
-# def dy_from_latlon(lat, lon, radius):
-#     """Compute meridional spacing of grid cell centers."""
-#     y = y_from_latlon(lat, lon, radius)
-#     return y[1:] - y[:-1]
-
-# def dlon_from_latlon(lat, lon):
-    # """Compute longitude spacing of grid cell centers."""
-    # return
-
-# def dlat_from_latlon(lat, lon):
-    # """Compute latitude spacing of grid cell centers."""
-    # return
-
-
 # General finite differencing.
-
-def fwd_diff(f, dx):
-    """1st order accurate forward differencing."""
-    return (f[1:] - f[:-1]) / dx
-
-
-def cen_diff2(f, dx, dx_array=False):
-    """2nd order accurate centered differencing."""
-    if dx_array:
-        df_dx = (f[2:] - f[:-2]) / (dx[:-1] + dx[:1])
+def fwd_diff1(f, dx, x_array=False):
+    """1st order accurate forward differencing.
+    :param x_array: If true, `dx` is assumed to be array of positions, not
+                    spacing.  If false, `dx` is assumed to be spacing.  In
+                    former case, have to compute spacing from the positions.
+    """
+    if x_array:
+        return (f[1:] - f[:-1]) / (dx[1:] - dx[:-1])
     else:
-        df_dx = (f[2:] - f[:-2]) / (2.*dx)
-    return df_dx
+        return (f[1:] - f[:-1]) / dx
 
 
-def cen_diff4(f, dx, dx_array=False):
+def cen_diff2(f, dx, x_array=False):
+    """2nd order accurate centered differencing."""
+    if x_array:
+        return (f[2:] - f[:-2]) / (dx[:-1] + dx[:1])
+    else:
+        return (f[2:] - f[:-2]) / (2.*dx)
+
+
+def cen_diff4(f, dx, x_array=False):
     """4th order accurate centered differencing."""
-    if dx_array:
+    if x_array:
         # Assume len(dx) == len(f) - 1.
         d1 = (f[3:-1] - f[1:-3]) / (dx[1:-2] + dx[2:-1])
         d2 = (f[4:] - f[:-4]) / (dx[:-3] + dx[1:-2] + dx[2:-1] + dx[3:])
@@ -77,17 +47,39 @@ def cen_diff4(f, dx, dx_array=False):
         return (8*(f[3:-1] - f[1:-3]) - (f[4:] - f[:-4])) / (12.*dx)
 
 
-# Derivatives in x, y, and p.
+def upwind_order1(df_fwd, df_bwd, a):
+    """1st order upwind differencing scheme for advection.
 
-def d_dx_from_latlon(field, lat, lon, radius):
-    """Compute \partial(field)/\partial x using centered differencing."""
-    # Verify longitude spacing is uniform.
+    :param df_fwd: Forward difference of the field.
+    :oaram df_bwd: Backard difference of the field.
+    :param a: Flow that is advecting the field `f`.
+    """
+    a_pos = np.ma.where(a >= 0., a, 0)
+    a_neg = np.ma.where(a < 0., a, 0)
+    return a_pos*df_bwd + a_neg*df_fwd
+
+
+# Functions for derivatives in x, y, and p.
+def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
+    if d_dy_of_scalar_field:
+        return 1. / radius
+    else:
+        return 1. / (radius*np.cos(to_radians(lat)))
+
+
+def dlon_from_lon(lon):
+    "Compute longitude spacing and confirm it is uniform as assumed."""
     dlon = lon[1] - lon[0]
     assert np.allclose(360. - (lon[-1] - lon[0]), dlon)
     assert np.allclose(lon[2:] - lon[1:-1], lon[1:-1] - lon[:-2])
-    lat, lon = to_radians(lat), to_radians(lon)
-    dlon = lon[1] - lon[0]
-    prefactor = 1. / (radius*np.cos(lat))[:,np.newaxis]
+    lon_rad = to_radians(lon)
+    return lon_rad[1] - lon_rad[0]
+
+def d_dx_from_latlon(field, lat, lon, radius):
+    """Compute \partial(field)/\partial x using centered differencing."""
+    dlon = dlon_from_lon(lon)
+    lat = to_radians(lat)
+    prefactor = latlon_deriv_prefactor(lat, radius)[:,np.newaxis]
     # Assume latitude and longitude are last two axes.
     # Transpose the arrays: lon is 1st axis, lat is 2nd.
     f = field.T
@@ -123,11 +115,11 @@ def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     f = np.rollaxis(f, 1, 0)
     dlat = np.rollaxis(dlat, 1, 0)
     df_dy = np.ma.empty(f.shape)
-    df_dy[2:-2] = cen_diff4(f, dlat, dx_array=True)
-    df_dy[1]    = cen_diff2(f[:3], dlat[:2], dx_array=True)
-    df_dy[-2]   = cen_diff2(f[-3:], dlat[-2:], dx_array=True)
-    df_dy[0]    = fwd_diff(f[:2], dlat[0])
-    df_dy[-1]   = fwd_diff(f[-2:], dlat[-1])
+    df_dy[2:-2] = cen_diff4(f,      dlat,      x_array=True)
+    df_dy[1]    = cen_diff2(f[:3],  dlat[:2],  x_array=True)
+    df_dy[-2]   = cen_diff2(f[-3:], dlat[-2:], x_array=True)
+    df_dy[0]    = fwd_diff1(f[:2],  dlat[0])
+    df_dy[-1]   = fwd_diff1(f[-2:], dlat[-1])
     # Roll axis and transpose again to regain original axis order.
     df_dy = np.rollaxis(df_dy, 0, 2)
     return prefactor*df_dy.T
@@ -154,41 +146,91 @@ def d_dp_from_p(field, p):
     return df_dp.T
 
 
-# def add_ps_value_to_field(field, p, ps, field_at_ps):
-#     """Add value at surface pressure to pressure-defined data.
-#
-#     Result can be used to easily perform derivatives or integrals in pressure
-#     that extend all the way to the surface.
-#
-#     Algorithm is as follows:
-#     1) Determine p_bot, where p_bot is the largest p such that p < ps.
-#     2) Unmask the element directly below p_bot.
-#     3) Replace that element with the specified value at ps.
-#     """
-#     if p.ndim == 1:
-#         p = p[np.newaxis,:,np.newaaxis,np.newaxis]
-#     p_bot = np.ma.where(p < ps)
-#     return
-
-## Integrals in x, y, and p.
+def zonal_advec_upwind(field, u, lat, lon, radius):
+    """Advection in the zonal direction using upwind differencing."""
+    prefactor = latlon_deriv_prefactor(lat, radius)[:,np.newaxis]
+    # Assume latitude and longitude are last two axes.
+    # Transpose the arrays: lon is 1st axis, lat is 2nd.
+    f = field.T
+    # Wrap around at 0/360 degrees longitude.
+    f = np.ma.concatenate((f, f[:1]), axis=0)
+    lon = to_radians(np.ma.concatenate((lon, lon[:1]), axis=0))
+    lon = lon[:,np.newaxis,np.newaxis,np.newaxis]
+    df_fwd = fwd_diff1(f, lon, x_array=True)
+    df_bwd = fwd_diff1(f[::-1], lon[::-1], x_array=True)[::-1]
+    # Transpose again to regain original axis order.
+    return prefactor*upwind_order1(df_fwd.T, df_bwd.T, u)
 
 
-# def int_dlon(integrand, lat, lon, start=0., end=360.):
-    # """Integrate in longitude."""
-    # # Assume pressure is 3rd to last axis.
-    # inds = np.where((lon >= start) & (lon <= end))
-    # dlon = dlon_from_latlon(lat, lon)
-    # dlon = dlon[:,inds]
-    # try:
-        # integrand = integrand[inds]
-    # except IndexError:
-        # integrand = integrand[:,inds]
-    # return integrate(integrand, dlon, -3)
+def merid_advec_upwind(field, v, lat, radius, vec_field=False):
+    """Advection in the meridional direction using upwind differencing."""
+    lat = to_radians(lat)
+    # Assume latitude and longitude are last two axes.
+    if field.ndim == 2:
+        lat = lat[np.newaxis,:]
+    if field.ndim == 3:
+        lat = lat[np.newaxis,:,np.newaxis]
+    elif field.ndim == 4:
+        lat = lat[np.newaxis,:,np.newaxis,np.newaxis]
+    f = field.T
+    prefactor = 1. / radius
+    # Del operator differs in spherical coords for scalar v. vector fields.
+    if vec_field:
+        f *= np.cos(lat)
+        prefactor /= np.cos(lat)
+        prefactor = prefactor.T
+    # Roll lat to be leading axis for broadcasting.
+    f = np.rollaxis(f, 1, 0)
+    lat = np.rollaxis(lat, 1, 0)
+    # Create arrays holding positive and negative values, each with forward
+    # differencing at south pole and backward differencing at north pole.
+    df_fwd_except_np = fwd_diff1(f, lat, x_array=True)
+    df_bwd_except_sp = fwd_diff1(f[::-1], lat[::-1], x_array=True)[::-1]
+    df_fwd = np.ma.concatenate((df_fwd_except_np,
+                                df_bwd_except_sp[-1:]), axis=0)
+    df_bwd = np.ma.concatenate((df_fwd_except_np[:1],
+                                df_bwd_except_sp), axis=0)
+    # Roll axis and transpose again to regain original axis order.
+    df_fwd = np.rollaxis(df_fwd, 0, 2).T
+    df_bwd = np.rollaxis(df_bwd, 0, 2).T    
+    return prefactor*upwind_order1(df_fwd, df_bwd, v)
 
 
-# def int_dlat(integrand, lat, lon, start=-90., end=-90.):
-    # """Integrate in latitude."""
-    # return
+def horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field=False):
+    return (zonal_advec_upwind(field, u, lat, lon, radius) +
+            merid_advec_upwind(field, v, lat, radius, vec_field=vec_field))
+
+
+def vert_advec_upwind(field, omega, p):
+    """Advection in pressure using upwind differencing."""
+    # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
+    f = field.T
+    p = to_pascal(p)
+    # Amend array dimensions as necessary for broadcasting purposes.
+    if p.ndim == 1:
+        p = p[np.newaxis,np.newaxis,:,np.newaxis]
+    elif p.ndim == 3:
+        p = p[np.newaxis,:,:,:].T
+    else:
+        p = p.T
+    # Roll pressure to be leading axis for broadcasting.
+    f = np.rollaxis(f, 2, 0)
+    p = np.rollaxis(p, 2, 0)
+    # Create arrays holding positive and negative values, each with forward
+    # differencing at south pole and backward differencing at north pole.
+    df_fwd_partial = fwd_diff1(f, p, x_array=True)
+    df_bwd_partial = fwd_diff1(f[::-1], p[::-1], x_array=True)[::-1]
+    df_fwd = np.ma.concatenate((df_fwd_partial, df_bwd_partial[-1:]), axis=0)
+    df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
+    # Roll axis and transpose again to regain original axis order.
+    df_fwd = np.rollaxis(df_fwd, 0, -1).T
+    df_bwd = np.rollaxis(df_bwd, 0, -1).T    
+    return upwind_order1(df_fwd, df_bwd, omega)
+
+def total_advec_upwind(field, u, v, omega, lat, lon, p, radius,
+                       vec_field=False):
+    return (horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field) +
+            vert_advec_upwind(field, omega, p))
 
 
 # Trenberth mass balance & energy budget quantities
@@ -342,8 +384,10 @@ def field_vert_flux_divg(field, omega, p):
 
 
 def field_horiz_advec_divg_sum(field, u, v, lat, lon, radius, dp):
-    return (field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp)
-            + horiz_advec(field, u, v, lat, lon, radius))
+    return (
+        field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp) +
+        horiz_advec(field, u, v, lat, lon, radius)
+    )
 
 
 def field_horiz_vert_advec_sum(field, u, v, omega, lat, lon, p, radius):
@@ -395,6 +439,23 @@ def mse_horiz_vert_advec_sum(temp, hght, sphum, u, v, omega, lat, lon, p,
                              radius):
     mse_ = mse(temp, hght, sphum)
     return field_horiz_vert_advec_sum(mse_, u, v, omega, lat, lon, p, radius)
+
+
+
+def mse_horiz_advec_upwind(temp, hght, sphum, u, v, lat, lon, radius,
+                           vec_field=False):
+    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, lat, lon, radius,
+                              vec_field=vec_field)
+
+
+def mse_vert_advec_upwind(temp, hght, sphum, omega, p):
+    return vert_advec_upwind(mse(temp, hght, sphum), omega, p)
+
+
+def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, lat, lon, p, radius,
+                           vec_field=False):
+    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, lat, lon, p,
+                              radius, vec_field=vec_field)
 
 
 def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega, lat, lon,
