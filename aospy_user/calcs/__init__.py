@@ -13,6 +13,7 @@ from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
 from aospy.utils import (level_thickness, to_pascal, to_radians,
                          int_dp_g, weight_by_delta)
 
+
 # General finite differencing functions.
 def fwd_diff1(f, dx):
     """1st order accurate forward differencing."""
@@ -111,9 +112,9 @@ def d_dy_from_latlon(field, lat, lon, radius, vec_field=False):
     f = np.rollaxis(f, 1, 0)
     dlat = np.rollaxis(dlat, 1, 0)
     df_dy = np.ma.empty(f.shape)
-    df_dy[2:-2] = cen_diff4(f,      dlat,      x_array=True)
-    df_dy[1]    = cen_diff2(f[:3],  dlat[:2],  x_array=True)
-    df_dy[-2]   = cen_diff2(f[-3:], dlat[-2:], x_array=True)
+    df_dy[2:-2] = cen_diff4(f,      dlat)
+    df_dy[1]    = cen_diff2(f[:3],  dlat[:2])
+    df_dy[-2]   = cen_diff2(f[-3:], dlat[-2:])
     df_dy[0]    = fwd_diff1(f[:2],  dlat[0])
     df_dy[-1]   = fwd_diff1(f[-2:], dlat[-1])
     # Roll axis and transpose again to regain original axis order.
@@ -150,11 +151,11 @@ def zonal_advec_upwind(field, u, lat, lon, radius):
     f = field.T
     # Wrap around at 0/360 degrees longitude.
     # Assumes longitude array starts at 0 and goes to 360.
-    f = np.ma.concatenate((f[-1:], f, f[:1]), axis=0)
+    f = np.ma.concatenate((f, f[:1]), axis=0)
     lon = to_radians(lon)[:,np.newaxis,np.newaxis,np.newaxis]
-    lon = np.ma.concatenate((lon[-1:], lon, lon[:1]), axis=0))
-    df_fwd = fwd_diff1(f[1:], lon[1:], x_array=True)
-    df_bwd = fwd_diff1(f[-2::-1], lon[-2::-1], x_array=True)[::-1]
+    lon = np.ma.concatenate((lon, 2*np.pi + lon[:1]), axis=0)
+    df_fwd = fwd_diff1(f, lon)
+    df_bwd = np.ma.concatenate((df_fwd[-1:], df_fwd[:-1]), axis=0)
     # Transpose again to regain original axis order.
     return prefactor*upwind_order1(df_fwd.T, df_bwd.T, u)
 
@@ -181,8 +182,8 @@ def merid_advec_upwind(field, v, lat, radius, vec_field=False):
     lat = np.rollaxis(lat, 1, 0)
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
-    df_fwd_except_np = fwd_diff1(f, lat, x_array=True)
-    df_bwd_except_sp = fwd_diff1(f[::-1], lat[::-1], x_array=True)[::-1]
+    df_fwd_except_np = fwd_diff1(f, lat)
+    df_bwd_except_sp = fwd_diff1(f[::-1], lat[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_except_np,
                                 df_bwd_except_sp[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_except_np[:1],
@@ -215,8 +216,8 @@ def vert_advec_upwind(field, omega, p):
     p = np.rollaxis(p, 2, 0)
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
-    df_fwd_partial = fwd_diff1(f, p, x_array=True)
-    df_bwd_partial = fwd_diff1(f[::-1], p[::-1], x_array=True)[::-1]
+    df_fwd_partial = fwd_diff1(f, p)
+    df_bwd_partial = fwd_diff1(f[::-1], p[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_partial, df_bwd_partial[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
     # Roll axis and transpose again to regain original axis order.
