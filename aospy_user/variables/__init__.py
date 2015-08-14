@@ -1681,6 +1681,34 @@ q_horiz_advec = Var(
     units=units.s1,
     colormap='BrBG_r'
 )
+q_zonal_advec_upwind = Var(
+    name='q_zonal_advec_upwind',
+    domain='atmos',
+    description=('Zonal advection of specific humidity using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(sphum, ucomp, lat, lon, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.zonal_advec_upwind,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_merid_advec_upwind = Var(
+    name='q_merid_advec_upwind',
+    domain='atmos',
+    description=('Meridional advection of specific humidity using upwind '
+                 'finite differencing scheme for derivatives.'),
+    variables=(sphum, vcomp, lat, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.merid_advec_upwind,
+    units=units.s1,
+    colormap='BrBG_r'
+)
 q_horiz_advec_upwind = Var(
     name='q_horiz_advec_upwind',
     domain='atmos',
@@ -2126,18 +2154,6 @@ total_gms = Var(
     func=calcs.total_gms,
     units=units.K
 )
-toa_swup_cld = Var(
-    name='toa_swup_cld',
-    domain='atmos',
-    description='Upwelling cloudy-sky top-of-atmosphere shortwave radiative flux',
-    variables=(swup_toa, swup_toa_clr),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.toa_swup_cld,
-    units=units.W_m2
-)
 cre_sw_precip_corr = Var(
     name='cre_sw_precip_corr',
     domain='atmos',
@@ -2318,8 +2334,8 @@ master_vars_list = [
     mse_horiz_advec, mse_times_horiz_divg, mse_vert_advec, msf, mass_flux,
     p_minus_e, pot_temp, prec_conv_frac, sfc_albedo, sfc_energy, sfc_lw,
     sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw, sfc_sw_cld, tdt_diab, tdt_lw_cld,
-    tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw, toa_swup_cld, vert_divg,
-    virt_pot_temp, divg_mass_bal, horiz_divg_mass_bal, vert_divg_mass_bal,
+    tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw, vert_divg, virt_pot_temp,
+    divg_mass_bal, horiz_divg_mass_bal, vert_divg_mass_bal,
     mse_horiz_flux_divg, q_horiz_advec, q_vert_advec, q_times_horiz_divg,
     q_horiz_flux_divg, qu, qv, du_dx, dv_dy, dse_horiz_flux_divg,
     dse_times_horiz_divg, dse_horiz_advec, temp_horiz_flux_divg,
@@ -2336,8 +2352,8 @@ master_vars_list = [
     fmse_budget_advec_residual, q_budget_advec_residual,
     q_horiz_vert_advec_sum, mse_horiz_vert_advec_sum, omega_zero_global_mean,
     q_vert_advec_omega_zero_mean, q_horiz_advec_upwind, q_vert_advec_upwind,
-    q_total_advec_upwind, mse_horiz_advec_upwind, mse_vert_advec_upwind,
-    mse_total_advec_upwind
+    q_total_advec_upwind, q_zonal_advec_upwind, q_merid_advec_upwind,
+    mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind
 ]
 
 
