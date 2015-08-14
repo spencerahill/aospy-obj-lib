@@ -11,40 +11,34 @@ from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
-                         phalf_from_sigma, pfull_from_phalf, phalf_from_pfull,
-                         dp_from_phalf, dp_from_sigma, int_dp_g, integrate,
-                         weight_by_delta)
+                         int_dp_g, weight_by_delta)
 
-# General finite differencing.
-def fwd_diff1(f, dx, x_array=False):
-    """1st order accurate forward differencing.
-    :param x_array: If true, `dx` is assumed to be array of positions, not
-                    spacing.  If false, `dx` is assumed to be spacing.  In
-                    former case, have to compute spacing from the positions.
-    """
-    if x_array:
-        return (f[1:] - f[:-1]) / (dx[1:] - dx[:-1])
-    else:
+# General finite differencing functions.
+def fwd_diff1(f, dx):
+    """1st order accurate forward differencing."""
+    if isinstance(dx, (float, int)):
         return (f[1:] - f[:-1]) / dx
-
-
-def cen_diff2(f, dx, x_array=False):
-    """2nd order accurate centered differencing."""
-    if x_array:
-        return (f[2:] - f[:-2]) / (dx[:-1] + dx[:1])
     else:
+        return (f[1:] - f[:-1]) / (dx[1:] - dx[:-1])
+
+
+def cen_diff2(f, dx):
+    """2nd order accurate centered differencing."""
+    if isinstance(dx, (float, int)):
         return (f[2:] - f[:-2]) / (2.*dx)
+    else:
+        return (f[2:] - f[:-2]) / (dx[:-1] + dx[:1])
 
 
-def cen_diff4(f, dx, x_array=False):
+def cen_diff4(f, dx):
     """4th order accurate centered differencing."""
-    if x_array:
+    if isinstance(dx, (float, int)):
+        return (8*(f[3:-1] - f[1:-3]) - (f[4:] - f[:-4])) / (12.*dx)
+    else:
         # Assume len(dx) == len(f) - 1.
         d1 = (f[3:-1] - f[1:-3]) / (dx[1:-2] + dx[2:-1])
         d2 = (f[4:] - f[:-4]) / (dx[:-3] + dx[1:-2] + dx[2:-1] + dx[3:])
         return (4*d1 - d2) / 3.
-    else:
-        return (8*(f[3:-1] - f[1:-3]) - (f[4:] - f[:-4])) / (12.*dx)
 
 
 def upwind_order1(df_fwd, df_bwd, a):
@@ -61,6 +55,7 @@ def upwind_order1(df_fwd, df_bwd, a):
 
 # Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
+    """Factor that multiplies del operations in spherical coordinates."""
     if d_dy_of_scalar_field:
         return 1. / radius
     else:
@@ -74,6 +69,7 @@ def dlon_from_lon(lon):
     assert np.allclose(lon[2:] - lon[1:-1], lon[1:-1] - lon[:-2])
     lon_rad = to_radians(lon)
     return lon_rad[1] - lon_rad[0]
+
 
 def d_dx_from_latlon(field, lat, lon, radius):
     """Compute \partial(field)/\partial x using centered differencing."""
@@ -153,11 +149,12 @@ def zonal_advec_upwind(field, u, lat, lon, radius):
     # Transpose the arrays: lon is 1st axis, lat is 2nd.
     f = field.T
     # Wrap around at 0/360 degrees longitude.
-    f = np.ma.concatenate((f, f[:1]), axis=0)
-    lon = to_radians(np.ma.concatenate((lon, lon[:1]), axis=0))
-    lon = lon[:,np.newaxis,np.newaxis,np.newaxis]
-    df_fwd = fwd_diff1(f, lon, x_array=True)
-    df_bwd = fwd_diff1(f[::-1], lon[::-1], x_array=True)[::-1]
+    # Assumes longitude array starts at 0 and goes to 360.
+    f = np.ma.concatenate((f[-1:], f, f[:1]), axis=0)
+    lon = to_radians(lon)[:,np.newaxis,np.newaxis,np.newaxis]
+    lon = np.ma.concatenate((lon[-1:], lon, lon[:1]), axis=0))
+    df_fwd = fwd_diff1(f[1:], lon[1:], x_array=True)
+    df_bwd = fwd_diff1(f[-2::-1], lon[-2::-1], x_array=True)[::-1]
     # Transpose again to regain original axis order.
     return prefactor*upwind_order1(df_fwd.T, df_bwd.T, u)
 
@@ -192,7 +189,7 @@ def merid_advec_upwind(field, v, lat, radius, vec_field=False):
                                 df_bwd_except_sp), axis=0)
     # Roll axis and transpose again to regain original axis order.
     df_fwd = np.rollaxis(df_fwd, 0, 2).T
-    df_bwd = np.rollaxis(df_bwd, 0, 2).T    
+    df_bwd = np.rollaxis(df_bwd, 0, 2).T
     return prefactor*upwind_order1(df_fwd, df_bwd, v)
 
 
@@ -224,7 +221,7 @@ def vert_advec_upwind(field, omega, p):
     df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
     # Roll axis and transpose again to regain original axis order.
     df_fwd = np.rollaxis(df_fwd, 0, -1).T
-    df_bwd = np.rollaxis(df_bwd, 0, -1).T    
+    df_bwd = np.rollaxis(df_bwd, 0, -1).T
     return upwind_order1(df_fwd, df_bwd, omega)
 
 def total_advec_upwind(field, u, v, omega, lat, lon, p, radius,
@@ -261,19 +258,27 @@ def global_integral(field, sfc_area, dp):
 
 def field_zero_global_mean(field, sfc_area, dp):
     """Subtract the global mean value from the given field."""
-    ones = np.ones(np.shape(field))
+    ones = np.ma.ones(np.shape(field), mask=field.mask)
     global_mean = (global_integral(field, sfc_area, dp) /
                    global_integral(ones, sfc_area, dp))
     return field - global_mean[:,np.newaxis,np.newaxis,np.newaxis]
 
 
-# Horizontal & vertical advection, divergence, and flux divergence functions.
+# Advection and divergence functions.
+def zonal_advec(field, u, lat, lon, radius):
+    """Zonal advection of the given field."""
+    return u*d_dx_from_latlon(field, lat, lon, radius)
 
-def horiz_advec(field, u, v, lat, lon, radius):
+
+def meridional_advec(field, v, lat, lon, radius, vec_field=False):
+    """Zonal advection of the given field."""
+    return v*d_dy_from_latlon(field, lat, lon, radius, vec_field=vec_field)
+
+
+def horiz_advec(field, u, v, lat, lon, radius, vec_field=False):
     """Horizontal advection of the given field."""
-    df_dx = d_dx_from_latlon(field, lat, lon, radius)
-    df_dy = d_dy_from_latlon(field, lat, lon, radius, vec_field=False)
-    return u*df_dx + v*df_dy
+    return (zonal_advec(field, u, lat, lon, radius) +
+            meridional_advec(field, v, lat, lon, radius, vec_field=vec_field))
 
 
 def vert_advec(field, omega, p):
@@ -281,10 +286,17 @@ def vert_advec(field, omega, p):
     return omega*d_dp_from_p(field, p)
 
 
+def total_advec(field, u, v, omega, lat, lon, p, radius, vec_field=False):
+    """Total advection of the given field."""
+    return (horiz_advec(field, u, v, lat, lon, radius, vec_field=vec_field) +
+            vert_advec(field, omega, p))
+
+
 def vert_advec_omega_zero_mean(field, omega, sfc_area, p, dp):
     """Vertical advection, with omega adjusted to equal 0 in global mean."""
     omega_adj = field_zero_global_mean(omega, sfc_area, dp)
     return omega_adj*d_dp_from_p(field, p)
+
 
 def horiz_divg(u, v, lat, lon, radius):
     """Flow horizontal divergence."""
@@ -396,8 +408,6 @@ def field_horiz_vert_advec_sum(field, u, v, omega, lat, lon, p, radius):
 
 
 # Advection, divergence etc. applied to specific fields.
-
-
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, lat, lon, radius):
     """Horizontal flux convergence of moist static energy."""
     return field_horiz_flux_divg(mse(temp, hght, sphum),
@@ -561,8 +571,7 @@ def qv(sphum, v):
     return sphum*v
 
 
-### Eddy computations.
-
+# Eddy computations.
 def covariance(array1, array2, axis=None, weights=None):
     """
     Average `covariance` along the specified axis of two arrays.
@@ -608,10 +617,13 @@ def eddy_covar_avg(array1, array2, axis=None, weights=None):
     return covariance(cov1, cov2, axis=axis, weights=weights)
 
 
-### Thermodynamic functions.
-
+# Thermodynamic functions.
 def dse(temp, hght):
-    """Dry static energy, in Joules per kilogram."""
+    """Dry static energy.  Units: Joules per kilogram.
+
+    :param temp: Temperature.  Units: Kelvin.
+    :param hght: Geopotential height. Units: meters.
+    """
     try:
         ds = c_p*temp + grav*hght
     except ValueError:
@@ -643,30 +655,34 @@ def specific_mass_dry_air(q_v, q_l, q_s):
 
 
 def specific_gas_constant_moist_air(q_v, q_l, q_s):
+    """Specific gas constant of moist air with the given water masses."""
     q_a = specific_mass_dry_air(q_v, q_l, q_s)
     return q_a*R_a + q_v*R_v
 
 
 def heat_capacity_moist_air_constant_volume(q_v, q_l, q_s):
+    """Heat capacity at constant volume of moist air."""
     q_a = specific_mass_dry_air(q_v, q_l, q_s)
     return c_va*q_a + c_vv*q_v + c_vl*q_l + c_vs*q_s
 
 
-def mse_romps(T, q_v, q_s, z):
-    """Moist static energy defined in Romps 2015, JAS."""
-    return
+# def mse_romps(T, q_v, q_s, z):
+#     """Moist static energy defined in Romps 2015, JAS."""
+#     pass
 
 
 def specific_entropy_dry_air(T, p):
+    """Specific entropy of dry air.  From Romps."""
     return c_p*np.log(T/T_trip) - R_d*np.log(p / p_trip)
 
 
-def specific_entropy_water_vapor(T, p, ):
+def specific_entropy_water_vapor(T, p):
+    """Specific entropy of water vapor.  From Romps."""
     return c_pv*np.log(T/T_trip) - R_d*np.log(p / p_trip)
 
 
 def pot_temp(temp, p, p0=1000.):
-    """Potential temperature."""
+    """Potential temperature.  Units: Kelvin."""
     return temp*(p0/p[:,np.newaxis,np.newaxis])**kappa
 
 
@@ -685,18 +701,7 @@ def equiv_pot_temp(temp, p, sphum, p0=1000.):
     return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
 
 
-### Gross moist stability-related quantities
-
-# def dse_int_sigma(bk, pk, ps, hght, temp):
-#     """Column integral of DSE using data on sigma-coordinates."""
-#     dp_g = dp_from_sigma(bk, pk, ps) / grav
-#     # temp is on level centers; hght is on level borders.
-#     # So interpolate to level centers by simple averaging.
-#     hght = 0.5*(hght[1:] + hght[:-1])
-#     dry = dse(temp, hght)
-#     return np.sum(dry*dp_g, axis=0)
-
-
+# Gross moist stability-related quantities
 def field_vert_int_max(field, dp):
     """Maximum magnitude of integral of a field from surface up."""
     dp = to_pascal(dp)
@@ -712,7 +717,7 @@ def field_vert_int_max(field, dp):
 
 
 def horiz_divg_vert_int_max(u, v, lat, lon, radius, dp):
-    """Maximum magnitude of integral from surface up of horizontal divergence."""
+    """Maximum magnitude of integral upwards of horizontal divergence."""
     return field_vert_int_max(horiz_divg_mass_bal(u, v, lat, lon, radius, dp),
                               dp)
 
@@ -750,6 +755,7 @@ def gross_moist_stab(temp, hght, sphum, u, v, lat, lon, radius, dp):
     return -gms_like_ratio(divg, mse(temp, hght, sphum), dp)
 
 
+# Radiative transfer quantities.
 def albedo(swdn_toa, swup_toa):
     """Net column albedo, i.e. fraction of insolation reflected back."""
     return np.ma.masked_where(swdn_toa == 0., swup_toa/swdn_toa)
@@ -773,14 +779,17 @@ def cre_sw(swup_toa, swup_toa_clr):
 #     return swdn_toa - swup_toa - swdn_toa_clr + swup_toa_clr
 
 
-def toa_swup_cld(swup_toa, swup_toa_clr):
-    """Cloudy-sky TOA upwelling shortwave radiative flux."""
-    return swup_toa - swup_toa_clr
-
-
 def cre_lw(olr, olr_clr):
     """Cloudy-sky OLR (outgoing longwave radiation, i.e. upwelling longwave radiative flux at TOA."""
     return -1*olr + olr_clr
+
+
+def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
+    """Cloudy-sky TOA downward radiative flux."""
+    return cre_sw(swup_toa, swup_toa_clr) + cre_lw(olr, olr_clr)
+# def cre_net(swdn_toa, swup_toa, olr, swdn_toa_clr, swup_toa_clr, olr_clr):
+#     """Cloudy-sky TOA downward radiative flux."""
+#     return swdn_toa - swup_toa - olr - swdn_toa_clr + swup_toa_clr + olr_clr
 
 
 def toa_rad(swdn_toa, swup_toa, olr):
@@ -788,22 +797,9 @@ def toa_rad(swdn_toa, swup_toa, olr):
     return swdn_toa - swup_toa - olr
 
 
-def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
-    """Cloudy-sky TOA downward radiative flux."""
-    return -1*swup_toa - olr + swup_toa_clr + olr_clr
-# def cre_net(swdn_toa, swup_toa, olr, swdn_toa_clr, swup_toa_clr, olr_clr):
-#     """Cloudy-sky TOA downward radiative flux."""
-#     return swdn_toa - swup_toa - olr - swdn_toa_clr + swup_toa_clr + olr_clr
-
-
 def toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr):
     """Clear-sky TOA downward radiative flux."""
     return swdn_toa_clr - swup_toa_clr - olr_clr
-
-
-def sfc_albedo(swup_sfc, swdn_sfc):
-    """Surface albedo."""
-    return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
 
 
 def sfc_sw(swup_sfc, swdn_sfc):
@@ -880,6 +876,7 @@ def evap_frac(evap, shflx):
     return L_v*evap / (L_v*evap + shflx)
 
 
+# Zonal-mean, meridional circulation and mass transport quantities.
 def msf(lats, levs, v):
     """Meridional mass streamfunction."""
     # Compute half level boundaries and widths.
@@ -920,7 +917,7 @@ def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
         sfc_area * (local_flat - global_mean[:,np.newaxis,np.newaxis]),
         axis=-1
     )
-    return np.cumsum(zonal_integral, axis=-1)
+    return np.ma.cumsum(zonal_integral, axis=-1)
 
 
 def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
@@ -957,7 +954,9 @@ def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
 
 def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
     """
-    Gross moist stability. Near surface MSE diff b/w ITCZ and the given latitude.
+    Approximation of gross moist stability from Held (2001).
+
+    Near surface MSE diff b/w ITCZ and the given latitude.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
@@ -969,8 +968,10 @@ def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
 
 def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
     """
-    Gross moist stability. Near surface MSE diff b/w ITCZ and the given latitude
-    neglecting the geopotential term.
+    Approximation of gross moist stability from Held (2001).
+
+    Near surface MSE diff b/w ITCZ and the given latitude, neglecting the
+    geopotential term.
     """
     sphum = np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1))
     temp = np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1))
@@ -982,8 +983,9 @@ def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
 
 def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
     """
-    Gross moist stability. MSE diff b/w ITCZ aloft and near surface at the
-    given latitude.
+    Approximation of gross moist stability from Held (2001).
+
+    MSE diff b/w ITCZ aloft and near surface at the given latitude.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
@@ -998,9 +1000,11 @@ def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
 
 def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
     """
-    Gross moist stability change estimated as near surface MSE difference
-    between ITCZ and local latitude, neglecting geopotential term and applying
-    a thermodynamic scaling for the moisture term.
+    Gross moist stability change estimate.
+
+    Near surface MSE difference between ITCZ and local latitude, neglecting
+    geopotential term and applying a thermodynamic scaling for the moisture
+    term.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
@@ -1019,11 +1023,13 @@ def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
 def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
                     lev_sfc=925., gamma=1.):
     """
-    Gross moist stability change estimated as near surface MSE difference
-    between ITCZ and local latitude, neglecting geopotential term and applying
-    a thermodynamic scaling for the moisture term, and multiplying the ITCZ
-    terms by cos(lat) and a fixed fraction gamma to account for deviation of
-    upper level MSE from the near surface ITCZ value.
+    Gross moist stability change estimate.
+
+    Near surface MSE difference between ITCZ and local latitude, neglecting
+    geopotential term and applying a thermodynamic scaling for the moisture
+    term, and multiplying the ITCZ terms by cos(lat) and a fixed fraction gamma
+    to account for deviation of upper level MSE from the near surface ITCZ
+    value.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
     itcz_ind = np.argmax(precip.mean(axis=-1))
@@ -1082,13 +1088,11 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
             np.sum(field*lev_thick, axis=0))
 
 
-###############################
 # Functions below this line haven't been converted to new argument format.
-
 def tht(variables, **kwargs):
     """Total atmospheric plus oceanic northward energy flux."""
     # Calculate energy balance at each grid point.
-    loc = -1*(variables[0] - variables[1] - variables[2])             # TOA radiation
+    loc = -1*(variables[0] - variables[1] - variables[2])
     # Calculate meridional heat transport.
     len_dt = variables[0].shape[0]
     sfc_area = grid_sfc_area(nc)
