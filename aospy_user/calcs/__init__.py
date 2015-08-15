@@ -28,9 +28,11 @@ def fwd_diff1(fx, x):
     """
     if isinstance(x, (float, int)):
         dx = x
-        return (fx[1:] - fx[:-1]) / dx
     else:
-        return (fx[1:] - fx[:-1]) / (x[1:] - x[:-1])
+        dx = x[1:] - x[:-1]
+    if not np.all(dx):
+        raise ValueError("`dx` has >=1 zero value")
+    return (fx[1:] - fx[:-1]) / dx
 
 
 def fwd_diff2(fx, x):
@@ -46,7 +48,7 @@ def fwd_diff2(fx, x):
     """
     if isinstance(x, (float, int)):
         dx = x
-        return (-fx[3:] +4*fx[2:-1] -3*fx[:-2]) / (2.*dx)
+        return (-fx[2:] +4*fx[1:-1] -3*fx[:-2]) / (2.*dx)
     else:
         df_dx1 = (fx[1:-1] - fx[:-2]) / (x[1:-1] - x[:-2])
         df_dx2 = (fx[2:]   - fx[:-2]) / (x[2:]   - x[:-2])
