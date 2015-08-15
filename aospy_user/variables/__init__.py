@@ -1062,7 +1062,7 @@ dv_dy = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.d_dy_from_latlon,
+    func=calcs.d_dy_from_lat,
     units=units.s1
 )
 equiv_pot_temp = Var(
@@ -1511,8 +1511,8 @@ mse_times_vert_divg = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
-mse_horiz_vert_advec_sum = Var(
-    name='mse_horiz_vert_advec_sum',
+mse_total_advec = Var(
+    name='mse_total_advec',
     domain='atmos',
     description=('MSE transport computed as sum of horizontal and '
                  'vertical advection terms.'),
@@ -1521,7 +1521,7 @@ mse_horiz_vert_advec_sum = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.mse_horiz_vert_advec_sum,
+    func=calcs.mse_total_advec,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
@@ -1668,6 +1668,32 @@ prec_conv_frac = Var(
     plot_units=r'',
     plot_units_conv=1.
 )
+q_zonal_advec = Var(
+    name='q_zonal_advec',
+    domain='atmos',
+    description='Zonal advection of specific humidity.',
+    variables=(sphum, ucomp, lat, lon, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.zonal_advec,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_merid_advec = Var(
+    name='q_merid_advec',
+    domain='atmos',
+    description='Meridional advection of specific humidity.',
+    variables=(sphum, vcomp, lat, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.merid_advec,
+    units=units.s1,
+    colormap='BrBG_r'
+)
 q_horiz_advec = Var(
     name='q_horiz_advec',
     domain='atmos',
@@ -1677,7 +1703,20 @@ q_horiz_advec = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.q_horiz_advec,
+    func=calcs.horiz_advec,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_vert_advec = Var(
+    name='q_vert_advec',
+    domain='atmos',
+    description='Vertical advection of specific humidity.',
+    variables=(sphum, omega, 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.vert_advec,
     units=units.s1,
     colormap='BrBG_r'
 )
@@ -1803,19 +1842,6 @@ q_vert_flux_divg = Var(
     units=units.s1,
     colormap='BrBG_r'
 )
-q_vert_advec = Var(
-    name='q_vert_advec',
-    domain='atmos',
-    description='Vertical advection of specific humidity.',
-    variables=(sphum, omega, 'p'),
-    def_time=True,
-    def_vert='pfull',
-    def_lat=True,
-    def_lon=True,
-    func=calcs.vert_advec,
-    units=units.s1,
-    colormap='BrBG_r'
-)
 q_vert_advec_omega_zero_mean = Var(
     name='q_vert_advec_omega_zero_mean',
     domain='atmos',
@@ -1842,8 +1868,8 @@ q_times_vert_divg = Var(
     units=units.s1,
     colormap='BrBG_r'
 )
-q_horiz_vert_advec_sum = Var(
-    name='q_horiz_vert_advec_sum',
+q_total_advec = Var(
+    name='q_total_advec',
     domain='atmos',
     description=('Moisture transport computed as sum of horizontal and '
                  'vertical advection terms.'),
@@ -1852,7 +1878,7 @@ q_horiz_vert_advec_sum = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.field_horiz_vert_advec_sum,
+    func=calcs.field_total_advec,
     units=units.kg_m2_s,
     colormap='BrBG_r'
 )
@@ -2349,10 +2375,10 @@ master_vars_list = [
     cre_sw_precip_corr, cre_lw_precip_corr, t_surf_precip_lin_regr,
     cre_net_precip_lin_regr, toa_rad_clr_precip_corr,
     toa_rad_clr_precip_lin_regr, mse_budget_advec_residual,
-    fmse_budget_advec_residual, q_budget_advec_residual,
-    q_horiz_vert_advec_sum, mse_horiz_vert_advec_sum, omega_zero_global_mean,
-    q_vert_advec_omega_zero_mean, q_horiz_advec_upwind, q_vert_advec_upwind,
-    q_total_advec_upwind, q_zonal_advec_upwind, q_merid_advec_upwind,
+    fmse_budget_advec_residual, q_budget_advec_residual, q_total_advec,
+    mse_total_advec, omega_zero_global_mean, q_vert_advec_omega_zero_mean,
+    q_horiz_advec_upwind, q_vert_advec_upwind, q_total_advec_upwind,
+    q_zonal_advec_upwind, q_merid_advec_upwind, q_zonal_advec, q_merid_advec,
     mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind
 ]
 
