@@ -7,6 +7,7 @@ vertically defined, (lat, lon).
 import scipy.stats
 import numpy as np
 
+from aospy import FiniteDiff
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
@@ -28,9 +29,11 @@ def fwd_diff1(fx, x):
     """
     if isinstance(x, (float, int)):
         dx = x
-        return (fx[1:] - fx[:-1]) / dx
     else:
-        return (fx[1:] - fx[:-1]) / (x[1:] - x[:-1])
+        dx = x[1:] - x[:-1]
+    if not np.all(dx):
+        raise ValueError("`dx` has >=1 zero value")
+    return (fx[1:] - fx[:-1]) / dx
 
 
 def fwd_diff2(fx, x):
@@ -46,7 +49,7 @@ def fwd_diff2(fx, x):
     """
     if isinstance(x, (float, int)):
         dx = x
-        return (-fx[3:] +4*fx[2:-1] -3*fx[:-2]) / (2.*dx)
+        return (-fx[2:] +4*fx[1:-1] -3*fx[:-2]) / (2.*dx)
     else:
         df_dx1 = (fx[1:-1] - fx[:-2]) / (x[1:-1] - x[:-2])
         df_dx2 = (fx[2:]   - fx[:-2]) / (x[2:]   - x[:-2])
@@ -54,12 +57,15 @@ def fwd_diff2(fx, x):
 
 
 def cen_diff2(fx, x):
-    """2nd order accurate centered differencing."""
-    if isinstance(x, (float, int)):
-        dx = x
-        return (fx[2:] - fx[:-2]) / (2.*dx)
-    else:
-        return (fx[2:] - fx[:-2]) / (x[2:] - x[:-2])
+    fd = FiniteDiff(fx, positions=x)
+    return fd.cen_diff_deriv(order=2)
+# def cen_diff2(fx, x):
+#     """2nd order accurate centered differencing."""
+#     if isinstance(x, (float, int)):
+#         dx = x
+#         return (fx[2:] - fx[:-2]) / (2.*dx)
+#     else:
+#         return (fx[2:] - fx[:-2]) / (x[2:] - x[:-2])
 
 
 def cen_diff4(fx, x):
