@@ -902,6 +902,38 @@ column_energy = Var(
     units=units.W_m2,
     colormap='RdBu_r'
 )
+column_mass = Var(
+    name='column_mass',
+    math_str=r'$p_s/g$',
+    domain='atmos',
+    description=('Total mass per square meter of the atmospheric column, '
+                 'based on surface pressure.'),
+    variables=(ps,),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_mass,
+    units=units.kg_m2,
+    colormap='RdBu_r'
+)
+column_mass_integral = Var(
+    name='column_mass_integral',
+    math_str=r'$\int^{p_s}_{p_t}\,\mathrm{d}p/g$',
+    domain='atmos',
+    description=('Total mass per square meter of the atmospheric column,'
+                 'computed by explicitly integrating pressure.  Temperature '
+                 'variable (temp) is a dummy -- aospy.Calc needs at '
+                 'least one netCDF variable per aospy.Var.'),
+    variables=(temp, 'dp',),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_mass_integral,
+    units=units.kg_m2,
+    colormap='RdBu_r'
+)
 cre_lw = Var(
     name='cre_lw',
     domain='atmos',
@@ -1799,7 +1831,7 @@ q_times_horiz_divg = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.q_times_horiz_divg,
+    func=calcs.field_times_horiz_divg,
     units=units.s1,
     colormap='BrBG_r'
 )
@@ -1812,7 +1844,7 @@ q_horiz_flux_divg = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.q_horiz_flux_divg,
+    func=calcs.field_horiz_flux_divg,
     units=units.s1,
     colormap='BrBG_r'
 )
@@ -2379,7 +2411,8 @@ master_vars_list = [
     mse_total_advec, omega_zero_global_mean, q_vert_advec_omega_zero_mean,
     q_horiz_advec_upwind, q_vert_advec_upwind, q_total_advec_upwind,
     q_zonal_advec_upwind, q_merid_advec_upwind, q_zonal_advec, q_merid_advec,
-    mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind
+    mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind,
+    column_mass, column_mass_integral
 ]
 
 

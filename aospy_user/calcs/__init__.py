@@ -276,6 +276,7 @@ def vert_advec_upwind(field, omega, p):
     df_bwd = np.rollaxis(df_bwd, 0, -1).T
     return upwind_scheme(df_fwd, df_bwd, omega)
 
+
 def total_advec_upwind(field, u, v, omega, lat, lon, p, radius,
                        vec_field=False):
     return (horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field) +
@@ -283,9 +284,25 @@ def total_advec_upwind(field, u, v, omega, lat, lon, p, radius,
 
 
 # Trenberth mass balance & energy budget quantities
-def column_total_mass(ps):
-    """Total mass of atmospheric column (from Trenberth 1991)"""
-    return ps / grav
+def column_mass(ps):
+    """Total mass per square meter of atmospheric column."""
+    return (1. / grav)*ps[:,np.newaxis,:,:]
+
+
+def column_mass_integral(_, dp):
+    """
+    Total mass per square meter of atmospheric column.
+
+    Explicitly computed by integrating over pressure, rather than implicitly
+    using surface pressure.  Useful for checking if model data conserves mass.
+
+    :param dp: Pressure thickness of the model levels.
+    """
+    # `np.ones_like` function retains mask of input array, which is good.
+    mass = int_dp_g(np.ones_like(dp), dp)
+    if np.ndim(mass) == 3:
+        mass = mass[:,np.newaxis,:,:]
+    return mass
 
 
 def column_dry_air_mass(ps, wvp):
@@ -591,26 +608,6 @@ def dse_horiz_advec_divg_sum(T, gz, u, v, lat, lon, rad, dp):
 def dse_vert_advec(temp, hght, omega, p):
     """Vertical advection of moist static energy."""
     return vert_advec(dse(temp, hght), omega, p)
-
-
-def q_horiz_flux_divg(q, u, v, lat, lon, radius):
-    """Horizontal flux convergence of specific humidity."""
-    return field_horiz_flux_divg(q, u, v, lat, lon, radius)
-
-
-def q_horiz_advec(q, u, v, lat, lon, radius):
-    """Horizontal advection of specific humidity."""
-    return horiz_advec(q, u, v, lat, lon, radius)
-
-
-def q_times_horiz_divg(q, u, v, lat, lon, radius, dp):
-    """Horizontal divergence of specific humidity."""
-    return field_times_horiz_divg_mass_bal(q, u, v, lat, lon, radius, dp)
-
-
-def q_vert_advec(q, omega, p):
-    """Vertical advection of specific humidity."""
-    return vert_advec(q, omega, p)
 
 
 def qu(sphum, u):
