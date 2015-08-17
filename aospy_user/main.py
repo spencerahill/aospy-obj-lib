@@ -109,17 +109,20 @@ if __name__ == '__main__':
     mp.model = ['am2']
     mp.run = ['reyoi_cont']
     mp.ens_mem = [None]
-    mp.var = ['q_horiz_advec_upwind',
-              'mse_vert_advec_upwind', 'mse_horiz_advec_upwind',
-              'q_total_advec_upwind', 'mse_total_advec_upwind']
-    mp.yr_range = [(1983, 1983)]
+    mp.var = ['column_mass', 'column_mass_integral']
+    # mp.var = ['q_merid_advec_upwind', 'q_merid_advec',
+              # 'q_zonal_advec_upwind', 'q_zonal_advec',
+              # 'q_horiz_advec_upwind', 'q_horiz_advec',
+    #           'q_vert_advec_upwind', 'q_vert_advec',
+    #           'q_total_advec_upwind', 'q_total_advec']
+    mp.yr_range = ['default']
     mp.region = 'all'
     mp.intvl_in = ['monthly']
     mp.intvl_out = ['ann']
     mp.dtype_in_time = ['ts']
-    mp.dtype_in_vert = ['pressure']
+    mp.dtype_in_vert = ['sigma']
     mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = ['vert_int']
+    mp.dtype_out_vert = [False]
     mp.level = [None]
     mp.yr_chunk_len = False
     mp.compute = True

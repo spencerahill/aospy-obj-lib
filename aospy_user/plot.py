@@ -15,19 +15,19 @@ def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
         n_row=3,
-        n_col=2,
+        n_col=1,
         n_ax='all',
         n_plot=1,
         n_data=1,
 
-        row_size=4,
-        col_size=7,
+        row_size=2,
+        col_size=5,
         subplot_lims={'left': 0.1, 'right': 0.9, 'wspace': 0.1,
                       'bottom': 0.05, 'top': 0.93, 'hspace': 0.1},
 
-        min_cntr=-75,
-        max_cntr=75,
-        num_cntr=15,
+        min_cntr=-7.5,
+        max_cntr=7.5,
+        num_cntr=30,
         contourf_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
         col_map='default',
         do_colorbar=False,      # 'all' 'column' 'row' False True
@@ -36,16 +36,16 @@ def plot(plot_params):
         cbar_ticklabels=False,
         cbar_label='units',
 
-        # intvl_in=['monthly', '3hr'],#, '3hr'],#, '3hr'],
-        intvl_in='monthly',
+        intvl_in=['monthly'] + ['3hr']*2,
+        # intvl_in='monthly',
         intvl_out='ann',
-        # dtype_in_time=['ts', 'inst'],#, 'inst'],# 'inst'],
-        dtype_in_time='ts',
-        # dtype_in_vert=[False, 'sigma'],#, 'sigma'],# 'sigma'],
-        dtype_in_vert=[False] + ['pressure']*5,
+        dtype_in_time=['ts'] + ['inst']*2,
+        # dtype_in_time='ts',
+        dtype_in_vert=[False] + ['sigma']*2,
+        # dtype_in_vert='pressure',
         dtype_out_time='av',
-        dtype_out_vert=[False] + ['vert_int']*5,
-        # dtype_out_vert=False,
+        dtype_out_vert=[False] + ['vert_int']*2,
+        # dtype_out_vert='vert_int',
         level=False,
         yr_range=(1983, 1983),
         # yr_range='default',
@@ -54,10 +54,12 @@ def plot(plot_params):
         y_dim='lat',
 
         # Titles and labels
-        fig_title=r'AM2.1 Sahel JAS',
-        # ax_title=['3 hr, model levels', 'Monthly, $p$ levels', '', ''],
+        fig_title=r'AM2.1, 1983, annual mean',
+        ax_title=False,
         # ax_left_label=False,
-        ax_right_label=False,
+        ax_right_label=[r'$E-P$',
+                        r'Centered, 4th order',
+                        r'Upwind, 1st order'],
 
         # Axis limits
         # x_lim=(-2,2),
@@ -72,13 +74,13 @@ def plot(plot_params):
         y_label=False,
 
         # lat_lim=(-5, 35),
-        lat_lim=(-90,90),
+        lat_lim=(-50, 50),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
         # lon_lim=(-43, 65),
-        lon_lim=(-180,180),
+        lon_lim=(-180, 180),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -151,18 +153,17 @@ def main(main_params):
 if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
-    params.model = m.am2
-    params.run = r.am2_reyoi_cont
+    params.model = m.am3
+    params.run = r.am3_hc
     # params.run = [[r.am2_reyoi_cont, r.am2_reyoi_p2,
     #                {(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}]]
     params.ens_mem = False
-    params.var = [v.column_energy, v.mse_total_advec_upwind,
-                  v.mse_horiz_advec, v.mse_horiz_advec_upwind,
-                  v.mse_vert_advec, v.mse_vert_advec_upwind]
-    # params.var = [v.p_minus_e, v.q_total_advec_upwind,
-    #               v.q_horiz_advec, v.q_horiz_advec_upwind,
-    #               v.q_vert_advec, v.q_vert_advec_upwind]
-
+    # params.var = [v.column_energy, v.mse_total_advec_upwind,
+                  # v.mse_horiz_advec, v.mse_horiz_advec_upwind,
+                  # v.mse_vert_advec, v.mse_vert_advec_upwind]
+    params.var = [v.p_minus_e,
+                  v.q_total_advec,
+                  v.q_total_advec_upwind]
     params.region = False#reg.sahel
 
     fig = main(params)
