@@ -7,7 +7,7 @@ vertically defined, (lat, lon).
 import scipy.stats
 import numpy as np
 
-from aospy import FiniteDiff
+from aospy import FiniteDiff, WindspharmInterface
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
@@ -380,31 +380,13 @@ def horiz_divg(u, v, lat, lon, radius):
     return du_dx + dv_dy
 
 
-def horiz_divg_from_windspharm(u, v):
-    """Horizontal divergence computed using the windspharm package.
-
-    The windspharm package can't handle masked data, so the procedure is as
-    follows:
-
-    1. Unmask the data, setting masked gridpoints to 0.
-    2. Reshape the array, moving lat and lon to the first two dimensions
-       and combining time and level into a single 3rd dimension.
-    3. Perform the windspharm computations.
-    4. Reshape the array back to its original shape.
-    5. Re-apply the original mask and return the resulting array.
-
-    Windspharm can handle 3-D data, but lat and lon have to be the first two
-    dimensions.  So we have to reshape the array, moving time and/or level
-    to be after lat and lon, and then reshape the array back.
-    through the vertical and time indices.
-
-    All steps except #3 are independent of the windspharm function being called.
-    So we should have a single function that performs all steps, taking the
-    function to be called in #3 as an argument.
-    """
-    from windspharm.standard import VectorWind
-    w = VectorWind(u, v)
-    return w.divergence()
+# def windspharm_func(func_name, u, v, gridtype='regular',
+                    # *func_args, **func_kwargs):
+    # ws = WindspharmInterface(u, v, gridtype=gridtype)
+    # return getattr(ws, func_name)(*func_args, **func_kwargs)
+def divg_windspharm(u, v, gridtype='regular'):
+    ws = WindspharmInterface(u, v, gridtype=gridtype)
+    return ws.revert_to_raw(ws.divergence())
 
 
 def vert_divg(omega, p):
@@ -520,8 +502,7 @@ def mse_times_vert_divg(T, gz, q, omega, p, dp):
     return field_times_vert_divg_mass_bal(mse(T, gz, q), omega, p, dp)
 
 
-def mse_total_advec(temp, hght, sphum, u, v, omega, lat, lon, p,
-                             radius):
+def mse_total_advec(temp, hght, sphum, u, v, omega, lat, lon, p, radius):
     mse_ = mse(temp, hght, sphum)
     return field_total_advec(mse_, u, v, omega, lat, lon, p, radius)
 

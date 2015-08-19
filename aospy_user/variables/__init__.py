@@ -982,23 +982,32 @@ descent_tot = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.descent_tot,
-    units=r'Pa s$^{-1}$',
-    plot_units=r'hPa day$^{-1}$',
-    plot_units_conv=24.*3600./100.
+    units=units.Pa_s
 )
 divg_mass_bal = Var(
     name='divg_mass_bal',
     domain='atmos',
-    description='Divergence mass balanced in each column.',
+    description=('Horizontal divergence, adjusted to exact mass balance in '
+                 'each column integral.'),
     variables=(divg, 'dp'),
     def_time=True,
-    def_vert='pfull',
+    def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.field_vert_int_bal,
-    units=r's$^{-1}$',
-    plot_units=r'day$^{-1}$',
-    plot_units_conv=24.*3600.
+    units=units.s1
+)
+divg_windspharm = Var(
+    name='divg_windspharm',
+    domain='atmos',
+    description='Horizontal divergence using windspharm spherical harmonics.',
+    variables=(ucomp, vcomp),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.divg_windspharm,
+    units=units.s1
 )
 dry_static_stab = Var(
     name='dry_static_stab',
@@ -2412,7 +2421,7 @@ master_vars_list = [
     q_horiz_advec_upwind, q_vert_advec_upwind, q_total_advec_upwind,
     q_zonal_advec_upwind, q_merid_advec_upwind, q_zonal_advec, q_merid_advec,
     mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind,
-    column_mass, column_mass_integral
+    column_mass, column_mass_integral, divg_windspharm
 ]
 
 
