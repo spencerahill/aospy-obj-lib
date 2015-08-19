@@ -107,22 +107,21 @@ if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
     mp.model = ['am2']
-    mp.run = ['reyoi_cont']
+    mp.run = ['test']
+    # mp.run = ['ming0_p2K',
+    #           ['ming0_p2K']*3 + ['ming0']*5,
+    #           ['ming0']*3 + ['ming0_p2K']*5,
+    #           'ming0']
     mp.ens_mem = [None]
-    mp.var = ['column_mass', 'column_mass_integral']
-    # mp.var = ['q_merid_advec_upwind', 'q_merid_advec',
-              # 'q_zonal_advec_upwind', 'q_zonal_advec',
-              # 'q_horiz_advec_upwind', 'q_horiz_advec',
-    #           'q_vert_advec_upwind', 'q_vert_advec',
-    #           'q_total_advec_upwind', 'q_total_advec']
-    mp.yr_range = ['default']
+    mp.var = ['divg_windspharm']
+    mp.yr_range = [(1983, 1983)]
     mp.region = 'all'
-    mp.intvl_in = ['monthly']
+    mp.intvl_in = ['3hr']
     mp.intvl_out = ['ann']
-    mp.dtype_in_time = ['ts']
+    mp.dtype_in_time = ['inst']
     mp.dtype_in_vert = ['sigma']
     mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = [False]
+    mp.dtype_out_vert = ['vert_int']
     mp.level = [None]
     mp.yr_chunk_len = False
     mp.compute = True

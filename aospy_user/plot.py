@@ -17,56 +17,58 @@ def plot(plot_params):
         n_row=3,
         n_col=1,
         n_ax='all',
-        n_plot=1,
+        n_plot=2,
         n_data=1,
 
-        row_size=2,
-        col_size=5,
-        subplot_lims={'left': 0.1, 'right': 0.9, 'wspace': 0.1,
-                      'bottom': 0.05, 'top': 0.93, 'hspace': 0.1},
+        row_size=4,
+        col_size=4,
+        subplot_lims={'left': 0.12, 'right': 0.92, 'wspace': 0.1,
+                      'bottom': 0.1, 'top': 0.96, 'hspace': 0.1},
 
-        min_cntr=-7.5,
-        max_cntr=7.5,
-        num_cntr=30,
+        min_cntr=-1500,
+        max_cntr=1500,
+        num_cntr=15,
         contourf_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
         col_map='default',
         do_colorbar=False,      # 'all' 'column' 'row' False True
-        cbar_ax_lim=(0.1, 0.05, 0.8, 0.02),
+        cbar_ax_lim=(0.1, 0.08, 0.8, 0.03),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
 
-        intvl_in=['monthly'] + ['3hr']*2,
-        # intvl_in='monthly',
-        intvl_out='ann',
-        dtype_in_time=['ts'] + ['inst']*2,
-        # dtype_in_time='ts',
-        dtype_in_vert=[False] + ['sigma']*2,
-        # dtype_in_vert='pressure',
-        dtype_out_time='av',
-        dtype_out_vert=[False] + ['vert_int']*2,
-        # dtype_out_vert='vert_int',
+        # intvl_in=['monthly'] + ['3hr']*2,
+        intvl_in='monthly',
+        intvl_out='jas',
+        # dtype_in_time=['ts'] + ['inst']*2,
+        dtype_in_time='ts',
+        # dtype_in_vert=[False] + ['sigma']*2,
+        dtype_in_vert='pressure',
+        # dtype_out_time='av',
+        dtype_out_time='reg.av',
+        # dtype_out_vert=[False] + ['vert_int']*2,
+        dtype_out_vert=False,
         level=False,
-        yr_range=(1983, 1983),
-        # yr_range='default',
-        plot_type='map',
-        x_dim='lon',
-        y_dim='lat',
+        # yr_range=(1983, 1983),
+        yr_range='default',
+        plot_type='line',
+        x_dim='x',
+        y_dim='p',
 
         # Titles and labels
-        fig_title=r'AM2.1, 1983, annual mean',
+        # fig_title=False,
+        fig_title=r'AM2.1 Sahara JAS',
         ax_title=False,
-        # ax_left_label=False,
-        ax_right_label=[r'$E-P$',
-                        r'Centered, 4th order',
-                        r'Upwind, 1st order'],
-
+        ax_left_label=False,
+        # ax_right_label=False,
+        ax_right_label=['MSE', r'$T$', r'$q$'],
+        # ax_right_label=['divg', 'adjusted divg'],
         # Axis limits
-        # x_lim=(-2,2),
-        x_lim=False,
+        # x_lim=False,
+        x_lim=[(300, 400), (180, 320), (0, 18)],
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
+        # x_label=[False, False, r'W kg$^{-1}$'],
 
         y_lim=False,
         y_ticks=False,
@@ -88,7 +90,7 @@ def plot(plot_params):
         p_lim=(1000, 100),
         p_ticks=False,
         p_ticklabels=False,
-        p_label=False,
+        p_label='hPa',
 
         sigma_lim=(1, 0.1),
         sigma_ticks=False,
@@ -108,8 +110,18 @@ def plot(plot_params):
 
         do_quiver=False,
 
-        line_color=False,#[['k', 'r', 'k']],
-        linestyle=False,#[['-', '-', '--']],
+        # do_legend=False,
+        do_legend=[True, False, False],
+        # legend_labels=('Control', r'Control $h$, +2K $(\mathbf{v},\omega)$',
+        #                r'+2K $h$, Control $(\mathbf{v},\omega)$', '+2K'),
+        legend_labels=('Control', '+2K'),
+        legend_loc=0,
+
+        # line_color=False,
+        # linestyle=False,
+        # line_color=[['b', '0.2', '0.6', 'r']],
+        line_color=[['b','r']],
+        linestyle='-',
 
         marker_shape=None,
         marker_size=10,
@@ -153,17 +165,17 @@ def main(main_params):
 if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
-    params.model = m.am3
-    params.run = r.am3_hc
-    # params.run = [[r.am2_reyoi_cont, r.am2_reyoi_p2,
-    #                {(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}]]
+    params.model = m.am2
+    params.run = [[r.am2_reyoi_cont, r.am2_reyoi_p2]]
+    # params.run = [[
+    #     r.am3_hc,
+    #     (r.am3_hc,)*3 + (r.am3_hp2k,)*5,
+    #     (r.am3_hp2k,)*3 + (r.am3_hc,)*5,
+    #     r.am3_hp2k
+    # ]]
     params.ens_mem = False
-    # params.var = [v.column_energy, v.mse_total_advec_upwind,
-                  # v.mse_horiz_advec, v.mse_horiz_advec_upwind,
-                  # v.mse_vert_advec, v.mse_vert_advec_upwind]
-    params.var = [v.p_minus_e,
-                  v.q_total_advec,
-                  v.q_total_advec_upwind]
-    params.region = False#reg.sahel
+    params.var = [v.mse, v.temp, v.sphum]
+    params.region = reg.sahara
+    # params.region = False
 
     fig = main(params)
