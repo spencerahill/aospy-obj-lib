@@ -495,12 +495,23 @@ am2_cld_seed_sa_p2 = Run(
     nc_end_yr=2012,
     default_yr_range=(1983, 2012)
 )
+am2_test = Run(
+    name='test',
+    description='Dummy/testing run',
+    direc_nc='/archive/s1h/am2/am2test/gfdl.ncrc2-default-prod/pp/',
+    nc_dur=1,
+    nc_start_yr=1982,
+    nc_end_yr=1984,
+    default_yr_range=(1983, 1984)
+)
 
 # AM3
 am3_cont = Run(
     name='cont',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, with PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10/gfdl.ncrc2-intel-prod/pp'
+    description=('1981-2000 Hurrell climatological annual cycle of SSTs and '
+                 'sea ice, with PD atmospheric composition.'),
+    direc_nc=('/archive/yim/fms/siena_201211/c48L48_am3p10/'
+              'gfdl.ncrc2-intel-prod/pp')
 )
 am3_aero = Run(
     name='aero',

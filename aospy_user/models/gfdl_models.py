@@ -40,7 +40,8 @@ am2 = Model(
         runs.am2_amip1_p2, runs.am2_reynolds, runs.am2_reynolds_p2,
         runs.am2_hurrell_cont, runs.am2_hurrell_p2,
         runs.am2_cld_seed_all_p2, runs.am2_cld_seed_np_p2,
-        runs.am2_cld_seed_sp_p2, runs.am2_cld_seed_sa_p2
+        runs.am2_cld_seed_sp_p2, runs.am2_cld_seed_sa_p2,
+        runs.am2_test
     ],
     default_runs=[runs.am2_reyoi_cont, runs.am2_reyoi_p2]
 )
