@@ -7,7 +7,7 @@ vertically defined, (lat, lon).
 import scipy.stats
 import numpy as np
 
-from aospy import FiniteDiff, WindspharmInterface
+from aospy import FiniteDiff, SpharmInterface
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
@@ -380,13 +380,9 @@ def horiz_divg(u, v, lat, lon, radius):
     return du_dx + dv_dy
 
 
-# def windspharm_func(func_name, u, v, gridtype='regular',
-                    # *func_args, **func_kwargs):
-    # ws = WindspharmInterface(u, v, gridtype=gridtype)
-    # return getattr(ws, func_name)(*func_args, **func_kwargs)
-def divg_windspharm(u, v, gridtype='regular'):
-    ws = WindspharmInterface(u, v, gridtype=gridtype)
-    return ws.revert_to_raw(ws.divergence())
+def divg_spharm(u, v, **kwargs):
+    s = SpharmInterface(u, v, **kwargs)
+    return s.revert_to_raw(s.divergence())
 
 
 def vert_divg(omega, p):

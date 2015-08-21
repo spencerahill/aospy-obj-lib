@@ -423,7 +423,8 @@ sphum = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
+    in_nc_grid=False,
+    colormap='Greys'
 )
 sst = Var(
     name='sst',
@@ -693,7 +694,8 @@ wvp = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
+    in_nc_grid=False,
+    colormap='Greys'
 )
 # Grid variables.
 lat = Var(
