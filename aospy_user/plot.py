@@ -15,65 +15,73 @@ def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
         n_row=3,
-        n_col=1,
+        n_col=2,
         n_ax='all',
-        n_plot=2,
+        n_plot=1,
         n_data=1,
 
-        row_size=4,
-        col_size=4,
+        row_size=2,
+        col_size=5,
         subplot_lims={'left': 0.12, 'right': 0.92, 'wspace': 0.1,
-                      'bottom': 0.1, 'top': 0.96, 'hspace': 0.1},
+                      'bottom': 0.08, 'top': 0.96, 'hspace': 0.1},
 
-        min_cntr=-1500,
-        max_cntr=1500,
+        plot_type='contourf',
+        # plot_type=[['contourf', 'contour']],
+        x_dim='lon',
+        y_dim='lat',
+
+        min_cntr=-1.5e3,
+        max_cntr=1.5e3,
         num_cntr=15,
-        contourf_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
-        col_map='default',
-        do_colorbar=False,      # 'all' 'column' 'row' False True
-        cbar_ax_lim=(0.1, 0.08, 0.8, 0.03),
+        # min_cntr=[[-10, 250]],
+        # max_cntr=[[10, 450]],
+        # num_cntr=[[20, 40]],
+        contours_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
+        contour_labels=False,
+        # contour_labels=[[False, True]],
+        colormap='default',
+        do_colorbar='all',      # 'all' 'column' 'row' False True
+        cbar_ax_lim=(0.1, 0.04, 0.8, 0.02),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
 
-        # intvl_in=['monthly'] + ['3hr']*2,
         intvl_in='monthly',
-        intvl_out='jas',
-        # dtype_in_time=['ts'] + ['inst']*2,
+        # intvl_in=['monthly'] + ['3hr']*2,
+        intvl_out='ann',
         dtype_in_time='ts',
+        # dtype_in_time=['ts'] + ['inst']*2,
+        dtype_in_vert=['pressure', 'sigma']*3,
         # dtype_in_vert=[False] + ['sigma']*2,
-        dtype_in_vert='pressure',
-        # dtype_out_time='av',
-        dtype_out_time='reg.av',
+        dtype_out_time='av',
+        # dtype_out_time='reg.av',
+        dtype_out_vert='vert_int',
         # dtype_out_vert=[False] + ['vert_int']*2,
-        dtype_out_vert=False,
         level=False,
-        # yr_range=(1983, 1983),
-        yr_range='default',
-        plot_type='line',
-        x_dim='x',
-        y_dim='p',
+        # yr_range='default',
+        yr_range=(1983, 1983),
 
-        # Titles and labels
-        # fig_title=False,
-        fig_title=r'AM2.1 Sahara JAS',
+        fig_title=False,
+        # fig_title=r'MSE @ 500 hPa; +2K minus control',
         ax_title=False,
         ax_left_label=False,
-        # ax_right_label=False,
-        ax_right_label=['MSE', r'$T$', r'$q$'],
-        # ax_right_label=['divg', 'adjusted divg'],
-        # Axis limits
-        # x_lim=False,
-        x_lim=[(300, 400), (180, 320), (0, 18)],
+        # ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
+        ax_right_label=False,
+        # ax_right_label=['MSE', r'$T$', r'$q$'],
+
+        x_lim=False,
+        # x_lim=[(300, 400), (180, 320), (0, 18)],
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
         # x_label=[False, False, r'W kg$^{-1}$'],
+        do_mark_x0=False,
 
         y_lim=False,
         y_ticks=False,
         y_ticklabels=False,
         y_label=False,
+        do_mark_y0=False,
 
         # lat_lim=(-5, 35),
         lat_lim=(-50, 50),
@@ -107,21 +115,23 @@ def plot(plot_params):
         shiftgrid_start=False,
         shiftgrid_cyclic=360.0,
         latlon_rect=(-18, 40, 10, 20),
+        # latlon_rect=[[(-18, 40, 10, 20), False]],
+        do_mask_oceans=False,
 
         do_quiver=False,
-
-        # do_legend=False,
-        do_legend=[True, False, False],
+        do_legend=False,
+        # do_legend=[True, False, False],
         # legend_labels=('Control', r'Control $h$, +2K $(\mathbf{v},\omega)$',
         #                r'+2K $h$, Control $(\mathbf{v},\omega)$', '+2K'),
         legend_labels=('Control', '+2K'),
         legend_loc=0,
 
-        # line_color=False,
-        # linestyle=False,
+        line_color='0.2',
+        line_style=None,
+        line_width=0.5,
         # line_color=[['b', '0.2', '0.6', 'r']],
-        line_color=[['b','r']],
-        linestyle='-',
+        # line_color=[['b','r']],
+        # line_style='-',
 
         marker_shape=None,
         marker_size=10,
@@ -166,7 +176,14 @@ if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
     params.model = m.am2
-    params.run = [[r.am2_reyoi_cont, r.am2_reyoi_p2]]
+    # params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
+    params.run = [r.am2_reyoi_cont, r.am2_test]*3
+    # params.run = [
+        # [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}, r.am2_reyoi_cont],
+        # [{(r.am3_hp2k, r.am3_hc): '-'}, r.am3_hc],
+        # [{(r.hiram_gtm, r.hiram_cont): '-'}, r.hiram_cont],
+        # [{(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}, r.hiram_c48_0]
+    # ]
     # params.run = [[
     #     r.am3_hc,
     #     (r.am3_hc,)*3 + (r.am3_hp2k,)*5,
@@ -174,8 +191,9 @@ if __name__ == '__main__':
     #     r.am3_hp2k
     # ]]
     params.ens_mem = False
-    params.var = [v.mse, v.temp, v.sphum]
-    params.region = reg.sahara
-    # params.region = False
+    params.var = [v.horiz_divg]*2 + [v.vert_divg]*2 + [v.divg]*2
+    # params.var = [v.divg, v.divg_windspharm]
+    # params.region = reg.sahara
+    params.region = False
 
     fig = main(params)
