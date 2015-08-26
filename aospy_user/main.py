@@ -2,6 +2,8 @@
 """Main script for automating computations using aospy."""
 import itertools
 
+import colorama
+
 import aospy
 import aospy_user
 
@@ -16,27 +18,36 @@ class CalcParams(object):
     pass
 
     def print_params(self):
-        print '\nProject:', self.proj
-        print 'Models:', self.model
-        print 'Runs:', self.run
-        print 'Ensemble members:', self.ens_mem
-        print 'Variables:', self.var
-        print 'Year ranges:', self.yr_range
-        print 'Geographical regions:', self.region
-        print 'Time interval of input data:', self.intvl_in
-        print 'Time intervals for averaging:', self.intvl_out
-        print 'Input data time type:', self.dtype_in_time
-        print 'Input data vertical type:', self.dtype_in_vert
-        print 'Output data time types:', self.dtype_out_time
-        print 'Output data vert types:', self.dtype_out_vert
-        print 'Vertical levels:', self.level
-        print 'Year chunks:', self.yr_chunk_len
-        print 'Compute this data:', self.compute
-        print 'Print this data:', self.print_table
+        pairs = (
+            ('Project', self.proj),
+            ('Models', self.model),
+            ('Runs', self.run),
+            ('Ensemble members', self.ens_mem),
+            ('Variables', self.var),
+            ('Year ranges', self.yr_range),
+            ('Geographical regions', self.region),
+            ('Time interval of input data', self.intvl_in),
+            ('Time interval for averaging', self.intvl_out),
+            ('Input data time type', self.dtype_in_time),
+            ('Input data vertical type', self.dtype_in_vert),
+            ('Output data time type', self.dtype_out_time),
+            ('Output data vertical type', self.dtype_out_vert),
+            ('Vertical levels', self.level),
+            ('Year chunks', self.yr_chunk_len),
+            ('Compute this data', self.compute),
+            ('Print this data', self.print_table)
+        )
+        print ''
+        colorama.init()
+        color_left = colorama.Fore.BLUE
+        color_right = colorama.Fore.RESET
+        for left, right in pairs:
+            print color_left, left, ':', color_right, right
+        print colorama.Style.RESET_ALL
 
 
 def prompt_user_verify():
-    if not raw_input("\nProceed using these parameters? ").lower() == 'y':
+    if not raw_input("Proceed using these parameters? ").lower() == 'y':
         raise IOError('\nExecution cancelled by user.')
 
 
@@ -106,23 +117,22 @@ def main(main_params):
 if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
-    mp.model = ['am2']
-    mp.run = ['test']
-    # mp.run = ['ming0_p2K',
-    #           ['ming0_p2K']*3 + ['ming0']*5,
-    #           ['ming0']*3 + ['ming0_p2K']*5,
-    #           'ming0']
+    mp.model = 'default'
+    mp.run = 'default'
     mp.ens_mem = [None]
-    mp.var = ['divg_windspharm']
-    mp.yr_range = [(1983, 1983)]
+    mp.var = ['sphum']
+    mp.yr_range = ['default']
     mp.region = 'all'
-    mp.intvl_in = ['3hr']
+    mp.intvl_in = ['monthly']
     mp.intvl_out = ['ann']
-    mp.dtype_in_time = ['inst']
-    mp.dtype_in_vert = ['sigma']
+    mp.dtype_in_time = ['ts']
+    # mp.dtype_in_vert = [False]
+    mp.dtype_in_vert = ['pressure']
+    # mp.dtype_out_time = ('reg.av',)
     mp.dtype_out_time = ('av', 'std', 'reg.av', 'reg.ts', 'reg.std')
-    mp.dtype_out_vert = ['vert_int']
-    mp.level = [None]
+    # mp.dtype_out_vert = [False]
+    mp.dtype_out_vert = [False]
+    mp.level = [False]
     mp.yr_chunk_len = False
     mp.compute = True
     mp.verbose = True
