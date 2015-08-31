@@ -14,60 +14,69 @@ from aospy_user import regions as reg
 def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
-        n_row=3,
-        n_col=2,
+        n_row=4,
+        n_col=1,
         n_ax='all',
-        n_plot=1,
-        n_data=1,
+        n_plot=3,
+        n_data=[[1, 1, 2]],
+        # n_data=2,
 
         row_size=2,
         col_size=5,
-        subplot_lims={'left': 0.12, 'right': 0.92, 'wspace': 0.1,
-                      'bottom': 0.08, 'top': 0.96, 'hspace': 0.1},
+        subplot_lims={'left': 0.1, 'right': 0.95, 'wspace': 0.05,
+                      'bottom': 0.08, 'top': 0.93, 'hspace': 0.06},
 
-        plot_type='contourf',
-        # plot_type=[['contourf', 'contour']],
+        # plot_type='quiver',
+        plot_type=[['contourf', 'contour', 'quiver']],
         x_dim='lon',
         y_dim='lat',
 
-        min_cntr=-1.5e3,
-        max_cntr=1.5e3,
-        num_cntr=15,
-        # min_cntr=[[-10, 250]],
-        # max_cntr=[[10, 450]],
-        # num_cntr=[[20, 40]],
-        contours_extend='both',  # 'auto' 'neither' 'min' 'max' 'both'
-        contour_labels=False,
-        # contour_labels=[[False, True]],
-        colormap='default',
-        do_colorbar='all',      # 'all' 'column' 'row' False True
-        cbar_ax_lim=(0.1, 0.04, 0.8, 0.02),
+        # min_cntr=-200,
+        # max_cntr=200,
+        # num_cntr=15,
+        min_cntr=[[-75, 5700, False]],
+        max_cntr=[[75, 6000, False]],
+        num_cntr=[[15, 15, False]],
+        contours_extend='both',  # 'neither' 'min' 'max' 'both'
+        # contour_labels=False,
+        contour_labels=[[False, True, False]],
+        # colormap='default',
+        colormap=[['default', False, False]],
+        # do_colorbar=False,      # 'all' 'column' 'row' False True
+        do_colorbar=[['all', False, False]],
+        cbar_ax_lim=(0.13, 0.045, 0.8, 0.02),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
 
         intvl_in='monthly',
         # intvl_in=['monthly'] + ['3hr']*2,
-        intvl_out='ann',
+        intvl_out='jas',
         dtype_in_time='ts',
         # dtype_in_time=['ts'] + ['inst']*2,
-        dtype_in_vert=['pressure', 'sigma']*3,
-        # dtype_in_vert=[False] + ['sigma']*2,
+        dtype_in_vert='pressure',
+        # dtype_in_vert=['pressure']*5 + [False]*1,
         dtype_out_time='av',
         # dtype_out_time='reg.av',
-        dtype_out_vert='vert_int',
-        # dtype_out_vert=[False] + ['vert_int']*2,
-        level=False,
-        # yr_range='default',
-        yr_range=(1983, 1983),
+        dtype_out_vert=False,
+        # dtype_out_vert=['vert_int']*5 + [False]*1,
+        level=500,
+        yr_range='default',
+        # yr_range=(1983, 1983),
 
-        fig_title=False,
-        # fig_title=r'MSE @ 500 hPa; +2K minus control',
+        # fig_title=False,
+        fig_title='Geopotential height and winds @ 500 hPa; +2K minus control',
         ax_title=False,
+        # ax_title=[r'$\{\omega\partial_pq\}+\{\mathbf{v}\cdot\nabla q\}$, centered',
+                  # r'$\{\omega\partial_pq\}+\{\mathbf{v}\cdot\nabla q\}$, upwind',
+                  # r'$\{q\nabla\cdot\mathbf{v}\}+\{\mathbf{v}\cdot\nabla q\}$',
+                  # r'$\{q\nabla\cdot\mathbf{v}\}+\{\mathbf{v}\cdot\nabla q\}$, mass adjusted',
+                  # r'$\{\nabla\cdot(q\mathbf{v})\}$',
+                  # r'$E-P$'],
         ax_left_label=False,
         # ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
-        ax_right_label=False,
-        # ax_right_label=['MSE', r'$T$', r'$q$'],
+        # ax_right_label=False,
+        ax_right_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
 
         x_lim=False,
         # x_lim=[(300, 400), (180, 320), (0, 18)],
@@ -83,14 +92,14 @@ def plot(plot_params):
         y_label=False,
         do_mark_y0=False,
 
-        # lat_lim=(-5, 35),
-        lat_lim=(-50, 50),
+        lat_lim=(-5, 35),
+        # lat_lim=(-50, 50),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        # lon_lim=(-43, 65),
-        lon_lim=(-180, 180),
+        lon_lim=(-43, 65),
+        # lon_lim=(-180, 180),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -114,11 +123,23 @@ def plot(plot_params):
         map_res='c',
         shiftgrid_start=False,
         shiftgrid_cyclic=360.0,
-        latlon_rect=(-18, 40, 10, 20),
-        # latlon_rect=[[(-18, 40, 10, 20), False]],
+        # latlon_rect=(-18, 40, 10, 20),
+        latlon_rect=[[(-18, 40, 10, 20), False, False]],
         do_mask_oceans=False,
 
-        do_quiver=False,
+        plotting_func_kwargs={'angles': 'uv',
+                              'scale': 1,
+                              'latlon': False,
+                              'scale_units': 'xy',
+                              'angles': 'xy'},
+        quiver_n_lon=40,
+        quiver_n_lat=20,
+        do_quiverkey=True,
+        quiverkey_args=(-0.06, 0.5, 2, '2 m s$^{-1}$'),
+        quiverkey_kwargs={'labelpos': 'S',
+                          'coordinates': 'axes',
+                          'fontproperties': {'size': 'xx-small'}},
+
         do_legend=False,
         # do_legend=[True, False, False],
         # legend_labels=('Control', r'Control $h$, +2K $(\mathbf{v},\omega)$',
@@ -175,25 +196,23 @@ def main(main_params):
 if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
-    params.model = m.am2
-    # params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
-    params.run = [r.am2_reyoi_cont, r.am2_test]*3
-    # params.run = [
-        # [{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}, r.am2_reyoi_cont],
-        # [{(r.am3_hp2k, r.am3_hc): '-'}, r.am3_hc],
-        # [{(r.hiram_gtm, r.hiram_cont): '-'}, r.hiram_cont],
-        # [{(r.hiram_c48_0_p2K, r.hiram_c48_0): '-'}, r.hiram_c48_0]
-    # ]
-    # params.run = [[
-    #     r.am3_hc,
-    #     (r.am3_hc,)*3 + (r.am3_hp2k,)*5,
-    #     (r.am3_hp2k,)*3 + (r.am3_hc,)*5,
-    #     r.am3_hp2k
-    # ]]
+    # params.model = m.am2
+    params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
+    # params.run = [[{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}, r.am2_reyoi_cont]
+    dam2 = aospy.plotting.Operator('-', (r.am2_reyoi_p2, r.am2_reyoi_cont))
+    dam3 = aospy.plotting.Operator('-', (r.am3_hp2k, r.am3_hc))
+    dhir = aospy.plotting.Operator('-', (r.hiram_gtm, r.hiram_cont))
+    dc48 = aospy.plotting.Operator('-', (r.hiram_c48_0_p2K, r.hiram_c48_0))
+    # params.run = [[dam2, r.am2_reyoi_p2, dam2]]
+    # params.run = [r.am2_reyoi_cont, r.am3_hc, r.hiram_cont, r.hiram_c48_0]
+    # params.run = r.am2_reyoi_cont
+    params.run = [[dam2, r.am2_reyoi_cont, dam2],
+                  [dam3, r.am3_hc, dam3],
+                  [dhir, r.hiram_cont, dhir],
+                  [dc48, r.hiram_c48_0, dc48]]
     params.ens_mem = False
-    params.var = [v.horiz_divg]*2 + [v.vert_divg]*2 + [v.divg]*2
-    # params.var = [v.divg, v.divg_windspharm]
-    # params.region = reg.sahara
+    params.var = [[v.hght, v.hght, [v.ucomp, v.vcomp]]]
+    # params.var = [[[v.ucomp, v.vcomp]]]
     params.region = False
 
     fig = main(params)

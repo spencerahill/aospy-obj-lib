@@ -36,8 +36,14 @@ class MainParamsParser(object):
         run_objs = []
         for model in models:
             for run in runs:
-                run_objs.append(aospy_user.to_run(run, model, proj))
-        return list(itertools.chain.from_iterable(run_objs))
+                try:
+                    run_objs.append(aospy_user.to_run(run, model, proj))
+                except AttributeError as ae:
+                    print ae
+        if len(run_objs) == 1 and not isinstance(run_objs[0], (list, tuple)):
+            return run_objs
+        else:
+            return list(itertools.chain.from_iterable(run_objs))
 
     def __init__(self, main_params):
         """Turn all inputs into aospy-ready objects."""
@@ -47,6 +53,7 @@ class MainParamsParser(object):
                                        main_params.var, main_params.region)
             )
         self.run = self.create_child_run_obj(self.model, self.run, self.proj)
+        print self.run
         self.region = [aospy.utils.dict_name_keys(self.region)]
 
 
@@ -121,14 +128,13 @@ class CalcSuite(object):
         """Iterate through given parameter combos, creating needed Calcs."""
         calcs = []
         for params in param_combos:
-            calc_int = aospy.CalcInterface(**params)
             try:
-                calc = aospy.Calc(calc_int)
-            except:
-                print ("Failed to create Calc object with the given params; "
-                       "skipping it.  Params: %s" % params)
+                calc_int = aospy.CalcInterface(**params)
+            except AttributeError as ae:
+                print ae
             else:
-                calcs.append(aospy.Calc(calc_int))
+                calc = aospy.Calc(calc_int)
+                calcs.append(calc)
         return calcs
 
     def exec_calcs(self, calcs):
@@ -145,7 +151,6 @@ class CalcSuite(object):
 def main(main_params):
     """Main script for interfacing with aospy."""
     # Instantiate objects and load default/all models, runs, and regions.
-
     cs = CalcSuite(MainParamsParser(main_params))
     cs.print_params()
     cs.prompt_user_verify()
@@ -154,7 +159,7 @@ def main(main_params):
     print '\n\tVariable time averages and statistics:'
     if main_params.compute:
         cs.exec_calcs(calcs)
-    if main_params.print_table:
+    if main_params.print_table[0]:
         cs.print_results(calcs)
     print "Calculations finished."
     return calcs
@@ -162,8 +167,8 @@ def main(main_params):
 if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
-    mp.model = 'default'
-    mp.run = ['default']
+    mp.model = ['am2', 'am3']
+    mp.run = ['reyoi_cont']
     mp.ens_mem = [None]
     mp.var = ['t_surf']
     # mp.yr_range = [(1983, 1983)]

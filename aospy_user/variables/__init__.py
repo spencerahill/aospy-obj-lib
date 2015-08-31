@@ -661,6 +661,17 @@ ucomp = Var(
     def_lon=True,
     in_nc_grid=False
 )
+u_ref = Var(
+    name='u_ref',
+    units=units.m_s1,
+    domain='atmos',
+    description='Eastward velocity at 2 meters above ground.',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
 vcomp = Var(
     name='vcomp',
     alt_names=('va',),
@@ -669,6 +680,17 @@ vcomp = Var(
     description='Northward velocity.',
     def_time=True,
     def_vert='pfull',
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
+v_ref = Var(
+    name='v_ref',
+    units=units.m_s1,
+    domain='atmos',
+    description='Northward velocity at 2 meters above ground.',
+    def_time=True,
+    def_vert=False,
     def_lat=True,
     def_lon=True,
     in_nc_grid=False
@@ -911,6 +933,18 @@ descent_tot = Var(
     func=calcs.descent_tot,
     units=units.Pa_s1
 )
+divg_3d = Var(
+    name='divg_3d',
+    domain='atmos',
+    description='3-d divergence',
+    variables=(ucomp, vcomp, omega, lat, lon, r_e, 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.divg_3d,
+    units=units.s1
+)
 divg_mass_bal = Var(
     name='divg_mass_bal',
     domain='atmos',
@@ -924,16 +958,16 @@ divg_mass_bal = Var(
     func=calcs.field_vert_int_bal,
     units=units.s1
 )
-divg_windspharm = Var(
-    name='divg_windspharm',
+divg_spharm = Var(
+    name='divg_spharm',
     domain='atmos',
-    description='Horizontal divergence using windspharm spherical harmonics.',
+    description='Horizontal divergence using spharm spherical harmonics.',
     variables=(ucomp, vcomp),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.divg_windspharm,
+    func=calcs.divg_spharm,
     units=units.s1
 )
 dry_static_stab = Var(
@@ -1322,6 +1356,58 @@ horiz_divg_mass_bal = Var(
     units=units.s1,
     colormap='RdBu'
 )
+horiz_divg_mass_adj = Var(
+    name='horiz_divg_mass_adj',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, sphum, ps, lat, lon, r_e, 'dp', 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_divg_mass_adj,
+    units=units.s1,
+    colormap='RdBu'
+)
+divg_of_vert_int_horiz_flow = Var(
+    name='divg_of_vert_int_horiz_flow',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, lat, lon, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.divg_of_vert_int_horiz_flow,
+    units=units.s1,
+    colormap='RdBu'
+)
+divg_of_vert_int_horiz_flow_moist = Var(
+    name='divg_of_vert_int_horiz_flow_moist',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, evap, precip, lat, lon, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.divg_of_vert_int_horiz_flow_moist,
+    units=units.s1,
+    colormap='RdBu'
+)
+horiz_advec_sfc_pressure = Var(
+    name='horiz_advec_sfc_pressure',
+    domain='atmos',
+    description='',
+    variables=(ps, ucomp, vcomp, lat, lon, r_e, 'p'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_advec_sfc_pressure,
+    units=units.s1,
+    colormap='RdBu'
+)
 horiz_divg_vert_int_max = Var(
     name='horiz_divg_vert_int_max',
     domain='atmos',
@@ -1518,7 +1604,7 @@ mse_horiz_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_horiz_advec_upwind,
-    units=units.W_m2,
+    units=units.J_kg1_s1,
     colormap='RdBu'
 )
 mse_vert_advec_upwind = Var(
@@ -1532,7 +1618,7 @@ mse_vert_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_vert_advec_upwind,
-    units=units.W_m2,
+    units=units.J_kg1_s1,
     colormap='RdBu'
 )
 mse_total_advec_upwind = Var(
@@ -1546,7 +1632,7 @@ mse_total_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mse_total_advec_upwind,
-    units=units.W_m2,
+    units=units.J_kg1_s1,
     colormap='RdBu'
 )
 msf = Var(
@@ -1662,6 +1748,45 @@ q_horiz_advec = Var(
     units=units.s1,
     colormap='BrBG_r'
 )
+q_horiz_advec_mass_adj = Var(
+    name='q_horiz_advec_mass_adj',
+    domain='atmos',
+    description='',
+    variables=(sphum, ucomp, vcomp, sphum, ps, lat, lon, r_e, 'dp', 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_advec_mass_adj,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_times_horiz_divg_mass_adj = Var(
+    name='q_times_horiz_divg_mass_adj',
+    domain='atmos',
+    description='',
+    variables=(sphum, ucomp, vcomp, sphum, ps, lat, lon, r_e, 'dp', 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.field_times_horiz_divg_mass_adj,
+    units=units.s1,
+    colormap='BrBG_r'
+)
+q_horiz_flux_divg_mass_adj = Var(
+    name='q_horiz_flux_divg_mass_adj',
+    domain='atmos',
+    description='',
+    variables=(sphum, ucomp, vcomp, sphum, ps, lat, lon, r_e, 'dp', 'p'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.field_horiz_flux_divg_mass_adj,
+    units=units.s1,
+    colormap='BrBG_r'
+)
 q_vert_advec = Var(
     name='q_vert_advec',
     domain='atmos',
@@ -1754,7 +1879,7 @@ q_times_horiz_divg = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.field_times_horiz_divg,
+    func=calcs.field_times_horiz_divg_mass_bal,
     units=units.s1,
     colormap='BrBG_r'
 )
@@ -2293,37 +2418,41 @@ master_vars_list = [
     pv, rh, rh_ref, shflx, slp, snow_conv, snow_ls, soil_liq, soil_moisture,
     sphum, sst, swdn_sfc, swdn_sfc_clr, swup_sfc, swup_sfc_clr, swdn_toa,
     swdn_toa_clr, swup_toa, swup_toa_clr, t_surf, tdt_conv, tdt_ls, tdt_lw,
-    tdt_lw_clr, tdt_sw, tdt_sw_clr, tdt_vdif, temp, tot_cld_amt, ucomp, vcomp,
-    vort, wvp, lat, lon, level, pk, bk, sfc_area, aht, albedo, sfc_albedo,
-    ang_mom, bowen_ratio, column_energy, cre_net, cre_lw, cre_sw, descent_tot,
-    equiv_pot_temp, esf, evap_frac, fmse, gms_change_est, gms_change_est2,
-    gms_h01, gms_h01est, gms_h01est2, gms_moc, gms_msf, gms_up_low,
-    gms_each_level, gross_dry_stab, gross_moist_stab, dry_static_stab,
-    total_gms, dse, horiz_divg, moist_static_stab, gross_moist_strat, mse,
-    mse_horiz_advec, mse_times_horiz_divg, mse_vert_advec, msf, mass_flux,
-    p_minus_e, pot_temp, prec_conv_frac, sfc_albedo, sfc_energy, sfc_lw,
-    sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw, sfc_sw_cld, tdt_diab, tdt_lw_cld,
-    tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw, vert_divg, virt_pot_temp,
-    divg_mass_bal, horiz_divg_mass_bal, vert_divg_mass_bal,
-    mse_horiz_flux_divg, q_horiz_advec, q_vert_advec, q_times_horiz_divg,
-    q_horiz_flux_divg, qu, qv, du_dx, dv_dy, dse_horiz_flux_divg,
-    dse_times_horiz_divg, dse_horiz_advec, temp_horiz_flux_divg,
-    temp_times_horiz_divg, temp_horiz_advec, hght_horiz_flux_divg,
-    hght_times_horiz_divg, hght_horiz_advec, mse_horiz_advec_divg_sum,
-    q_horiz_advec_divg_sum, temp_horiz_advec_divg_sum,
-    hght_horiz_advec_divg_sum, dse_horiz_advec_divg_sum, q_times_vert_divg,
-    q_vert_flux_divg, mse_times_vert_divg, mse_vert_flux_divg,
-    horiz_divg_vert_int_max, vert_divg_vert_int_max, temp_vert_advec,
-    t_surf_precip_corr, evap_precip_corr, cre_net_precip_corr,
-    cre_sw_precip_corr, cre_lw_precip_corr, t_surf_precip_lin_regr,
-    cre_net_precip_lin_regr, toa_rad_clr_precip_corr,
-    toa_rad_clr_precip_lin_regr, mse_budget_advec_residual,
-    fmse_budget_advec_residual, q_budget_advec_residual, q_total_advec,
-    mse_total_advec, omega_zero_global_mean, q_vert_advec_omega_zero_mean,
-    q_horiz_advec_upwind, q_vert_advec_upwind, q_total_advec_upwind,
-    q_zonal_advec_upwind, q_merid_advec_upwind, q_zonal_advec, q_merid_advec,
-    mse_horiz_advec_upwind, mse_vert_advec_upwind, mse_total_advec_upwind,
-    column_mass, column_mass_integral, divg_windspharm
+    tdt_lw_clr, tdt_sw, tdt_sw_clr, tdt_vdif, temp, tot_cld_amt, ucomp, u_ref,
+    v_ref, vcomp, vort, wvp, lat, lon, level, pk, bk, sfc_area, aht, albedo,
+    sfc_albedo, ang_mom, bowen_ratio, column_energy, cre_net, cre_lw, cre_sw,
+    descent_tot, equiv_pot_temp, esf, evap_frac, fmse, gms_change_est,
+    gms_change_est2, gms_h01, gms_h01est, gms_h01est2, gms_moc, gms_msf,
+    gms_up_low, gms_each_level, gross_dry_stab, gross_moist_stab,
+    dry_static_stab, total_gms, dse, horiz_divg, moist_static_stab,
+    gross_moist_strat, mse, mse_horiz_advec, mse_times_horiz_divg,
+    mse_vert_advec, msf, mass_flux, p_minus_e, pot_temp, prec_conv_frac,
+    sfc_albedo, sfc_energy, sfc_lw, sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw,
+    sfc_sw_cld, tdt_diab, tdt_lw_cld, tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw,
+    vert_divg, virt_pot_temp, divg_mass_bal, horiz_divg_mass_bal,
+    vert_divg_mass_bal, mse_horiz_flux_divg, q_horiz_advec, q_vert_advec,
+    q_times_horiz_divg, q_horiz_flux_divg, qu, qv, du_dx, dv_dy,
+    dse_horiz_flux_divg, dse_times_horiz_divg, dse_horiz_advec,
+    temp_horiz_flux_divg, temp_times_horiz_divg, temp_horiz_advec,
+    hght_horiz_flux_divg, hght_times_horiz_divg, hght_horiz_advec,
+    mse_horiz_advec_divg_sum, q_horiz_advec_divg_sum,
+    temp_horiz_advec_divg_sum, hght_horiz_advec_divg_sum,
+    dse_horiz_advec_divg_sum, q_times_vert_divg, q_vert_flux_divg,
+    mse_times_vert_divg, mse_vert_flux_divg, horiz_divg_vert_int_max,
+    vert_divg_vert_int_max, temp_vert_advec, t_surf_precip_corr,
+    evap_precip_corr, cre_net_precip_corr, cre_sw_precip_corr,
+    cre_lw_precip_corr, t_surf_precip_lin_regr, cre_net_precip_lin_regr,
+    toa_rad_clr_precip_corr, toa_rad_clr_precip_lin_regr,
+    mse_budget_advec_residual, fmse_budget_advec_residual,
+    q_budget_advec_residual, q_total_advec, mse_total_advec,
+    omega_zero_global_mean, q_vert_advec_omega_zero_mean, q_horiz_advec_upwind,
+    q_vert_advec_upwind, q_total_advec_upwind, q_zonal_advec_upwind,
+    q_merid_advec_upwind, q_zonal_advec, q_merid_advec, mse_horiz_advec_upwind,
+    mse_vert_advec_upwind, mse_total_advec_upwind, column_mass,
+    column_mass_integral, divg_spharm, horiz_divg_mass_adj, divg_3d,
+    divg_of_vert_int_horiz_flow, divg_of_vert_int_horiz_flow_moist,
+    horiz_advec_sfc_pressure, q_horiz_advec_mass_adj,
+    q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj
 ]
 
 
