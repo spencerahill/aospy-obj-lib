@@ -79,8 +79,16 @@ def to_run(run, model, proj):
         elif run == 'all':
             return model.runs
         else:
-            run = model.runs[run]
-            return run
+            try:
+                return model.runs[run]
+            except KeyError:
+                raise AttributeError("Model '%s' has no run '%s'."
+                                     % (model, run))
+
+    elif isinstance(run, aospy.plotting.Operator):
+        operator = run.operator
+        runs = to_run(run.objects, model, proj)
+        return aospy.plotting.Operator(operator, runs)
 
     elif isinstance(run, dict):
         # Assume run(s) is/are key(s), not value(s).

@@ -12,7 +12,7 @@ from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
-                         int_dp_g, weight_by_delta)
+                         integrate, int_dp_g, weight_by_delta)
 
 
 # General finite differencing functions.
@@ -328,7 +328,7 @@ def global_integral(field, sfc_area, dp):
     vert_int = int_dp_g(field, dp)
     vert_int_flat = np.reshape(vert_int, (vert_int.shape[0], -1))
     # Assume first axis is time.
-    return np.ma.sum(vert_int_flat*sfc_area.ravel(), axis=1)
+    return np.ma.sum(vert_int_flat*sfc_area.ravel(), axis=-3)
 
 
 def field_zero_global_mean(field, sfc_area, dp):
@@ -385,6 +385,76 @@ def divg_spharm(u, v, **kwargs):
     return s.revert_to_raw(s.divergence())
 
 
+def u_or_v_mass_adjustment(uv, q, ps, dp, p):
+    """
+    Correction to subtract from outputted u or v to balance mass budget.
+
+    Spencer Hill, derived following Trenberth 1991 equations 9 and 10.
+    """
+    numer = int_dp_g((1. - q)*uv, dp)[:,np.newaxis,:,:]
+    pt = p.min(axis=-3)[:,np.newaxis,:,:]
+    denom = (ps - pt)*(1. /grav) - int_dp_g(q, dp)[:,np.newaxis,:,:]
+    return numer / denom
+
+
+def u_or_v_mass_adjusted(uv, q, ps, dp, p):
+    """Corrected u or v in order to balance mass budget."""
+    return uv - u_or_v_mass_adjustment(uv, q, ps, dp, p)
+
+
+def horiz_divg_mass_adj(u, v, q, ps, lat, lon, radius, dp, p):
+    u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
+    v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
+    return horiz_divg(u_cor, v_cor, lat, lon, radius)
+
+def field_times_horiz_divg_mass_adj(field, u, v, q, ps, lat, lon,
+                                    radius, dp, p):
+    return field*horiz_divg_mass_adj(u, v, q, ps, lat, lon, radius, dp, p)
+
+
+def horiz_advec_mass_adj(field, u, v, q, ps, lat, lon, radius, dp,
+                         p, vec_field=False):
+    u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
+    v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
+    return horiz_advec(field, u_cor, v_cor, lat, lon, radius,
+                       vec_field=vec_field)
+
+def field_horiz_flux_divg_mass_adj(field, u, v, q, ps, lat, lon,
+                                   radius, dp, p, vec_field=False):
+    return (field_times_horiz_divg_mass_adj(field, u, v, q, ps, lat, lon,
+                                            radius, dp, p) +
+            horiz_advec_mass_adj(field, u, v, q, ps, lat, lon, radius,
+                                 dp, p, vec_field=vec_field))
+
+
+def divg_of_vert_int_horiz_flow(u, v, lat, lon, radius, dp):
+    """Horizontal divergence of vertically integrated flow."""
+    u_int = int_dp_g(u, dp)[:,np.newaxis,:,:]
+    v_int = int_dp_g(v, dp)[:,np.newaxis,:,:]
+    return horiz_divg(u_int, v_int, lat, lon, radius)
+
+
+def divg_of_vert_int_horiz_flow_moist(u, v, evap, precip, lat, lon,
+                                      radius, dp):
+    """Horizontal divergence of vertically integrated flow."""
+    u_int = int_dp_g(u, dp)[:,np.newaxis,:,:]
+    v_int = int_dp_g(v, dp)[:,np.newaxis,:,:]
+    return horiz_divg(u_int, v_int, lat, lon, radius) + precip - evap
+
+
+def horiz_advec_sfc_pressure(ps, u, v, lat, lon, radius, p, vec_field=False):
+    """Horizontal advection of surface pressure."""
+    # Pressure data indexing is surface to TOA; sigma data is opposite.
+    if p.shape[-1] == 1:
+        sfc_index = 0
+    else:
+        sfc_index = -1
+    print sfc_index, u[:,sfc_index,45,0]
+    u_sfc = (u[:,sfc_index])[:,np.newaxis,:,:]
+    v_sfc = (v[:,sfc_index])[:,np.newaxis,:,:]
+    return horiz_advec(ps, u_sfc, v_sfc, lat, lon, radius,
+                       vec_field=vec_field) * (1./grav)
+
 def vert_divg(omega, p):
     """Flow vertical divergence."""
     return d_dp_from_p(omega, p)
@@ -415,10 +485,8 @@ def vert_divg_mass_bal(omega, p, dp):
 
 
 def divg_3d(u, v, omega, lat, lon, radius, p):
-    """Total (3-D) divergence.  Should equal 0 by continuity."""
-    horiz = horiz_divg(u, v, lat, lon, radius)
-    vert = vert_divg(omega, p)
-    return horiz + vert
+    """Total (3-D) divergence.  Should nearly equal 0 by continuity."""
+    return horiz_divg(u, v, lat, lon, radius) + vert_divg(omega, p)
 
 
 def field_times_horiz_divg(field, u, v, lat, lon, radius):
@@ -450,7 +518,8 @@ def field_vert_flux_divg(field, omega, p):
 
 def field_horiz_advec_divg_sum(field, u, v, lat, lon, radius, dp):
     return (
-        field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp) +
+        # field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp) +
+        field_times_horiz_divg(field, u, v, lat, lon, radius) +
         horiz_advec(field, u, v, lat, lon, radius)
     )
 
