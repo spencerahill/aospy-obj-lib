@@ -283,26 +283,32 @@ cld_seed_sp.land_mask = 'ocean'
 cld_seed_sa = Region()
 cld_seed_sa.name = 'cld_seed_sa'
 cld_seed_sa.description = 'South Atlantic region of Hill & Ming 2012 GRL cloud brightening geoengineering study'
-cld_seed_sa.mask_bounds = [((-30, 5), (0, 12)), 
+cld_seed_sa.mask_bounds = [((-30, 5), (0, 12)),
                            ((-30, 5), (342, 360))]
 cld_seed_sa.land_mask = 'ocean'
 # Cloud seeding all 3 regions
 cld_seed_all = Region()
 cld_seed_all.name = 'cld_seed_all'
 cld_seed_all.description = 'All 3 regions from Hill & Ming 2012 GRL'
-cld_seed_all.mask_bounds = [((-30, 5), (0, 12)), 
-                            ((-30, 5), (342, 360)), 
+cld_seed_all.mask_bounds = [((-30, 5), (0, 12)),
+                            ((-30, 5), (342, 360)),
                             ((-30, -5), (240, 285)),
                             ((10, 30), (204, 244))]
 cld_seed_all.land_mask = 'ocean'
-
-# # Extratropics.
-# extrop = Region()
-# extrop.name = 'extrop'
-# extrop.description = 'Extratropics (poleward of 30S/N)'
-# extrop.lat_bnds = (-90, -30)
-# extrop.lon_bnds = (0, 360)
-# extrop.land_mask = False
+# East Asian Monsoon
+east_asia_monsoon = Region()
+east_asia_monsoon.name = 'east_asia_monsoon'
+east_asia_monsoon.description = 'East Asian Monsoon land region'
+east_asia_monsoon.lat_bnds = (22.5, 40)
+east_asia_monsoon.lon_bnds = (100, 122.5)
+east_asia_monsoon.land_mask = False
+# Extratropics.
+extrop = Region()
+extrop.name = 'extratropics'
+extrop.description = 'Extratropics (poleward of 30S/N)'
+extrop.mask_bounds = [((-90, -30), (0, 360)),
+                      ((30, 90), (0, 360))]
+extrop.land_mask = False
 # # NH tropics
 # names.append('nh_tropics')
 # lat_bnds = (0, 30)
