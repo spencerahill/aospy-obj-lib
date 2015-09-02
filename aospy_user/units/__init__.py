@@ -28,6 +28,11 @@ s1 = Units(
     plot_units=r'day$^{-1}$',
     plot_units_conv=seconds_in_day,
 )
+s1_spec_mass = Units(
+    units=r's$^{-1}$',
+    plot_units=r'g kg$^{-1}$ day$^{-1}$',
+    plot_units_conv=seconds_in_day*1e3,
+)
 s1_vort = Units(
     units=r's$^{-1}$',
     plot_units=r'10$^{-6}$ s$^{-1}$',

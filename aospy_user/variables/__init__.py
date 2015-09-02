@@ -1719,7 +1719,7 @@ q_zonal_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.zonal_advec,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_merid_advec = Var(
@@ -1732,7 +1732,7 @@ q_merid_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.merid_advec,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_advec = Var(
@@ -1745,7 +1745,7 @@ q_horiz_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_advec,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_advec_mass_adj = Var(
@@ -1758,7 +1758,7 @@ q_horiz_advec_mass_adj = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_advec_mass_adj,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_times_horiz_divg_mass_adj = Var(
@@ -1771,7 +1771,7 @@ q_times_horiz_divg_mass_adj = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_horiz_divg_mass_adj,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_flux_divg_mass_adj = Var(
@@ -1784,7 +1784,7 @@ q_horiz_flux_divg_mass_adj = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_flux_divg_mass_adj,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_vert_advec = Var(
@@ -1797,7 +1797,7 @@ q_vert_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_zonal_advec_upwind = Var(
@@ -1811,7 +1811,7 @@ q_zonal_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.zonal_advec_upwind,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_merid_advec_upwind = Var(
@@ -1825,7 +1825,7 @@ q_merid_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.merid_advec_upwind,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_advec_upwind = Var(
@@ -1839,7 +1839,7 @@ q_horiz_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_advec_upwind,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_vert_advec_upwind = Var(
@@ -1853,7 +1853,7 @@ q_vert_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec_upwind,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_total_advec_upwind = Var(
@@ -1867,7 +1867,7 @@ q_total_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.total_advec_upwind,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_times_horiz_divg = Var(
@@ -1880,7 +1880,7 @@ q_times_horiz_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_horiz_divg_mass_bal,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_flux_divg = Var(
@@ -1893,7 +1893,7 @@ q_horiz_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_flux_divg,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_horiz_advec_divg_sum = Var(
@@ -1906,7 +1906,7 @@ q_horiz_advec_divg_sum = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_horiz_advec_divg_sum,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_vert_flux_divg = Var(
@@ -1919,7 +1919,7 @@ q_vert_flux_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_vert_flux_divg,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_vert_advec_omega_zero_mean = Var(
@@ -1932,7 +1932,7 @@ q_vert_advec_omega_zero_mean = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec_omega_zero_mean,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_times_vert_divg = Var(
@@ -1945,7 +1945,7 @@ q_times_vert_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_times_vert_divg_mass_bal,
-    units=units.s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_total_advec = Var(
@@ -1959,7 +1959,7 @@ q_total_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.field_total_advec,
-    units=units.kg_m2_s1,
+    units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
 q_budget_advec_residual = Var(
@@ -2159,7 +2159,7 @@ temp_vert_advec = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.vert_advec,
-    units=units.s1
+    units=units.K_s1
 )
 tdt_diab = Var(
     name='tdt_diab',
