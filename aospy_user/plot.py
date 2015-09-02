@@ -14,37 +14,37 @@ from aospy_user import regions as reg
 def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
-        n_row=4,
+        n_row=1,
         n_col=1,
         n_ax='all',
-        n_plot=3,
-        n_data=[[1, 1, 2]],
-        # n_data=2,
+        n_plot=1,
+        # n_data=[[1, 1, 2]],
+        n_data=2,
 
-        row_size=2,
+        row_size=4,
         col_size=5,
         subplot_lims={'left': 0.1, 'right': 0.95, 'wspace': 0.05,
-                      'bottom': 0.08, 'top': 0.93, 'hspace': 0.06},
+                      'bottom': 0.05, 'top': 0.95, 'hspace': 0.06},
 
-        # plot_type='quiver',
-        plot_type=[['contourf', 'contour', 'quiver']],
-        x_dim='lon',
-        y_dim='lat',
+        plot_type='scatter',
+        # plot_type=[['contourf', 'contour']],# 'quiver']],
+        x_dim='x',
+        y_dim='y',
 
-        # min_cntr=-200,
-        # max_cntr=200,
-        # num_cntr=15,
-        min_cntr=[[-75, 5700, False]],
-        max_cntr=[[75, 6000, False]],
-        num_cntr=[[15, 15, False]],
-        contours_extend='both',  # 'neither' 'min' 'max' 'both'
-        # contour_labels=False,
-        contour_labels=[[False, True, False]],
-        # colormap='default',
-        colormap=[['default', False, False]],
-        # do_colorbar=False,      # 'all' 'column' 'row' False True
-        do_colorbar=[['all', False, False]],
-        cbar_ax_lim=(0.13, 0.045, 0.8, 0.02),
+        min_cntr=-200,
+        max_cntr=200,
+        num_cntr=15,
+        # min_cntr=[[-3.75, 0]],# False]],
+        # max_cntr=[[3.75, 20]],# False]],
+        # num_cntr=[[15, 10]],# False]],
+        # contours_extend='both',  # 'neither' 'min' 'max' 'both'
+        contour_labels=False,
+        # contour_labels=[[False, True]],# False]],
+        colormap='default',
+        # colormap=[['BrBG', False]],# False]],
+        do_colorbar=False,      # 'all' 'column' 'row' False True
+        # do_colorbar=[['all', False]],# False]],
+        cbar_ax_lim=(0.11, 0.05, 0.8, 0.02),
         cbar_ticks=False,
         cbar_ticklabels=False,
         cbar_label='units',
@@ -54,51 +54,52 @@ def plot(plot_params):
         intvl_out='jas',
         dtype_in_time='ts',
         # dtype_in_time=['ts'] + ['inst']*2,
-        dtype_in_vert='pressure',
+        dtype_in_vert=False,
+        # dtype_in_vert=['pressure'] + [['sigma', 'pressure']]*3,
         # dtype_in_vert=['pressure']*5 + [False]*1,
-        dtype_out_time='av',
-        # dtype_out_time='reg.av',
+        # dtype_out_time='av',
+        dtype_out_time='reg.ts',
         dtype_out_vert=False,
         # dtype_out_vert=['vert_int']*5 + [False]*1,
-        level=500,
+        # level=700,
+        level=False,
         yr_range='default',
         # yr_range=(1983, 1983),
 
-        # fig_title=False,
-        fig_title='Geopotential height and winds @ 500 hPa; +2K minus control',
+        fig_title=False,
+        # fig_title=r'Sahel JAS moisture advection responses to +2K',
         ax_title=False,
-        # ax_title=[r'$\{\omega\partial_pq\}+\{\mathbf{v}\cdot\nabla q\}$, centered',
-                  # r'$\{\omega\partial_pq\}+\{\mathbf{v}\cdot\nabla q\}$, upwind',
-                  # r'$\{q\nabla\cdot\mathbf{v}\}+\{\mathbf{v}\cdot\nabla q\}$',
-                  # r'$\{q\nabla\cdot\mathbf{v}\}+\{\mathbf{v}\cdot\nabla q\}$, mass adjusted',
-                  # r'$\{\nabla\cdot(q\mathbf{v})\}$',
-                  # r'$E-P$'],
-        ax_left_label=False,
+        # ax_title=['Total', 'Vertical', 'Horizontal'],
+        # ax_left_label=False,
         # ax_left_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
-        # ax_right_label=False,
-        ax_right_label=['AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'],
+        ax_right_label=False,
+        # ax_right_label=['Total', 'Vertical', 'Horizontal'],
+        # ax_right_label=['AM2.1', 'AM3'],# 'HiRAM', 'c48-HiRAM'],
 
-        x_lim=False,
-        # x_lim=[(300, 400), (180, 320), (0, 18)],
+        # x_lim=False,
+        x_lim=(-5, 5),
         x_ticks=False,
         x_ticklabels=False,
         x_label=False,
-        # x_label=[False, False, r'W kg$^{-1}$'],
-        do_mark_x0=False,
+        # x_label=[False, False, r'g kg$^{-1}$ day$^{-1}$'],
+        do_mark_x0=True,
 
-        y_lim=False,
+        # y_lim=False,
+        y_lim=(-5, 5),
         y_ticks=False,
         y_ticklabels=False,
         y_label=False,
-        do_mark_y0=False,
+        do_mark_y0=True,
 
         lat_lim=(-5, 35),
+        # lat_lim=(12.5, 50),
         # lat_lim=(-50, 50),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
         lon_lim=(-43, 65),
+        # lon_lim=(70, 152.5),
         # lon_lim=(-180, 180),
         lon_ticks=False,
         lon_ticklabels=False,
@@ -123,15 +124,47 @@ def plot(plot_params):
         map_res='c',
         shiftgrid_start=False,
         shiftgrid_cyclic=360.0,
-        # latlon_rect=(-18, 40, 10, 20),
-        latlon_rect=[[(-18, 40, 10, 20), False, False]],
+        latlon_rect=(-18, 40, 10, 20),
+        # latlon_rect=[[(-18, 40, 10, 20), False]],# False]],
+        # latlon_rect=[[(100, 122.5, 22.5, 40), False]],
         do_mask_oceans=False,
 
-        plotting_func_kwargs={'angles': 'uv',
-                              'scale': 1,
-                              'latlon': False,
-                              'scale_units': 'xy',
-                              'angles': 'xy'},
+        do_legend=False,
+        # do_legend=[True, False, False],
+        # legend_labels=('Control', r'Control $h$, +2K $(\mathbf{v},\omega)$',
+        #                r'+2K $h$, Control $(\mathbf{v},\omega)$', '+2K'),
+        legend_labels=('AM2.1', 'AM3', 'HiRAM', 'c48-HiRAM'),
+        legend_loc=0,
+
+        # plot_kwargs={'color': c,
+        plot_kwargs={'color': 'r',
+                      'linestyle': '-',
+                      'linewidth': 1.5,
+                      'marker': None,
+                      'markersize': 10,
+                      'markerfacecolor': 'k'},
+                      # for c in ('red', 'orange', 'green', 'blue')]],
+        scatter_kwargs={'s': 10,
+                        'c': '0.4',
+                        'marker': 'o',
+                        'cmap': None,
+                        'edgecolors': None,
+                        'facecolors': None,
+                        'linewidths': None,
+                        'linestyles': 'solid'                        
+        },
+        contour_kwargs={'extend': 'both',
+                        'colors': '0.2',
+                        # 'levels': [0],
+                        'linestyles': '-',
+                        'linewidths': 2
+        },
+        quiver_kwargs={'angles': 'uv',
+                       'scale': 1,
+                       'latlon': False,
+                       'scale_units': 'xy',
+                       'angles': 'xy'
+        },
         quiver_n_lon=40,
         quiver_n_lat=20,
         do_quiverkey=True,
@@ -140,25 +173,7 @@ def plot(plot_params):
                           'coordinates': 'axes',
                           'fontproperties': {'size': 'xx-small'}},
 
-        do_legend=False,
-        # do_legend=[True, False, False],
-        # legend_labels=('Control', r'Control $h$, +2K $(\mathbf{v},\omega)$',
-        #                r'+2K $h$, Control $(\mathbf{v},\omega)$', '+2K'),
-        legend_labels=('Control', '+2K'),
-        legend_loc=0,
-
-        line_color='0.2',
-        line_style=None,
-        line_width=0.5,
-        # line_color=[['b', '0.2', '0.6', 'r']],
-        # line_color=[['b','r']],
-        # line_style='-',
-
-        marker_shape=None,
-        marker_size=10,
-        marker_color='k',
-
-        do_subtract_mean=False,
+        do_subtract_mean=True,
     )
 
     fig.create_fig()
@@ -196,23 +211,33 @@ def main(main_params):
 if __name__ == '__main__':
     params = MainParams()
     params.proj = p.aero_3agcm
-    # params.model = m.am2
-    params.model = [m.am2, m.am3, m.hiram, m.hiram_c48]
-    # params.run = [[{(r.am2_reyoi_p2, r.am2_reyoi_cont): '-'}, r.am2_reyoi_cont]
+    params.model = m.am2
+    # params.model = [[m.am2, m.am3, m.hiram, m.hiram_c48]]
+
     dam2 = aospy.plotting.Operator('-', (r.am2_reyoi_p2, r.am2_reyoi_cont))
     dam3 = aospy.plotting.Operator('-', (r.am3_hp2k, r.am3_hc))
     dhir = aospy.plotting.Operator('-', (r.hiram_gtm, r.hiram_cont))
     dc48 = aospy.plotting.Operator('-', (r.hiram_c48_0_p2K, r.hiram_c48_0))
     # params.run = [[dam2, r.am2_reyoi_p2, dam2]]
-    # params.run = [r.am2_reyoi_cont, r.am3_hc, r.hiram_cont, r.hiram_c48_0]
-    # params.run = r.am2_reyoi_cont
-    params.run = [[dam2, r.am2_reyoi_cont, dam2],
-                  [dam3, r.am3_hc, dam3],
-                  [dhir, r.hiram_cont, dhir],
-                  [dc48, r.hiram_c48_0, dc48]]
+    # params.run = [[dam2, dam3, dhir, dc48]]
+    params.run = r.am2_reyoi_cont
+    # params.run = [[dam2, r.am2_reyoi_cont],
+                  # [dam3, r.am3_hc],
+                  # [dhir, r.hiram_cont],
+                  # [dc48, r.hiram_c48_0]]
+    # params.run = [[dam2, r.am2_reyoi_cont, dam2],
+                  # [dam3, r.am3_hc, dam3],
+                  # [dhir, r.hiram_cont, dhir],
+                  # [dc48, r.hiram_c48_0, dc48]]
+
     params.ens_mem = False
-    params.var = [[v.hght, v.hght, [v.ucomp, v.vcomp]]]
-    # params.var = [[[v.ucomp, v.vcomp]]]
-    params.region = False
+    # params.var = [[v.hght, v.hght, [v.ucomp, v.vcomp]]]
+    # params.var = [[v.column_energy, v.column_energy],
+                  # [v.mse_vert_advec_upwind, v.column_energy],
+                  # [v.mse_horiz_advec_upwind, v.column_energy],
+                  # [v.mse_total_advec_upwind, v.column_energy]]*1
+    params.var = [[[v.precip,
+                  v.t_surf]]]
+    params.region = reg.sahel
 
     fig = main(params)
