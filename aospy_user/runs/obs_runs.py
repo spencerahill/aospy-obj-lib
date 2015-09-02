@@ -5,7 +5,7 @@ from aospy.run import Run
 cru_v322 = Run(
     name='v3.22',
     description='CRU v3.22',
-    direc_nc='/archive/s1h/obs/HadCRU/3.22',
+    direc_nc='/archive/Spencer.Hill/obs/HadCRU/3.22',
     nc_dir_struc='one_dir',
     nc_dur=113,
     nc_start_yr=1901,
@@ -29,7 +29,7 @@ cru_v322 = Run(
 prec_l_0p5deg = Run(
     name='0.5deg',
     description='PREC/L 0.5x0.5 degree resolution',
-    direc_nc='/archive/s1h/obs/PREC_L/20150212',
+    direc_nc='/archive/Spencer.Hill/obs/PREC_L/20150212',
     nc_dir_struc='one_dir',
     nc_dur=64,
     nc_start_yr=1948,
@@ -42,7 +42,7 @@ prec_l_0p5deg = Run(
 prec_l_1deg = Run(
     name='1deg',
     description='PREC/L 1x1 degree resolution',
-    direc_nc='/archive/s1h/obs/PREC_L/20150212',
+    direc_nc='/archive/Spencer.Hill/obs/PREC_L/20150212',
     nc_dir_struc='one_dir',
     nc_dur=67,
     nc_start_yr=1948,
@@ -55,7 +55,7 @@ prec_l_1deg = Run(
 prec_l_2p5deg = Run(
     name='2.5deg',
     description='PREC/L 2.5x2.5 degree resolution',
-    direc_nc='/archive/s1h/obs/PREC_L/20150212',
+    direc_nc='/archive/Spencer.Hill/obs/PREC_L/20150212',
     nc_dir_struc='one_dir',
     nc_dur=67,
     nc_start_yr=1948,
@@ -152,7 +152,7 @@ cmap_standard = Run(
     name='standard',
     description=('CMAP standard version, which does not include NCEP '
                  'reanalysis data to fill in gaps.'),
-    direc_nc='/archive/s1h/obs/CMAP/standard',
+    direc_nc='/archive/Spencer.Hill/obs/CMAP/standard',
     nc_dir_struc='one_dir',
     nc_dur=36,
     nc_start_yr=1979,
@@ -167,7 +167,7 @@ cmap_enhanced = Run(
     name='enhanced',
     description=('CMAP enhanced version, which includes NCEP reanalysis '
                  'data to fill in gaps.'),
-    direc_nc='/archive/s1h/obs/CMAP/enhanced',
+    direc_nc='/archive/Spencer.Hill/obs/CMAP/enhanced',
     nc_dur=36,
     nc_start_yr=1979,
     nc_end_yr=2014,
@@ -181,7 +181,7 @@ cmap_enhanced = Run(
 udel_v201 = Run(
     name='v201',
     description='U. Delaware version 2.01',
-    direc_nc='/archive/s1h/obs/U_Del',
+    direc_nc='/archive/Spencer.Hill/obs/U_Del',
     nc_dur=109,
     nc_start_yr=1900,
     nc_end_yr=2008,
@@ -193,7 +193,7 @@ udel_v201 = Run(
 udel_v301 = Run(
     name='v301',
     description='U. Delaware version 3.01',
-    direc_nc='/archive/s1h/obs/U_Del',
+    direc_nc='/archive/Spencer.Hill/obs/U_Del',
     nc_dur=111,
     nc_start_yr=1900,
     nc_end_yr=2010,
@@ -214,51 +214,47 @@ era_i = Run(
     nc_start_month=1,
     nc_end_yr=2013,
     nc_end_month=12,
-    default_yr_range=(1979, 2013),
+    default_yr_range=(1981, 2000),
     nc_dir_struc='one_dir',
     nc_files={
-              'cld_amt': ['cl_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                          for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                      for yr in range(1979, 2014)]],
-              'evap': ['evspsbl_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2014)]],
-              'hght': ['zg_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2014)]],
-              'omega': ['wap_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2014)]],
-              'precip': ['pr_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                         for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                     for yr in range(1979, 2014)]],
-              'ps': ['ps_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                     for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                 for yr in range(1979, 2014)]],
-              'rh': ['hur_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                     for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                 for yr in range(1979, 2014)]],
-              'shflx': ['hfss_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2014)]],
-              'slp': ['psl_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                      for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                  for yr in range(1979, 2014)]],
-              'sphum': ['hus_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2014)]],
-              'temp': ['ta_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2014)]],
-              'ucomp': ['ua_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2014)]],
-              'vcomp': ['va_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2014)]],
-              'wvp': ['prw_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
-                      for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                  for yr in range(1979, 2014)]]
+        'cld_amt': ['cl_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                    for yrs in [str(yr) + '01-' + str(yr) + '12'
+                                for yr in range(1979, 2014)]],
+        'hght': ['zg_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                 for yrs in [str(yr) + '01-' + str(yr) + '12'
+                             for yr in range(1979, 2014)]],
+        'omega': ['wap_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2014)]],
+        'rh': ['hur_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+               for yrs in [str(yr) + '01-' + str(yr) + '12'
+                           for yr in range(1979, 2014)]],
+        'sphum': ['hus_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2014)]],
+        'temp': ['ta_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                 for yrs in [str(yr) + '01-' + str(yr) + '12'
+                             for yr in range(1979, 2014)]],
+        'ucomp': ['ua_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2014)]],
+        'vcomp': ['va_Amon_reanalysis_IFS-Cy31r2_' + yrs + '.nc' for yrs in
+                  ['%s01-%s12' % (yr, yr) for yr in range(1979, 2014)]],
+        'evap':     'evspsbl_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'lwdn_sfc': 'rlds_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'lwup_sfc': 'rlus_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'olr':      'rlut_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'olr_clr':  'rlutcs_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'precip':   'pr_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'ps':       'ps_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'shflx':    'hfss_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'slp':      'psl_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'swdn_sfc': 'rsds_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'swdn_toa': 'rsdt_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'swup_sfc': 'rsus_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        # 'swup_toa': 'rsut_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        't_surf':   'tas_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
+        'wvp':      'prw_Amon_reanalysis_IFS-Cy31r2_197901-201312.nc',
               }
     )
 
@@ -273,50 +269,72 @@ merra = Run(
     nc_start_month=1,
     nc_end_yr=2011,
     nc_end_month=12,
-    default_yr_range=(1979, 2011),
+    default_yr_range=(1981, 2000),
     nc_dir_struc='one_dir',
-    nc_files={'cld_amt': ['cl_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                          for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                      for yr in range(1979, 2012)]],
-              'evap': ['evspsbl_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2012)]],
-              'hght': ['zg_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2012)]],
-              'omega': ['wap_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2012)]],
-              'precip': ['pr_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                         for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                     for yr in range(1979, 2012)]],
-              'ps': ['ps_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                     for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                 for yr in range(1979, 2012)]],
-              'rh': ['hur_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                     for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                 for yr in range(1979, 2012)]],
-              'shflx': ['hfss_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2012)]],
-              'slp': ['psl_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                      for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                  for yr in range(1979, 2012)]],
-              'sphum': ['hus_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2012)]],
-              'temp': ['ta_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                       for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                   for yr in range(1979, 2012)]],
-              'ucomp': ['ua_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2012)]],
-              'vcomp': ['va_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                        for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                    for yr in range(1979, 2012)]],
-              'wvp': ['prw_Amon_reanalysis_MERRA_' + yrs + '.nc'
-                      for yrs in [str(yr) + '01-' + str(yr) + '12'
-                                  for yr in range(1979, 2012)]]
+    nc_files={
+        'cld_amt': ['cl_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                    for yrs in [str(yr) + '01-' + str(yr) + '12'
+                                for yr in range(1979, 2012)]],
+        'evap': ['evspsbl_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                 for yrs in [str(yr) + '01-' + str(yr) + '12'
+                             for yr in range(1979, 2012)]],
+        'hght': ['zg_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                 for yrs in [str(yr) + '01-' + str(yr) + '12'
+                             for yr in range(1979, 2012)]],
+        'lwdn_sfc': ['rlds_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'lwdn_sfc_clr': ['rldscs_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                         for yrs in
+                         ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'lwup_sfc': ['rlus_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'olr': ['rlut_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'olr_clr': ['rlutcs_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'omega': ['wap_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2012)]],
+        'precip': ['pr_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                   for yrs in [str(yr) + '01-' + str(yr) + '12'
+                               for yr in range(1979, 2012)]],
+        'ps': ['ps_Amon_reanalysis_MERRA_' + yrs + '.nc'
+               for yrs in [str(yr) + '01-' + str(yr) + '12'
+                           for yr in range(1979, 2012)]],
+        'rh': ['hur_Amon_reanalysis_MERRA_' + yrs + '.nc'
+               for yrs in [str(yr) + '01-' + str(yr) + '12'
+                           for yr in range(1979, 2012)]],
+        'shflx': ['hfss_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2012)]],
+        'slp': ['psl_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                for yrs in [str(yr) + '01-' + str(yr) + '12'
+                            for yr in range(1979, 2012)]],
+        'sphum': ['hus_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2012)]],
+        'swdn_sfc': ['rsds_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'swup_sfc': ['rsus_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'swdn_toa': ['rsdt_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'swup_toa': ['rsut_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                     ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'swup_toa_clr': ['rsutcs_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                         for yrs in
+                         ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'temp': ['ta_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                 for yrs in [str(yr) + '01-' + str(yr) + '12'
+                             for yr in range(1979, 2012)]],
+        'ucomp': ['ua_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                  for yrs in [str(yr) + '01-' + str(yr) + '12'
+                              for yr in range(1979, 2012)]],
+        'vcomp': ['va_Amon_reanalysis_MERRA_' + yrs + '.nc' for yrs in
+                  ['%s01-%s12' % (yr, yr) for yr in range(1979, 2012)]],
+        'wvp': ['prw_Amon_reanalysis_MERRA_' + yrs + '.nc'
+                for yrs in [str(yr) + '01-' + str(yr) + '12'
+                            for yr in range(1979, 2012)]]
               }
     )
 
@@ -331,7 +349,7 @@ cfsr = Run(
     nc_start_month=1,
     nc_end_yr=2013,
     nc_end_month=12,
-    default_yr_range=(1979, 2013),
+    default_yr_range=(1981, 2000),
     nc_dir_struc='one_dir',
     nc_files={'cld_amt': ['cl_Amon_reanalysis_CFSR_' + yrs + '.nc'
                           for yrs in [str(yr) + '01-' + str(yr) + '12'
@@ -399,7 +417,7 @@ jra25 = Run(
 lfe_all = Run(
     name='all',
     description='LandFlux-EVAL 1989-2005 using all products',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -413,7 +431,7 @@ lfe_all = Run(
 lfe_diag = Run(
     name='diagnostic',
     description='LandFlux-EVAL 1989-2005 using only diagnostic products',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -427,7 +445,7 @@ lfe_diag = Run(
 lfe_lsm = Run(
     name='lsm',
     description='LandFlux-EVAL 1989-2005 using land surface models only',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -441,7 +459,7 @@ lfe_lsm = Run(
 lfe_rean = Run(
     name='reanalyses',
     description='LandFlux-EVAL 1989-2005 using reanalyses only',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -457,7 +475,7 @@ lfe_rean = Run(
 lfe95_all = Run(
     name='all',
     description='LandFlux-EVAL 1989-1995 using all products',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -471,7 +489,7 @@ lfe95_all = Run(
 lfe95_diag = Run(
     name='diagnostic',
     description='LandFlux-EVAL 1989-1995 using diagnostic products only',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -485,7 +503,7 @@ lfe95_diag = Run(
 lfe95_lsm = Run(
     name='lsm',
     description='LandFlux-EVAL 1989-1995 using land surface models only',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -499,7 +517,7 @@ lfe95_lsm = Run(
 lfe95_rean = Run(
     name='reanalyses',
     description='LandFlux-EVAL 1989-1995 using reanalyses only',
-    direc_nc='/archive/s1h/obs/LandFlux-EVAL',
+    direc_nc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
     nc_dur=17,
     nc_start_yr=1989,
     nc_start_month=1,
@@ -515,7 +533,7 @@ lfe95_rean = Run(
 hadisst1 = Run(
     name='hadisst1',
     description='HadISST1 product; SST data only',
-    direc_nc='/archive/s1h/obs/HadISST',
+    direc_nc='/archive/Spencer.Hill/obs/HadISST',
     nc_dur=1,
     nc_start_yr=2005,
     nc_start_month=1,
@@ -523,12 +541,12 @@ hadisst1 = Run(
     nc_end_month=12,
     default_yr_range=(2005, 2005),
     nc_dir_struc='one_dir',
-    nc_files={'monthly': '/archive/s1h/obs/HadISST/HadISST_sst.nc'}
+    nc_files={'monthly': '/archive/Spencer.Hill/obs/HadISST/HadISST_sst.nc'}
 )
 hurrell = Run(
     name='hurrell',
     description='Hurrell SST product',
-    direc_nc='/archive/s1h/obs/Hurrell',
+    direc_nc='/archive/Spencer.Hill/obs/Hurrell',
     nc_dur=1,
     nc_start_yr=2000,
     nc_start_month=1,
@@ -537,13 +555,13 @@ hurrell = Run(
     default_yr_range=(2000, 2000),
     nc_dir_struc='one_dir',
     nc_files={
-        'monthly': '/archive/s1h/obs/Hurrell/sst.climo.1981-2000.data.nc'
+        'monthly': '/archive/Spencer.Hill/obs/Hurrell/sst.climo.1981-2000.data.nc'
     }
 )
 reynolds_oi = Run(
     name='reynolds_oi',
     description='Reynolds OI SST observational dataset',
-    direc_nc='/archive/s1h/obs/ReynoldsOI',
+    direc_nc='/archive/Spencer.Hill/obs/ReynoldsOI',
     nc_dur=19,
     nc_start_yr=1981,
     nc_start_month=11,
@@ -551,5 +569,5 @@ reynolds_oi = Run(
     nc_end_month=1,
     default_yr_range=(1982, 1998),
     nc_dir_struc='one_dir',
-    nc_files={'monthly': '/archive/s1h/obs/ReynoldsOI/reyoi_sst.data.nc'}
+    nc_files={'monthly': '/archive/Spencer.Hill/obs/ReynoldsOI/reyoi_sst.data.nc'}
 )

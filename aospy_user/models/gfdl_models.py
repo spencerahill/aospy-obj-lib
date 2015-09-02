@@ -1,22 +1,22 @@
-"""gfdl_models.py: aospy.Model objects for various models developed at GFDL"""
+"""aospy.Model objects for various models developed at GFDL"""
 from aospy.model import Model
 from aospy_user import runs
 
 am2 = Model(
     name='am2',
     nc_grid_paths=(
-        ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
+        ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos/atmos.static.nc'),
-        ['/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
+        ['/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
          'atmos/ts/monthly/1yr/atmos.' + str(n) + '01-' + str(n) +
          '12.ucomp.nc' for n in range(1982, 2013)],
-        # ('/archive/yim/siena_201203/m45_am2p14_1990/gfdl.ncrc2-intel-prod/'
-        #  'pp/atmos/ts/monthly/16yr/atmos.198301-199812.temp.nc'),
-        ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
-         'pp/atmos_level/atmos_level.static.nc'),
-        ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
+        # ('/archive/Yi.Ming/siena_201203/m45_am2p14_1990/gfdl.ncrc2-intel-prod/'
+         # 'pp/atmos/ts/monthly/16yr/atmos.198301-199812.temp.nc'),
+        # ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
+         # 'pp/atmos_level/atmos_level.static.nc'),
+        ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos_level/ts/monthly/1yr/atmos_level.198201-198212.temp.nc'),
-        ('/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
+        ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos_level/ts/monthly/1yr/atmos_level.198201-198212.hght.nc')
     ),
     nc_dur=1,
@@ -48,9 +48,9 @@ am2 = Model(
 am3 = Model(
     name='am3',
     nc_grid_paths=(
-        '/archive/s1h/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-openmp/'
+        '/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-openmp/'
         'pp/atmos/atmos.static.nc',
-        ['/archive/s1h/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-openmp/pp/'
+        ['/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-openmp/pp/'
          'atmos/ts/monthly/1yr/atmos.' + str(n) + '01-' + str(n) +
          '12.ucomp.nc' for n in range(1980, 2011)]
     ),
@@ -73,9 +73,9 @@ am3 = Model(
 hiram = Model(
     name='hiram',
     nc_grid_paths=(
-        '/archive/yim/siena_201211/c180_hiram_clim/gfdl.ncrc2-default-prod/'
+        '/archive/Yi.Ming/siena_201211/c180_hiram_clim/gfdl.ncrc2-default-prod/'
         'pp/atmos/atmos.static.nc',
-        '/archive/yim/siena_201211/c180_hiram_clim/gfdl.ncrc2-default-prod/'
+        '/archive/Yi.Ming/siena_201211/c180_hiram_clim/gfdl.ncrc2-default-prod/'
         'pp/atmos/ts/monthly/17yr/atmos.197901-199512.ucomp.nc'
     ),
     nc_dur=17,
@@ -93,9 +93,9 @@ sm2 = Model(
     name='sm2',
     description='AM2.1 atmosphere coupled to mixed-layer ocean.',
     nc_grid_paths=(
-        '/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie_rerun6.YIM/pp/'
+        '/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie_rerun6.YIM/pp/'
         'atmos/ts/monthly/100yr/atmos.000101-010012.vcomp.nc',
-        '/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie_rerun6.YIM/pp/'
+        '/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie_rerun6.YIM/pp/'
         'atmos/atmos.static.nc'
     ),
     nc_dur=20,

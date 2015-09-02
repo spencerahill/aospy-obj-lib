@@ -1,4 +1,4 @@
-from aospy.run import Run
+from aospy import Run
 
 am2_cont = Run(
     name='cont',
@@ -15,8 +15,14 @@ am2_cont = Run(
 )
 am2_aero = Run(
     name='aero',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
+        'repeated annually, overlaid with annual cycle of equilibrium SST '
+        'anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
+        'layer ocean.  PD atmospheric composition.'
+    ),
+    direc_nc=('/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero/'
+              'gfdl.ncrc2-intel-prod/pp'),
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -25,7 +31,7 @@ am2_aero = Run(
 am2_atm = Run(
     name='aero_tm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero_trop_mean/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero_trop_mean/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -34,7 +40,7 @@ am2_atm = Run(
 am2_amtm = Run(
     name='aero_mtm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, subtracting annual tropical mean equilibrium SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero_m_trop_mean_fixed2/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero_m_trop_mean_fixed2/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -43,7 +49,7 @@ am2_amtm = Run(
 am2_apac = Run(
     name='aero_pac',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Pacific Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero_pac/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero_pac/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -52,7 +58,7 @@ am2_apac = Run(
 am2_aatl = Run(
     name='aero_atl',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Atlantic Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero_atl/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero_atl/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -61,7 +67,7 @@ am2_aatl = Run(
 am2_aind = Run(
     name='aero_ind',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Indian Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_aero_ind/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero_ind/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -70,7 +76,7 @@ am2_aind = Run(
 am2_gas = Run(
     name='gas',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_gas/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_gas/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -79,7 +85,7 @@ am2_gas = Run(
 am2_gtm = Run(
     name='gas_tm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_gas_trop_mean/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_gas_trop_mean/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -88,7 +94,7 @@ am2_gtm = Run(
 am2_gmtm = Run(
     name='gas_mtm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies minus their annual tropical mean from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/siena_201203/m45_am2p14_1990_clim_gas_m_trop_mean/gfdl.ncrc2-intel-prod/pp',
+    direc_nc='/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_gas_m_trop_mean/gfdl.ncrc2-intel-prod/pp',
     nc_dur=16,
     nc_start_yr=1983,
     nc_end_yr=1998,
@@ -126,7 +132,7 @@ am2_reyoi_cont = Run(
     name='reyoi_cont',
     tags=['reyoi', 'cont'],
     description='PI atmos and Reynolds OI climatological SSTs',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
     nc_end_yr=2012,
@@ -135,7 +141,7 @@ am2_reyoi_cont = Run(
 am2_reyoi_m0p25 = Run(
     name='reyoi-0.25K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-0p25K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-0p25K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -145,7 +151,7 @@ am2_reyoi_m0p25 = Run(
 am2_reyoi_m0p5 = Run(
     name='reyoi-0.5K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-0p5K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-0p5K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=15,
     nc_start_yr=1983,
@@ -155,7 +161,7 @@ am2_reyoi_m0p5 = Run(
 am2_reyoi_m1 = Run(
     name='reyoi-1K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-1K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-1K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=15,
     nc_start_yr=1983,
@@ -165,7 +171,7 @@ am2_reyoi_m1 = Run(
 am2_reyoi_m1p5 = Run(
     name='reyoi-1.5K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-1p5K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-1p5K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -176,7 +182,7 @@ am2_reyoi_m2 = Run(
     name='reyoi-2K',
     tags=['reyoi', '-2K'],
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-2K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-2K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=15,
     nc_start_yr=1983,
     nc_end_yr=2012,
@@ -185,7 +191,7 @@ am2_reyoi_m2 = Run(
 am2_reyoi_m3 = Run(
     name='reyoi-3K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-3K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-3K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -195,7 +201,7 @@ am2_reyoi_m3 = Run(
 am2_reyoi_m4 = Run(
     name='reyoi-4K',
     description='',
-    direc_nc=('/archive/s1h/am2/am2clim_reyoi-4K/'
+    direc_nc=('/archive/Spencer.Hill/am2/am2clim_reyoi-4K/'
               'gfdl.ncrc2-default-prod/pp/'),
     nc_dur=1,
     nc_start_yr=1982,
@@ -205,7 +211,7 @@ am2_reyoi_m4 = Run(
 am2_reyoi_m6 = Run(
     name='reyoi-6K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-6K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-6K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -215,7 +221,7 @@ am2_reyoi_m6 = Run(
 am2_reyoi_m8 = Run(
     name='reyoi-8K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-8K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-8K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -225,7 +231,7 @@ am2_reyoi_m8 = Run(
 am2_reyoi_m10 = Run(
     name='reyoi-10K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi-10K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi-10K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -235,7 +241,7 @@ am2_reyoi_m10 = Run(
 am2_reyoi_p0p25 = Run(
     name='reyoi+0.25K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+0p25K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+0p25K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -245,7 +251,7 @@ am2_reyoi_p0p25 = Run(
 am2_reyoi_p0p5 = Run(
     name='reyoi+0.5K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+0p5K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+0p5K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=15,
     nc_start_yr=1983,
     nc_end_yr=2012,
@@ -254,7 +260,7 @@ am2_reyoi_p0p5 = Run(
 am2_reyoi_p1 = Run(
     name='reyoi+1K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+1K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+1K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=15,
     nc_start_yr=1983,
     nc_end_yr=2012,
@@ -263,7 +269,7 @@ am2_reyoi_p1 = Run(
 am2_reyoi_p1p5 = Run(
     name='reyoi+1.5K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+1p5K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+1p5K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
     nc_end_yr=2012,
@@ -272,7 +278,7 @@ am2_reyoi_p1p5 = Run(
 am2_reyoi_p2 = Run(
     name='reyoi+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+2K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+2K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
     nc_end_yr=2012,
@@ -281,7 +287,7 @@ am2_reyoi_p2 = Run(
 am2_reyoi_p3 = Run(
     name='reyoi+3K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+3K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+3K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -291,7 +297,7 @@ am2_reyoi_p3 = Run(
 am2_reyoi_p4 = Run(
     name='reyoi+4K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+4K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+4K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -301,7 +307,7 @@ am2_reyoi_p4 = Run(
 am2_reyoi_p6 = Run(
     name='reyoi+6K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+6K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+6K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -311,7 +317,7 @@ am2_reyoi_p6 = Run(
 am2_reyoi_p8 = Run(
     name='reyoi+8K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+8K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+8K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -321,7 +327,7 @@ am2_reyoi_p8 = Run(
 am2_reyoi_p10 = Run(
     name='reyoi+10K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi+10K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi+10K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
@@ -331,7 +337,7 @@ am2_reyoi_p10 = Run(
 am2_reyoi_wpwp_p2 = Run(
     name='reyoi_wpwp+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_wpwp+2K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_wpwp+2K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1982,
     nc_end_yr=2012,
@@ -340,7 +346,7 @@ am2_reyoi_wpwp_p2 = Run(
 am2_reyoi_wpwp_m2 = Run(
     name='reyoi_wpwp-2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_wpwp-2K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_wpwp-2K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=30,
     nc_start_yr=1983,
     nc_end_yr=2012,
@@ -349,7 +355,7 @@ am2_reyoi_wpwp_m2 = Run(
 am2_reyoi_wpwp_m2 = Run(
     name='reyoi_wpwp-2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_wpwp-2K/gfdl.ncrc2-default-prod/pp/',
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_wpwp-2K/gfdl.ncrc2-default-prod/pp/',
     nc_dur=30,
     nc_start_yr=1983,
     nc_end_yr=2012,
@@ -358,7 +364,7 @@ am2_reyoi_wpwp_m2 = Run(
 am2_cld_lock_cont = Run(
     name='cld_lock_cont',
     description='',
-    direc_nc=('/archive/yim/quickstart/m45_am2p14_1990_nocre_1995/'
+    direc_nc=('/archive/Yi.Ming/quickstart/m45_am2p14_1990_nocre_1995/'
               'gfdl.ncrc2-default-prod/pp/'),
     nc_dur=16,
     nc_start_yr=1983,
@@ -368,7 +374,7 @@ am2_cld_lock_cont = Run(
 am2_cld_lock_cld = Run(
     name='cld_lock+2Kcld',
     description='',
-    direc_nc=('/archive/yim/quickstart/m45_am2p14_1990_nocre_1995_p2K_fix2/'
+    direc_nc=('/archive/Yi.Ming/quickstart/m45_am2p14_1990_nocre_1995_p2K_fix2/'
               'gfdl.ncrc2-default-prod/pp/'),
     nc_dur=16,
     nc_start_yr=1983,
@@ -378,7 +384,7 @@ am2_cld_lock_cld = Run(
 am2_cld_lock_sst = Run(
     name='cld_lock+2Ksst',
     description='',
-    direc_nc=('/archive/yim/quickstart/m45_am2p14_1990_nocre_1995_p2K_fix1/'
+    direc_nc=('/archive/Yi.Ming/quickstart/m45_am2p14_1990_nocre_1995_p2K_fix1/'
               'gfdl.ncrc2-default-prod/pp/'),
     nc_dur=16,
     nc_start_yr=1983,
@@ -388,7 +394,7 @@ am2_cld_lock_sst = Run(
 am2_cld_lock_p2 = Run(
     name='cld_lock+2K',
     description='',
-    direc_nc=('/archive/yim/quickstart/m45_am2p14_1990_nocre_1995_p2K/'
+    direc_nc=('/archive/Yi.Ming/quickstart/m45_am2p14_1990_nocre_1995_p2K/'
               'gfdl.ncrc2-default-prod/pp/'),
     nc_dur=16,
     nc_start_yr=1983,
@@ -398,7 +404,7 @@ am2_cld_lock_p2 = Run(
 am2_hurrell_cont = Run(
     name='hurrell_cont',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_hurrell/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_hurrell/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -408,7 +414,7 @@ am2_hurrell_cont = Run(
 am2_hurrell_p2 = Run(
     name='hurrell+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_hurrell+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_hurrell+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -418,7 +424,7 @@ am2_hurrell_p2 = Run(
 am2_reynolds = Run(
     name='reynolds_cont',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reynoldsEOF/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reynoldsEOF/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -428,7 +434,7 @@ am2_reynolds = Run(
 am2_reynolds_p2 = Run(
     name='reynolds+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reynoldsEOF+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reynoldsEOF+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -438,7 +444,7 @@ am2_reynolds_p2 = Run(
 am2_amip1 = Run(
     name='amip1_cont',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_amip1/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_amip1/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -448,7 +454,7 @@ am2_amip1 = Run(
 am2_amip1_p2 = Run(
     name='amip1+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_amip1+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_amip1+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -458,7 +464,7 @@ am2_amip1_p2 = Run(
 am2_cld_seed_all_p2 = Run(
     name='cld_seed_all+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_cld_seed_all+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_cld_seed_all+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -468,7 +474,7 @@ am2_cld_seed_all_p2 = Run(
 am2_cld_seed_np_p2 = Run(
     name='cld_seed_np+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_cld_seed_np+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_cld_seed_np+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -478,7 +484,7 @@ am2_cld_seed_np_p2 = Run(
 am2_cld_seed_sp_p2 = Run(
     name='cld_seed_sp+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_cld_seed_sp+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_cld_seed_sp+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -488,7 +494,7 @@ am2_cld_seed_sp_p2 = Run(
 am2_cld_seed_sa_p2 = Run(
     name='cld_seed_sa+2K',
     description='',
-    direc_nc='/archive/s1h/am2/am2clim_reyoi_cld_seed_sa+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am2/am2clim_reyoi_cld_seed_sa+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
     nc_dur=1,
     nc_start_yr=1983,
@@ -498,9 +504,9 @@ am2_cld_seed_sa_p2 = Run(
 am2_test = Run(
     name='test',
     description='Dummy/testing run',
-    direc_nc='/archive/s1h/am2/am2test/gfdl.ncrc2-default-prod/pp/',
-    nc_dur=1,
-    nc_start_yr=1982,
+    direc_nc='/archive/Spencer.Hill/am2/am2test/gfdl.ncrc2-default-prod/pp/',
+    nc_dur=2,
+    nc_start_yr=1983,
     nc_end_yr=1984,
     default_yr_range=(1983, 1984)
 )
@@ -510,48 +516,48 @@ am3_cont = Run(
     name='cont',
     description=('1981-2000 Hurrell climatological annual cycle of SSTs and '
                  'sea ice, with PD atmospheric composition.'),
-    direc_nc=('/archive/yim/fms/siena_201211/c48L48_am3p10/'
+    direc_nc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10/'
               'gfdl.ncrc2-intel-prod/pp')
 )
 am3_aero = Run(
     name='aero',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero/gfdl.ncrc2-intel-prod/pp'
 )
 am3_atm = Run(
     name='aero_tm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero_trop_mean/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_trop_mean/gfdl.ncrc2-intel-prod/pp'
 )
 am3_amtm = Run(
     name='aero_mtm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, subtracting annual tropical mean equilibrium SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero_m_trop_mean_fixed/gfdl.ncrc2-intel-prod-openmp/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_m_trop_mean_fixed/gfdl.ncrc2-intel-prod-openmp/pp'
 )
 am3_apac = Run(
     name='aero_pac',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Pacific Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero_pac/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_pac/gfdl.ncrc2-intel-prod/pp'
 )
 am3_aatl = Run(
     name='aero_atl',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Atlantic Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero_atl/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_atl/gfdl.ncrc2-intel-prod/pp'
 )
 am3_aind = Run(
     name='aero_ind',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Indian Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_aero_ind/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_ind/gfdl.ncrc2-intel-prod/pp'
 )
 am3_gas = Run(
     name='gas',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_gas/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas/gfdl.ncrc2-intel-prod/pp'
 )
 am3_gtm = Run(
     name='gas_tm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    direc_nc='/archive/yim/fms/siena_201211/c48L48_am3p10_gas_trop_mean/gfdl.ncrc2-intel-prod/pp'
+    direc_nc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_trop_mean/gfdl.ncrc2-intel-prod/pp'
 )
 am3_gmtm = Run(
     name='gas_mtm',
@@ -560,7 +566,7 @@ am3_gmtm = Run(
                  'equilibrium SST anomalies minus their annual tropical mean '
                  'from a PI-to-PD WMGG and ozone simulation of AM2.1 with a '
                  'mixed layer ocean.  PD atmospheric composition.'),
-    direc_nc=('/archive/yim/fms/siena_201211/c48L48_am3p10_gas_m_trop_mean/'
+    direc_nc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_m_trop_mean/'
               'gfdl.ncrc2-intel-prod/pp')
 )
 am3_amip = Run(
@@ -577,7 +583,7 @@ am3_amip = Run(
 am3_hc = Run(
     name='hurrell_cont',
     description='',
-    direc_nc='/archive/s1h/am3/am3clim_hurrell/' + \
+    direc_nc='/archive/Spencer.Hill/am3/am3clim_hurrell/' + \
              'gfdl.ncrc2-intel-prod-openmp/pp',
     nc_dur=1,
     nc_start_yr=1980,
@@ -587,7 +593,7 @@ am3_hc = Run(
 am3_hp1k = Run(
     name='hurrell+1K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+1K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+1K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -597,7 +603,7 @@ am3_hp1k = Run(
 am3_hp2k = Run(
     name='hurrell+2K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+2K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+2K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=1,
     nc_start_yr=1980,
@@ -607,7 +613,7 @@ am3_hp2k = Run(
 am3_hp4k = Run(
     name='hurrell+4K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+4K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+4K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=1,
     nc_start_yr=1980,
@@ -617,7 +623,7 @@ am3_hp4k = Run(
 am3_hp6k = Run(
     name='hurrell+6K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+6K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+6K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -627,7 +633,7 @@ am3_hp6k = Run(
 am3_hp8k = Run(
     name='hurrell+8K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+8K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+8K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -637,7 +643,7 @@ am3_hp8k = Run(
 am3_hp10k = Run(
     name='hurrell+10K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell+10K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell+10K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -647,7 +653,7 @@ am3_hp10k = Run(
 am3_hm1k = Run(
     name='hurrell-1K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-1K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-1K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=1,
     nc_start_yr=1980,
@@ -657,7 +663,7 @@ am3_hm1k = Run(
 am3_hm2k = Run(
     name='hurrell-2K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-2K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-2K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=1,
     nc_start_yr=1980,
@@ -667,7 +673,7 @@ am3_hm2k = Run(
 am3_hm4k = Run(
     name='hurrell-4K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-4K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-4K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -677,7 +683,7 @@ am3_hm4k = Run(
 am3_hm6k = Run(
     name='hurrell-6K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-6K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-6K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -687,7 +693,7 @@ am3_hm6k = Run(
 am3_hm8k = Run(
     name='hurrell-8K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-8K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-8K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -697,7 +703,7 @@ am3_hm8k = Run(
 am3_hm10k = Run(
     name='hurrell-10K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-10K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-10K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -707,7 +713,7 @@ am3_hm10k = Run(
 am3_hm15k = Run(
     name='hurrell-15K',
     description='',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell-15K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell-15K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=31,
     nc_start_yr=1980,
@@ -717,7 +723,7 @@ am3_hm15k = Run(
 am3_hwpwp_p2k = Run(
     name='hurrell_wpwp+2K',
     description='',
-    direc_nc='/archive/s1h/am3/am3clim_hurrell_wpwp+2K/' + \
+    direc_nc='/archive/Spencer.Hill/am3/am3clim_hurrell_wpwp+2K/' + \
              'gfdl.ncrc2-intel-prod-openmp/pp',
     nc_dur=1,
     nc_start_yr=1980,
@@ -728,7 +734,7 @@ am3_hc_static_veg = Run(
     name='hurrell_static_veg_cont',
     description=('Climatological SST annual cycle from Hurrell dataset '
                  'repeated annually, with static year 2000 vegetation'),
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell_static_veg/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=30,
     nc_start_yr=1981,
@@ -738,7 +744,7 @@ am3_hc_static_veg = Run(
 am3_hc_static_veg_p4k = Run(
     name='hurrell_static_veg+4K',
     description='Hurrell climatological SSTs w/ uniform +4K and static veg',
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg+4K/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell_static_veg+4K/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=30,
     nc_start_yr=1981,
@@ -749,7 +755,7 @@ am3_hc_static_veg_10kyr = Run(
     name='hurrell_static_veg_10kyr',
     description=('Hurrell climatological SSTs w/ 10 ka obliquity and '
                  'precession and static year 2000 vegetation'),
-    direc_nc=('/archive/s1h/am3/am3clim_hurrell_static_veg_10kyr_obliq_prec/'
+    direc_nc=('/archive/Spencer.Hill/am3/am3clim_hurrell_static_veg_10kyr_obliq_prec/'
               'gfdl.ncrc2-intel-prod-openmp/pp'),
     nc_dur=30,
     nc_start_yr=1981,
@@ -765,7 +771,7 @@ hiram_cont = Run(
         'and sea ice repeated annually, with PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aero = Run(
@@ -778,7 +784,7 @@ hiram_aero = Run(
         'PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_atm = Run(
@@ -790,7 +796,7 @@ hiram_atm = Run(
         'mixed layer ocean.  PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero_trop_mean/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_trop_mean/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_amtm = Run(
@@ -802,7 +808,7 @@ hiram_amtm = Run(
         'layer ocean.  PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero_m_trop_mean/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_m_trop_mean/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_apac = Run(
@@ -814,7 +820,7 @@ hiram_apac = Run(
         'AM2.1 with a mixed layer ocean.  PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero_pac/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_pac/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aatl = Run(
@@ -826,7 +832,7 @@ hiram_aatl = Run(
         'AM2.1 with a mixed layer ocean.  PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero_atl/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_atl/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aind = Run(
@@ -838,7 +844,7 @@ hiram_aind = Run(
         'M2.1 with a mixed layer ocean. PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_aero_ind/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_ind/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_gas = Run(
@@ -851,7 +857,7 @@ hiram_gas = Run(
         'PD atmospheric composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_gas_rerun2/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_rerun2/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_gtm = Run(
@@ -863,7 +869,7 @@ hiram_gtm = Run(
         'of AM2.1 with a mixed layer ocean. PD atmospheric composition.'
         ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_gas_trop_mean/'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_trop_mean/'
               'gfdl.ncrc2-default-prod/pp')
 )
 hiram_gmtm = Run(
@@ -876,7 +882,7 @@ hiram_gmtm = Run(
         'composition.'
     ),
     default_yr_range=(1979, 1995),
-    direc_nc=('/archive/yim/siena_201211/c180_hiram_clim_gas_m_trop_mean'
+    direc_nc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_m_trop_mean'
               '/gfdl.ncrc2-default-prod/pp')
 )
 hiram_amip = Run(
@@ -896,7 +902,7 @@ hiram_amip = Run(
 sm2_cont = Run(
     name='cont',
     description='',
-    direc_nc=('/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie'
+    direc_nc=('/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie'
               '_rerun6.YIM/pp'),
     nc_dur=20,
     nc_start_yr=1,
@@ -905,7 +911,7 @@ sm2_cont = Run(
 sm2_aero = Run(
     name='aero',
     description='',
-    direc_nc=('/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie2'
+    direc_nc=('/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie2'
               '_rerun6.YIM/pp'),
     nc_dur=100,
     nc_start_yr=1,
@@ -914,7 +920,7 @@ sm2_aero = Run(
 sm2_gas = Run(
     name='gas',
     description='',
-    direc_nc=('/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie3'
+    direc_nc=('/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie3'
               '_rerun8.YIM/pp'),
     nc_dur=5,
     nc_start_yr=1,
@@ -923,7 +929,7 @@ sm2_gas = Run(
 sm2_both = Run(
     name='both',
     description='',
-    direc_nc=('/archive/yim/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie4'
+    direc_nc=('/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie4'
               '_rerun6.YIM/pp'),
     nc_dur=100,
     nc_start_yr=1,
