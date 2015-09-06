@@ -105,12 +105,8 @@ ceres = Model(
 era = Model(
     name='era',
     description='ERA reanalyses',
-    nc_grid_paths=(
-        ['/archive/pcmdi/repo/ana4MIPs/ECMWF/ERA-Interim/atmos/'
-         'mon/v20140416/wap_Amon_reanalysis_IFS-Cy31r2_' + yrs +
-         '.nc' for yrs in [str(yr) + '01-' + str(yr) + '12'
-                           for yr in range(1979, 2014)]],
-    ),
+    nc_grid_paths=('/archive/pcmdi/repo/ana4MIPs/ECMWF/ERA-Interim/atmos/'
+                   'mon/v20140416/wap_*.nc'),
     nc_dur=1,
     nc_start_yr=1979,
     nc_start_month=1,
@@ -124,8 +120,7 @@ merra = Model(
     name='merra',
     description='MERRA reanalyses',
     nc_grid_paths=(
-        # [
-            # '/archive/pcmdi/repo/ana4MIPs/NASA-GMAO/MERRA/atmos/'
+        # ['/archive/pcmdi/repo/ana4MIPs/NASA-GMAO/MERRA/atmos/'
          # 'mon/v20140624/hfss_Amon_reanalysis_MERRA_' + yrs +
          # '.nc' for yrs in [str(yr) + '01-' + str(yr) + '12'
                            # for yr in range(1979, 2012)]],
@@ -151,6 +146,8 @@ cfsr = Model(
          'mon/v20140822/zg_Amon_reanalysis_CFSR_' + yrs +
          '.nc' for yrs in [str(yr) + '01-' + str(yr) + '12'
                            for yr in range(1979, 2014)]],
+        # ('/archive/pcmdi/repo/ana4MIPs/NOAA-NCEP/CFSR/atmos/'
+         # 'mon/v20140822/rlut_Amon_reanalysis_CFSR_201201-201212.nc'),
     ),
     nc_dur=1,
     nc_start_yr=1979,

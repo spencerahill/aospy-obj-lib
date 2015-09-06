@@ -40,8 +40,9 @@ class MainParamsParser(object):
                     run_objs.append(aospy_user.to_run(run, model, proj))
                 except AttributeError as ae:
                     print ae
-        if len(run_objs) == 1 and not isinstance(run_objs[0], (list, tuple)):
-            return run_objs
+        # If flat list, return the list.  If nested, then flatten it.
+        if all([isinstance(r, aospy.Run) for r in run_objs]):
+            return [run_objs[0]]
         else:
             return list(itertools.chain.from_iterable(run_objs))
 
@@ -53,7 +54,6 @@ class MainParamsParser(object):
                                        main_params.var, main_params.region)
             )
         self.run = self.create_child_run_obj(self.model, self.run, self.proj)
-        print self.run
         self.region = [aospy.utils.dict_name_keys(self.region)]
 
 
@@ -93,7 +93,6 @@ class CalcSuite(object):
     def prompt_user_verify(self):
         if not raw_input("Proceed using these parameters? ").lower() == 'y':
             raise IOError('\nExecution cancelled by user.')
-        print '\n\tVariable time averages and statistics:'
 
     def create_params_all_calcs(self):
         attr_names = ('proj',
@@ -124,16 +123,27 @@ class CalcSuite(object):
             param_combos.append(dict(zip(attr_names, permutation)))
         return param_combos
 
-    def create_calcs(self, param_combos):
+    def create_calcs(self, param_combos, exec_calcs=False, print_table=False):
         """Iterate through given parameter combos, creating needed Calcs."""
         calcs = []
         for params in param_combos:
             try:
                 calc_int = aospy.CalcInterface(**params)
             except AttributeError as ae:
-                print ae
+                print 'aospy warning:', ae
             else:
                 calc = aospy.Calc(calc_int)
+                if exec_calcs:
+                    try:
+                        calc.compute()
+                    except:
+                        print 'Calc %s failed.  Skipping.' % calc
+                    else:
+                        if print_table:
+                            print ("%.1f" % calc.load('reg.av', False,
+                                                      calc_int.region['sahel'],
+                                                      plot_units=False))
+
                 calcs.append(calc)
         return calcs
 
@@ -155,38 +165,69 @@ def main(main_params):
     cs.print_params()
     cs.prompt_user_verify()
     param_combos = cs.create_params_all_calcs()
-    calcs = cs.create_calcs(param_combos)
+    calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
     print '\n\tVariable time averages and statistics:'
-    if main_params.compute:
-        cs.exec_calcs(calcs)
-    if main_params.print_table[0]:
-        cs.print_results(calcs)
+    # if main_params.compute:
+        # cs.exec_calcs(calcs)
+    # if main_params.print_table:
+        # cs.print_results(calcs)
     print "Calculations finished."
     return calcs
 
 if __name__ == '__main__':
+
+    cmip_models_h = ['bcc_csm1-1',
+                     'cccma_canam4',
+                     # 'cesm1-cam5',
+                     'cnrc-cm5',
+                     'hadgem2-a',
+                     'ichec-ec-earth',
+                     'ipsl-cm5a-lr',
+                     'ipsl-cm5b-lr',
+                     'lasg-cess-fgoals-g2',
+                     'miroc5',
+                     'mpi-esm-lr',
+                     'mpi-esm-mr',
+                     'mri-cgcm3',
+                     'ncar-ccsm4']
+    cmip_models_p = ['bcc_csm1-1',
+                     'cccma_canam4',
+                     'cesm1-cam5',
+                     'cnrc-cm5',
+                     # 'hadgem2-a',
+                     'ichec-ec-earth',
+                     'ipsl-cm5a-lr',
+                     'ipsl-cm5b-lr',
+                     'lasg-cess-fgoals-g2',
+                     'miroc5',
+                     'mpi-esm-lr',
+                     'mpi-esm-mr',
+                     'mri-cgcm3',
+                     'ncar-ccsm4']
+
     mp = MainParams()
-    mp.proj = 'aero_3agcm'
-    mp.model = ['am2', 'am3']
-    mp.run = ['reyoi_cont']
-    mp.ens_mem = [None]
-    mp.var = ['t_surf']
+    mp.proj = 'cmip5'
+    mp.model = cmip_models_h
+    mp.run = ['amip4K']
+    mp.ens_mem = [False]
+    mp.var = ['toa_rad']
+    # mp.var = ['mse_horiz_advec_upwind', 'mse_vert_advec_upwind']
     # mp.yr_range = [(1983, 1983)]
     mp.yr_range = ['default']
     mp.region = 'all'
     mp.intvl_in = ['monthly']
     mp.intvl_out = ['jas']
     mp.dtype_in_time = ['ts']
-    # mp.dtype_in_vert = [False]
-    mp.dtype_in_vert = ['pressure']
+    mp.dtype_in_vert = [False]
+    # mp.dtype_in_vert = ['pressure']
     # mp.dtype_out_time = [('reg.av',)]
     mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
     mp.dtype_out_vert = [False]
     # mp.dtype_out_vert = ['vert_int']
     mp.level = [False]
     mp.yr_chunk_len = [False]
-    mp.compute = [True]
     mp.verbose = [True]
-    mp.print_table = [False]
+    mp.compute = True
+    mp.print_table = False
 
     calcs = main(mp)
