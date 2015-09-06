@@ -23,8 +23,8 @@ def plot(plot_params):
 
         row_size=4,
         col_size=5,
-        subplot_lims={'left': 0.1, 'right': 0.95, 'wspace': 0.05,
-                      'bottom': 0.05, 'top': 0.95, 'hspace': 0.06},
+        subplot_lims={'left': 0.13, 'right': 0.95, 'wspace': 0.05,
+                      'bottom': 0.1, 'top': 0.9, 'hspace': 0.06},
 
         plot_type='scatter',
         # plot_type=[['contourf', 'contour']],# 'quiver']],
@@ -54,20 +54,20 @@ def plot(plot_params):
         intvl_out='jas',
         dtype_in_time='ts',
         # dtype_in_time=['ts'] + ['inst']*2,
-        dtype_in_vert=False,
-        # dtype_in_vert=['pressure'] + [['sigma', 'pressure']]*3,
+        # dtype_in_vert='pressure',
+        dtype_in_vert=[[['pressure', False]]],
         # dtype_in_vert=['pressure']*5 + [False]*1,
         # dtype_out_time='av',
         dtype_out_time='reg.ts',
-        dtype_out_vert=False,
-        # dtype_out_vert=['vert_int']*5 + [False]*1,
+        # dtype_out_vert='vert_int',
+        dtype_out_vert=[[['vert_int', False]]],
         # level=700,
         level=False,
         yr_range='default',
         # yr_range=(1983, 1983),
 
-        fig_title=False,
-        # fig_title=r'Sahel JAS moisture advection responses to +2K',
+        # fig_title=False,
+        fig_title=r'AM2.1 AMIP, Sahel JAS, interannual $P$ v. $\{\omega\partial_ph\}$',
         ax_title=False,
         # ax_title=['Total', 'Vertical', 'Horizontal'],
         # ax_left_label=False,
@@ -77,18 +77,19 @@ def plot(plot_params):
         # ax_right_label=['AM2.1', 'AM3'],# 'HiRAM', 'c48-HiRAM'],
 
         # x_lim=False,
-        x_lim=(-5, 5),
+        x_lim=(-20, 20),
         x_ticks=False,
         x_ticklabels=False,
-        x_label=False,
-        # x_label=[False, False, r'g kg$^{-1}$ day$^{-1}$'],
+        # x_label=False,
+        x_label=r'W m$^{-2}$',
         do_mark_x0=True,
 
         # y_lim=False,
-        y_lim=(-5, 5),
+        y_lim=(-2, 2),
         y_ticks=False,
         y_ticklabels=False,
-        y_label=False,
+        # y_label=False,
+        y_label=r'mm day$^{-1}$',
         do_mark_y0=True,
 
         lat_lim=(-5, 35),
@@ -151,7 +152,7 @@ def plot(plot_params):
                         'edgecolors': None,
                         'facecolors': None,
                         'linewidths': None,
-                        'linestyles': 'solid'                        
+                        'linestyles': 'solid'
         },
         contour_kwargs={'extend': 'both',
                         'colors': '0.2',
@@ -172,6 +173,10 @@ def plot(plot_params):
         quiverkey_kwargs={'labelpos': 'S',
                           'coordinates': 'axes',
                           'fontproperties': {'size': 'xx-small'}},
+
+        do_best_fit_line=True,
+        print_best_fit_slope=True,
+        print_corr_coeff = True,
 
         do_subtract_mean=True,
     )
@@ -210,6 +215,8 @@ def main(main_params):
 
 if __name__ == '__main__':
     params = MainParams()
+    # params.proj = p.obs
+    # params.model = m.merra
     params.proj = p.aero_3agcm
     params.model = m.am2
     # params.model = [[m.am2, m.am3, m.hiram, m.hiram_c48]]
@@ -220,7 +227,8 @@ if __name__ == '__main__':
     dc48 = aospy.plotting.Operator('-', (r.hiram_c48_0_p2K, r.hiram_c48_0))
     # params.run = [[dam2, r.am2_reyoi_p2, dam2]]
     # params.run = [[dam2, dam3, dhir, dc48]]
-    params.run = r.am2_reyoi_cont
+    # params.run = r.merra
+    params.run = r.am2_amip
     # params.run = [[dam2, r.am2_reyoi_cont],
                   # [dam3, r.am3_hc],
                   # [dhir, r.hiram_cont],
@@ -236,8 +244,8 @@ if __name__ == '__main__':
                   # [v.mse_vert_advec_upwind, v.column_energy],
                   # [v.mse_horiz_advec_upwind, v.column_energy],
                   # [v.mse_total_advec_upwind, v.column_energy]]*1
-    params.var = [[[v.precip,
-                  v.t_surf]]]
+    params.var = [[[v.mse_vert_advec_upwind,
+                    v.precip]]]
     params.region = reg.sahel
 
     fig = main(params)
