@@ -32,6 +32,8 @@ s1_spec_mass = Units(
     units=r's$^{-1}$',
     plot_units=r'g kg$^{-1}$ day$^{-1}$',
     plot_units_conv=seconds_in_day*1e3,
+    vert_int_plot_units=r'mm day$^{-1}$',
+    vert_int_plot_units_conv=seconds_in_day
 )
 s1_vort = Units(
     units=r's$^{-1}$',
