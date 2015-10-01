@@ -2077,6 +2077,18 @@ sfc_rad_cld = Var(
     func=calcs.sfc_rad_cld,
     units=units.W_m2
 )
+sfc_rad_clr = Var(
+    name='sfc_rad_clr',
+    domain='atmos',
+    description='Net clear-sky surface radiative flux, positive upwards.',
+    variables=(swup_sfc_clr, swdn_sfc_clr, lwup_sfc_clr, lwdn_sfc_clr),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.sfc_rad,
+    units=units.W_m2
+)
 sfc_sw = Var(
     name='sfc_sw',
     domain='atmos',
@@ -2427,12 +2439,12 @@ master_vars_list = [
     dry_static_stab, total_gms, dse, horiz_divg, moist_static_stab,
     gross_moist_strat, mse, mse_horiz_advec, mse_times_horiz_divg,
     mse_vert_advec, msf, mass_flux, p_minus_e, pot_temp, prec_conv_frac,
-    sfc_albedo, sfc_energy, sfc_lw, sfc_lw_cld, sfc_rad, sfc_rad_cld, sfc_sw,
-    sfc_sw_cld, tdt_diab, tdt_lw_cld, tdt_sw_cld, toa_rad, toa_rad_clr, toa_sw,
-    vert_divg, virt_pot_temp, divg_mass_bal, horiz_divg_mass_bal,
-    vert_divg_mass_bal, mse_horiz_flux_divg, q_horiz_advec, q_vert_advec,
-    q_times_horiz_divg, q_horiz_flux_divg, qu, qv, du_dx, dv_dy,
-    dse_horiz_flux_divg, dse_times_horiz_divg, dse_horiz_advec,
+    sfc_albedo, sfc_energy, sfc_lw, sfc_lw_cld, sfc_rad, sfc_rad_cld,
+    sfc_rad_clr, sfc_sw, sfc_sw_cld, tdt_diab, tdt_lw_cld, tdt_sw_cld, toa_rad,
+    toa_rad_clr, toa_sw, vert_divg, virt_pot_temp, divg_mass_bal,
+    horiz_divg_mass_bal, vert_divg_mass_bal, mse_horiz_flux_divg,
+    q_horiz_advec, q_vert_advec, q_times_horiz_divg, q_horiz_flux_divg, qu, qv,
+    du_dx, dv_dy, dse_horiz_flux_divg, dse_times_horiz_divg, dse_horiz_advec,
     temp_horiz_flux_divg, temp_times_horiz_divg, temp_horiz_advec,
     hght_horiz_flux_divg, hght_times_horiz_divg, hght_horiz_advec,
     mse_horiz_advec_divg_sum, q_horiz_advec_divg_sum,
