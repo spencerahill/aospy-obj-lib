@@ -73,9 +73,8 @@ kg_s1 = Units(
     plot_units_conv=seconds_in_day
 )
 W_m2 = Units(
-    units=r'W m$^{-2}$',
-    vert_int_units=r''
-    )
+    units=r'W m$^{-2}$'
+)
 J_kg1 = Units(
     units=r'J kg$^{-1}$',
     plot_units='K',
