@@ -65,8 +65,8 @@ def plot(plot_params):
         dtype_out_vert=[False]*2 + [['vert_int', False]]*4,
         # level=700,
         level=False,
-        yr_range='default',
-        # yr_range=(1983, 1983),
+        # date_range='default',
+        date_range=('1983-01-01', '1983-12-31'),
 
         # fig_title=False,
         fig_title=r'Control JAS MSE budget terms',
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     # params.var = ([v.column_energy]*2 +
                   # [v.mse_vert_advec_upwind]*2 +
                   # [v.mse_horiz_advec_upwind]*2)
-    params.var = ([[v.column_energy, v.column_energy]]*2 +
+    params.var = ([[v.toa_rad, v.column_energy]]*2 +
                   [[v.mse_vert_advec_upwind, v.column_energy]]*2 +
                   [[v.mse_horiz_advec_upwind, v.column_energy]]*2)
     # params.var = [[v.hght, v.hght, [v.ucomp, v.vcomp]]]
