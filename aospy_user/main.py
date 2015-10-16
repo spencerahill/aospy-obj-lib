@@ -39,7 +39,7 @@ class MainParamsParser(object):
                 try:
                     run_objs.append(aospy_user.to_run(run, model, proj))
                 except AttributeError as ae:
-                    print ae
+                    print(ae)
         # If flat list, return the list.  If nested, then flatten it.
         if all([isinstance(r, aospy.Run) for r in run_objs]):
             return [run_objs[0]]
@@ -69,7 +69,7 @@ class CalcSuite(object):
             ('Runs', self.run),
             ('Ensemble members', self.ens_mem),
             ('Variables', self.var),
-            ('Year ranges', self.yr_range),
+            ('Year ranges', self.date_range),
             ('Geographical regions', [r.values() for r in self.region]),
             ('Time interval of input data', self.intvl_in),
             ('Time interval for averaging', self.intvl_out),
@@ -78,20 +78,20 @@ class CalcSuite(object):
             ('Output data time type', self.dtype_out_time),
             ('Output data vertical type', self.dtype_out_vert),
             ('Vertical levels', self.level),
-            ('Year chunks', self.yr_chunk_len),
+            ('Year chunks', self.chunk_len),
             ('Compute this data', self.compute),
             ('Print this data', self.print_table)
         )
-        print ''
+        print('')
         colorama.init()
         color_left = colorama.Fore.BLUE
         color_right = colorama.Fore.RESET
         for left, right in pairs:
-            print color_left, left, ':', color_right, right
-        print colorama.Style.RESET_ALL
+            print(color_left, left, ':', color_right, right)
+        print(colorama.Style.RESET_ALL)
 
     def prompt_user_verify(self):
-        if not raw_input("Proceed using these parameters? ").lower() == 'y':
+        if not input("Proceed using these parameters? ").lower() == 'y':
             raise IOError('\nExecution cancelled by user.')
 
     def create_params_all_calcs(self):
@@ -100,7 +100,7 @@ class CalcSuite(object):
                       'run',
                       'ens_mem',
                       'var',
-                      'yr_range',
+                      'date_range',
                       'level',
                       'region',
                       'intvl_in',
@@ -110,7 +110,7 @@ class CalcSuite(object):
                       'dtype_in_vert',
                       'dtype_out_vert',
                       'verbose',
-                      'yr_chunk_len')
+                      'chunk_len')
         attrs = tuple([getattr(self, name) for name in attr_names])
 
         # Each permutation becomes a dictionary, with the keys being the attr
@@ -129,20 +129,23 @@ class CalcSuite(object):
         for params in param_combos:
             try:
                 calc_int = aospy.CalcInterface(**params)
-            except AttributeError as ae:
-                print 'aospy warning:', ae
+            # except AttributeError as ae:
+                # print('aospy warning:', ae)
+            except:
+                raise
             else:
                 calc = aospy.Calc(calc_int)
                 if exec_calcs:
                     try:
                         calc.compute()
                     except:
-                        print 'Calc %s failed.  Skipping.' % calc
+                        raise
+                        # print('Calc %s failed.  Skipping.' % calc)
                     else:
                         if print_table:
-                            print ("%.1f" % calc.load('reg.av', False,
-                                                      calc_int.region['sahel'],
-                                                      plot_units=False))
+                            print("%.1f" % calc.load('reg.av', False,
+                                                     calc_int.region['sahel'],
+                                                     plot_units=False))
 
                 calcs.append(calc)
         return calcs
@@ -153,9 +156,9 @@ class CalcSuite(object):
     def print_results(self, calcs):
         for calc in calcs:
             for region in calc.region.values():
-                print [calc.load(self.dtype_out_time[0],
+                print([calc.load(self.dtype_out_time[0],
                                  # dtype_out_vert=params[-2],
-                                 region=region, plot_units=True)]
+                                 region=region, plot_units=True)])
 
 
 def main(main_params):
@@ -166,12 +169,12 @@ def main(main_params):
     cs.prompt_user_verify()
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
-    print '\n\tVariable time averages and statistics:'
+    print('\n\tVariable time averages and statistics:')
     # if main_params.compute:
         # cs.exec_calcs(calcs)
     # if main_params.print_table:
         # cs.print_results(calcs)
-    print "Calculations finished."
+    print("Calculations finished.")
     return calcs
 
 if __name__ == '__main__':
@@ -206,14 +209,14 @@ if __name__ == '__main__':
                      'ncar-ccsm4']
 
     mp = MainParams()
-    mp.proj = 'cmip5'
-    mp.model = cmip_models_h
-    mp.run = ['amip4K']
+    mp.proj = 'aero_3agcm'
+    mp.model = 'am2'
+    mp.run = ['reyoi_cont']
     mp.ens_mem = [False]
-    mp.var = ['toa_rad']
-    # mp.var = ['mse_horiz_advec_upwind', 'mse_vert_advec_upwind']
-    # mp.yr_range = [(1983, 1983)]
-    mp.yr_range = ['default']
+    # mp.var = ['t_surf']
+    mp.var = ['mse_horiz_advec_upwind']#, 'mse_vert_advec_upwind']
+    mp.date_range = [('1983-01-01', '2012-12-31')]
+    # mp.date_range = ['default']
     mp.region = 'all'
     mp.intvl_in = ['monthly']
     mp.intvl_out = ['jas']
@@ -225,7 +228,7 @@ if __name__ == '__main__':
     mp.dtype_out_vert = [False]
     # mp.dtype_out_vert = ['vert_int']
     mp.level = [False]
-    mp.yr_chunk_len = [False]
+    mp.chunk_len = [False]
     mp.verbose = [True]
     mp.compute = True
     mp.print_table = False

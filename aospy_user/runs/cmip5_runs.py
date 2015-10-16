@@ -1,4 +1,3 @@
-"""aospy.Run objects pertaining to CMIP5 simulations."""
 from aospy import Run
 
 onepctCO2 = Run(
@@ -14,24 +13,24 @@ amip = Run(
     description='Atmosphere only',
     direc_nc='mon/atmos/Amon/r1i1p1',
     nc_dir_struc='gfdl_repo',
-    default_yr_range=(1979, 2008),
+    default_date_range=(1979, 2008),
 )
 amip4K = Run(
     name='amip4K',
     description='Atmosphere only',
     direc_nc='mon/atmos/Amon/r1i1p1',
     nc_dir_struc='gfdl_repo',
-    default_yr_range=(1979, 2008),
+    default_date_range=(1979, 2008),
 )
 amip4xCO2 = Run(
     name='amip4xCO2',
     description='Atmosphere only',
-    default_yr_range=(1979, 2008),
+    default_date_range=(1979, 2008),
 )
 amipFuture = Run(
     name='amipFuture',
     description='Atmosphere only',
-    default_yr_range=(1979, 2008),
+    default_date_range=(1979, 2008),
 )
 historical = Run(
     name='historical',
