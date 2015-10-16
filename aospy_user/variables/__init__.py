@@ -1700,13 +1700,27 @@ pot_temp = Var(
 prec_conv_frac = Var(
     name='prec_conv_frac',
     domain='atmos',
-    description='Fraction of liquid precipitation reaching surface originating from convection scheme (as opposed to large-scale condensation.',
+    description=('Fraction of liquid precipitation reaching surface '
+                 'originating from convection scheme (as opposed to '
+                 'large-scale condensation.'),
     variables=(prec_conv, precip),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
     func=calcs.prec_conv_frac,
+    units=units.unitless
+)
+ps_monthly_tendency = Var(
+    name='ps_monthly_tendency',
+    domain='atmos',
+    description='Monthly time-tendency of surface pressure.',
+    variables=(ps,),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.time_tendency,
     units=units.unitless
 )
 q_zonal_advec = Var(
@@ -2466,7 +2480,8 @@ master_vars_list = [
     horiz_divg_mass_adj, divg_3d,
     divg_of_vert_int_horiz_flow, divg_of_vert_int_horiz_flow_moist,
     horiz_advec_sfc_pressure, q_horiz_advec_mass_adj,
-    q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj
+    q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj,
+    ps_monthly_tendency
 ]
 
 
