@@ -7,12 +7,14 @@ vertically defined, (lat, lon).
 import scipy.stats
 import numpy as np
 
-from aospy import FiniteDiff, SpharmInterface
+from aospy import FiniteDiff
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v,
                              E_0v, E_0s, s_0v, s_0s)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
                          integrate, int_dp_g, weight_by_delta)
+
+from .budget_calcs import *
 
 
 # General finite differencing functions.
@@ -380,9 +382,9 @@ def horiz_divg(u, v, lat, lon, radius):
     return du_dx + dv_dy
 
 
-def divg_spharm(u, v, **kwargs):
-    s = SpharmInterface(u, v, **kwargs)
-    return s.revert_to_raw(s.divergence())
+# def divg_spharm(u, v, **kwargs):
+    # s = SpharmInterface(u, v, **kwargs)
+    # return s.revert_to_raw(s.divergence())
 
 
 def u_or_v_mass_adjustment(uv, q, ps, dp, p):
@@ -449,7 +451,6 @@ def horiz_advec_sfc_pressure(ps, u, v, lat, lon, radius, p, vec_field=False):
         sfc_index = 0
     else:
         sfc_index = -1
-    print sfc_index, u[:,sfc_index,45,0]
     u_sfc = (u[:,sfc_index])[:,np.newaxis,:,:]
     v_sfc = (v[:,sfc_index])[:,np.newaxis,:,:]
     return horiz_advec(ps, u_sfc, v_sfc, lat, lon, radius,

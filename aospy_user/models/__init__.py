@@ -1,12 +1,12 @@
 """Collection of Spencer Hill's aospy.Model objects."""
-from gfdl_models import (
+from .gfdl_models import (
     am2, am3, hiram, hiram_c48, sm2, am2p5, am3c90, am4a1, am4a2, am4c1
 )
-from obs_models import (
+from .obs_models import (
     cru, prec_l, gpcp, cmap, trmm, udel, ceres, era, merra, cfsr, jra,
     landflux, landflux95, hadisst, hurrell, reynolds_oi
 )
-from cmip5_models import (
+from .cmip5_models import (
     bcc_csm1, bnu_esm, cccma_canam4, cccma_cancm4, cccma_canesm2, cmcc_cesm,
     cmcc_cm, cmcc_cms, cnrm_cm5, cnrm_cm5_2, cola_cfsv2, csiro_bom_access1_0,
     csiro_bom_access1_3, csiro_qccce_mk3_6_0, fio_esm, ichec_ec_earth, inm_cm4,
