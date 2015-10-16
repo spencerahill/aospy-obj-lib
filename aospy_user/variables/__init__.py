@@ -958,18 +958,18 @@ divg_mass_bal = Var(
     func=calcs.field_vert_int_bal,
     units=units.s1
 )
-divg_spharm = Var(
-    name='divg_spharm',
-    domain='atmos',
-    description='Horizontal divergence using spharm spherical harmonics.',
-    variables=(ucomp, vcomp),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.divg_spharm,
-    units=units.s1
-)
+# divg_spharm = Var(
+#     name='divg_spharm',
+#     domain='atmos',
+#     description='Horizontal divergence using spharm spherical harmonics.',
+#     variables=(ucomp, vcomp),
+#     def_time=True,
+#     def_vert=True,
+#     def_lat=True,
+#     def_lon=True,
+#     func=calcs.divg_spharm,
+#     units=units.s1
+# )
 dry_static_stab = Var(
     name='dry_static_stab',
     domain='atmos',
@@ -2461,7 +2461,9 @@ master_vars_list = [
     q_vert_advec_upwind, q_total_advec_upwind, q_zonal_advec_upwind,
     q_merid_advec_upwind, q_zonal_advec, q_merid_advec, mse_horiz_advec_upwind,
     mse_vert_advec_upwind, mse_total_advec_upwind, column_mass,
-    column_mass_integral, divg_spharm, horiz_divg_mass_adj, divg_3d,
+    column_mass_integral,
+    # divg_spharm,
+    horiz_divg_mass_adj, divg_3d,
     divg_of_vert_int_horiz_flow, divg_of_vert_int_horiz_flow_moist,
     horiz_advec_sfc_pressure, q_horiz_advec_mass_adj,
     q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj

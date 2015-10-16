@@ -1,4 +1,3 @@
-"""aospy.Model objects for various models developed at GFDL"""
 from aospy.model import Model
 from aospy_user import runs
 

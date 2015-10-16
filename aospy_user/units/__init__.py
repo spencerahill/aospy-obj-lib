@@ -21,19 +21,19 @@ W = Units(
 s = Units(
     units=r's',
     plot_units=r'day',
-    plot_units_conv=1. / seconds_in_day
+    plot_units_conv=1. / seconds_in_day.value
 )
 s1 = Units(
     units=r's$^{-1}$',
     plot_units=r'day$^{-1}$',
-    plot_units_conv=seconds_in_day,
+    plot_units_conv=seconds_in_day.value,
 )
 s1_spec_mass = Units(
     units=r's$^{-1}$',
     plot_units=r'g kg$^{-1}$ day$^{-1}$',
-    plot_units_conv=seconds_in_day*1e3,
+    plot_units_conv=seconds_in_day.value*1e3,
     vert_int_plot_units=r'mm day$^{-1}$',
-    vert_int_plot_units_conv=seconds_in_day
+    vert_int_plot_units_conv=seconds_in_day.value
 )
 s1_vort = Units(
     units=r's$^{-1}$',
@@ -43,7 +43,7 @@ s1_vort = Units(
 K_s1 = Units(
     units=r'K s$^{-1}$',
     vert_int_plot_units=r'W m$^{-2}$',
-    vert_int_plot_units_conv=c_p
+    vert_int_plot_units_conv=c_p.value
 )
 m_s1 = Units(
     units=r'm s$^{-1}$',
@@ -59,7 +59,7 @@ kg_m2 = Units(
 kg_m2_s1 = Units(
     units=r'kg m$^{-2}$ s$^{-1}$',
     plot_units=r'mm day$^{-1}$',
-    plot_units_conv=seconds_in_day
+    plot_units_conv=seconds_in_day.value
 )
 # For vertical integrals of divergence.
 kg_m2_s1_mass = Units(
@@ -70,7 +70,7 @@ kg_m2_s1_mass = Units(
 kg_s1 = Units(
     units=r'kg s$^{-1}$',
     plot_units=r'kg day$^{-1}$',
-    plot_units_conv=seconds_in_day
+    plot_units_conv=seconds_in_day.value
 )
 W_m2 = Units(
     units=r'W m$^{-2}$'
@@ -78,7 +78,7 @@ W_m2 = Units(
 J_kg1 = Units(
     units=r'J kg$^{-1}$',
     plot_units='K',
-    plot_units_conv=1/c_p,
+    plot_units_conv=1/c_p.value,
     vert_int_units='J m$^{-2}$',
     vert_int_plot_units='10$^6$ J m$^{-2}$',
     vert_int_plot_units_conv=1e-6
@@ -86,7 +86,7 @@ J_kg1 = Units(
 J_kg1_s1 = Units(
     units=r'J kg$^{-1}$ s$^{-1}$',
     plot_units='K day$^{-1}',
-    plot_units_conv=seconds_in_day / c_p,
+    plot_units_conv=seconds_in_day.value / c_p.value,
     vert_int_units='W m$^{-2}$',
     vert_int_plot_units='W m$^{-2}$',
     vert_int_plot_units_conv=1
