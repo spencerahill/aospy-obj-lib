@@ -11,15 +11,15 @@ abrupt4xCO2 = Run(
 amip = Run(
     name='amip',
     description='Atmosphere only',
-    direc_nc='mon/atmos/Amon/r1i1p1',
-    nc_dir_struc='gfdl_repo',
+    data_in_direc='mon/atmos/Amon/r1i1p1',
+    data_in_dir_struc='gfdl_repo',
     default_date_range=(1979, 2008),
 )
 amip4K = Run(
     name='amip4K',
     description='Atmosphere only',
-    direc_nc='mon/atmos/Amon/r1i1p1',
-    nc_dir_struc='gfdl_repo',
+    data_in_direc='mon/atmos/Amon/r1i1p1',
+    data_in_dir_struc='gfdl_repo',
     default_date_range=(1979, 2008),
 )
 amip4xCO2 = Run(

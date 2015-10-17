@@ -128,25 +128,24 @@ class CalcSuite(object):
         calcs = []
         for params in param_combos:
             try:
-                calc_int = aospy.CalcInterface(**params)
+                ci = aospy.CalcInterface(**params)
             # except AttributeError as ae:
                 # print('aospy warning:', ae)
             except:
                 raise
             else:
-                calc = aospy.Calc(calc_int)
+                calc = aospy.Calc(ci)
                 if exec_calcs:
                     try:
                         calc.compute()
                     except:
                         raise
-                        # print('Calc %s failed.  Skipping.' % calc)
+                        # print('Calc {} failed.  Skipping.'.format(calc))
                     else:
                         if print_table:
-                            print("%.1f" % calc.load('reg.av', False,
-                                                     calc_int.region['sahel'],
-                                                     plot_units=False))
-
+                            print("{}".format(calc.load('reg.av', False,
+                                                        ci.region['sahel'],
+                                                        plot_units=False)))
                 calcs.append(calc)
         return calcs
 
@@ -177,15 +176,19 @@ if __name__ == '__main__':
     mp.model = 'am2'
     mp.run = ['reyoi_cont']
     mp.ens_mem = [False]
-    mp.var = ['t_surf']
-    # mp.var = ['mse_horiz_advec_upwind']
-    mp.date_range = [('1983-01-01', '2012-12-31')]
+    # mp.var = ['t_surf']
+    mp.var = ['ps_monthly_tendency']
+    # mp.date_range = [('1983-01-01', '2012-12-31')]
+    mp.date_range = [('1983-01-01', '1984-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
-    mp.intvl_in = ['monthly']
+    # mp.intvl_in = ['monthly']
+    mp.intvl_in = ['3hr']
     mp.intvl_out = ['jas']
-    mp.dtype_in_time = ['ts']
+    # mp.dtype_in_time = ['ts']
+    mp.dtype_in_time = ['inst']
     mp.dtype_in_vert = [False]
+    # mp.dtype_in_vert = ['sigma']
     # mp.dtype_in_vert = ['pressure']
     # mp.dtype_out_time = [('reg.av',)]
     mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
