@@ -92,7 +92,7 @@ class CalcSuite(object):
 
     def prompt_user_verify(self):
         if not input("Proceed using these parameters? ").lower() == 'y':
-            raise IOError('\nExecution cancelled by user.')
+            raise IOError('\n', 'Execution cancelled by user.')
 
     def create_params_all_calcs(self):
         attr_names = ('proj',
@@ -169,52 +169,16 @@ def main(main_params):
     cs.prompt_user_verify()
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
-    print('\n\tVariable time averages and statistics:')
-    # if main_params.compute:
-        # cs.exec_calcs(calcs)
-    # if main_params.print_table:
-        # cs.print_results(calcs)
-    print("Calculations finished.")
     return calcs
 
 if __name__ == '__main__':
-
-    cmip_models_h = ['bcc_csm1-1',
-                     'cccma_canam4',
-                     # 'cesm1-cam5',
-                     'cnrc-cm5',
-                     'hadgem2-a',
-                     'ichec-ec-earth',
-                     'ipsl-cm5a-lr',
-                     'ipsl-cm5b-lr',
-                     'lasg-cess-fgoals-g2',
-                     'miroc5',
-                     'mpi-esm-lr',
-                     'mpi-esm-mr',
-                     'mri-cgcm3',
-                     'ncar-ccsm4']
-    cmip_models_p = ['bcc_csm1-1',
-                     'cccma_canam4',
-                     'cesm1-cam5',
-                     'cnrc-cm5',
-                     # 'hadgem2-a',
-                     'ichec-ec-earth',
-                     'ipsl-cm5a-lr',
-                     'ipsl-cm5b-lr',
-                     'lasg-cess-fgoals-g2',
-                     'miroc5',
-                     'mpi-esm-lr',
-                     'mpi-esm-mr',
-                     'mri-cgcm3',
-                     'ncar-ccsm4']
-
     mp = MainParams()
     mp.proj = 'aero_3agcm'
     mp.model = 'am2'
     mp.run = ['reyoi_cont']
     mp.ens_mem = [False]
-    # mp.var = ['t_surf']
-    mp.var = ['mse_horiz_advec_upwind']#, 'mse_vert_advec_upwind']
+    mp.var = ['t_surf']
+    # mp.var = ['mse_horiz_advec_upwind']
     mp.date_range = [('1983-01-01', '2012-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
