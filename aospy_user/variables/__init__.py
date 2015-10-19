@@ -1,5 +1,5 @@
 """Collection of aospy.Var objects for use in my research."""
-from aospy.constants import c_p, r_e
+from aospy.constants import r_e
 from aospy.var import Var
 from aospy_user import calcs, units
 
@@ -863,6 +863,7 @@ column_mass = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.column_mass,
+    func_input_dtype='numpy',
     units=units.kg_m2,
     colormap='RdBu_r'
 )
@@ -1334,7 +1335,8 @@ horiz_divg = Var(
     math_str=r'$\nabla\cdot\mathbf{v}$',
     domain='atmos',
     description='',
-    variables=(ucomp, vcomp, lat, lon, r_e),
+    # variables=(ucomp, vcomp, lat, lon, r_e),
+    variables=(ucomp, vcomp, r_e),
     def_time=True,
     def_vert=True,
     def_lat=True,
@@ -1373,7 +1375,8 @@ divg_of_vert_int_horiz_flow = Var(
     name='divg_of_vert_int_horiz_flow',
     domain='atmos',
     description='',
-    variables=(ucomp, vcomp, lat, lon, r_e, 'dp'),
+    variables=(ucomp, vcomp, r_e, 'dp'),
+    # variables=(ucomp, vcomp, lat, lon, r_e, 'dp'),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -1720,8 +1723,8 @@ ps_monthly_tendency = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.time_tendency,
-    units=units.unitless
+    func=calcs.time_tendency_gfdl,
+    units=units.Pa_s1
 )
 q_zonal_advec = Var(
     name='q_zonal_advec',
