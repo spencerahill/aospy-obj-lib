@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 """Main script for automating computations using aospy."""
+from __future__ import print_function
 import itertools
 
 import colorama
@@ -91,7 +92,11 @@ class CalcSuite(object):
         print(colorama.Style.RESET_ALL)
 
     def prompt_user_verify(self):
-        if not input("Proceed using these parameters? ").lower() == 'y':
+        try:
+            input = raw_input
+        except NameError:
+            pass
+        if not input("Perform these computations? ").lower() in ('y', 'yes'):
             raise IOError('\n', 'Execution cancelled by user.')
 
     def create_params_all_calcs(self):
@@ -177,18 +182,18 @@ if __name__ == '__main__':
     mp.run = ['reyoi_cont']
     mp.ens_mem = [False]
     # mp.var = ['t_surf']
-    mp.var = ['ps_monthly_tendency']
+    mp.var = ['divg_of_vert_int_horiz_flow']
     # mp.date_range = [('1983-01-01', '2012-12-31')]
     mp.date_range = [('1983-01-01', '1984-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
-    # mp.intvl_in = ['monthly']
-    mp.intvl_in = ['3hr']
+    mp.intvl_in = ['monthly']
+    # mp.intvl_in = ['3hr']
     mp.intvl_out = ['jas']
-    # mp.dtype_in_time = ['ts']
-    mp.dtype_in_time = ['inst']
-    mp.dtype_in_vert = [False]
-    # mp.dtype_in_vert = ['sigma']
+    mp.dtype_in_time = ['ts']
+    # mp.dtype_in_time = ['inst']
+    # mp.dtype_in_vert = [False]
+    mp.dtype_in_vert = ['sigma']
     # mp.dtype_in_vert = ['pressure']
     # mp.dtype_out_time = [('reg.av',)]
     mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
