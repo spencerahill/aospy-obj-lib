@@ -95,7 +95,7 @@ class CalcSuite(object):
         try:
             input = raw_input
         except NameError:
-            pass
+            input = __builtin__.input
         if not input("Perform these computations? ").lower() in ('y', 'yes'):
             raise IOError('\n', 'Execution cancelled by user.')
 
