@@ -95,7 +95,8 @@ class CalcSuite(object):
         try:
             input = raw_input
         except NameError:
-            input = __builtin__.input
+            import builtins
+            input = builtins.input
         if not input("Perform these computations? ").lower() in ('y', 'yes'):
             raise IOError('\n', 'Execution cancelled by user.')
 
@@ -183,8 +184,8 @@ if __name__ == '__main__':
     mp.ens_mem = [False]
     # mp.var = ['t_surf']
     mp.var = ['divg_of_vert_int_horiz_flow']
-    # mp.date_range = [('1983-01-01', '2012-12-31')]
-    mp.date_range = [('1983-01-01', '1984-12-31')]
+    mp.date_range = [('1983-01-01', '2012-12-31')]
+    # mp.date_range = [('1983-01-01', '1984-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
     mp.intvl_in = ['monthly']
