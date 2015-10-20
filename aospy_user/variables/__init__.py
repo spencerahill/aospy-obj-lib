@@ -1044,6 +1044,30 @@ dse_horiz_advec_divg_sum = Var(
     func=calcs.dse_horiz_advec_divg_sum,
     units=units.J_kg1_s1
 )
+d_dx_of_vert_int_u = Var(
+    name='d_dx_of_vert_int_u',
+    domain='atmos',
+    description='',
+    variables=(ucomp, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.d_dx_of_vert_int,
+    units=units.kg_m2_s1_mass
+)
+d_dy_of_vert_int_v = Var(
+    name='d_dy_of_vert_int_v',
+    domain='atmos',
+    description='',
+    variables=(vcomp, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.d_dy_of_vert_int,
+    units=units.kg_m2_s1_mass
+)
 du_dx = Var(
     name='du_dx',
     domain='atmos',
@@ -1382,7 +1406,7 @@ divg_of_vert_int_horiz_flow = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.divg_of_vert_int_horiz_flow,
-    units=units.s1,
+    units=units.kg_m2_s1_mass,
     colormap='RdBu'
 )
 divg_of_vert_int_horiz_flow_moist = Var(
@@ -1395,7 +1419,7 @@ divg_of_vert_int_horiz_flow_moist = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.divg_of_vert_int_horiz_flow_moist,
-    units=units.s1,
+    units=units.kg_m2_s1_mass,
     colormap='RdBu'
 )
 horiz_advec_sfc_pressure = Var(
@@ -1724,7 +1748,7 @@ ps_monthly_tendency = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.time_tendency_gfdl,
-    units=units.Pa_s1
+    units=units.Pa_s1_mass
 )
 q_zonal_advec = Var(
     name='q_zonal_advec',
@@ -2484,7 +2508,9 @@ master_vars_list = [
     divg_of_vert_int_horiz_flow, divg_of_vert_int_horiz_flow_moist,
     horiz_advec_sfc_pressure, q_horiz_advec_mass_adj,
     q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj,
-    ps_monthly_tendency
+    ps_monthly_tendency,
+    d_dx_of_vert_int_u,
+    d_dy_of_vert_int_v
 ]
 
 

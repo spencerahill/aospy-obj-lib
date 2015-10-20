@@ -1,5 +1,5 @@
 from aospy.units import Units
-from aospy.constants import c_p, seconds_in_day
+from aospy.constants import c_p, grav, seconds_in_day
 
 unitless = Units(units='')
 specific_mass = Units(
@@ -108,4 +108,9 @@ Pa_s1 = Units(
     units=r'Pa s$^{-1}$',
     plot_units=r'hPa day$^{-1}$',
     plot_units_conv=24.*3600./100.
+)
+Pa_s1_mass = Units(
+    units=r'Pa s$^{-1}$',
+    plot_units=kg_m2_s1_mass.plot_units,
+    plot_units_conv=100. / grav.value
 )
