@@ -51,7 +51,7 @@ def d_dx_from_latlon(f, radius):
     # Wrap around at 0/360 degrees longitude.
     f_ext = wraparound_lon(f)
     # Perform the centered differencing.
-    df_dx = FiniteDiff.cen_diff_deriv(f_ext, LON_STR)
+    df_dx = FiniteDiff.cen_diff_deriv(f_ext, LON_STR, do_edges_one_sided=False)
     return prefactor*df_dx
 
 
@@ -279,11 +279,6 @@ def horiz_divg(u, v, radius):
     du_dx = d_dx_from_latlon(u, radius)
     dv_dy = d_dy_from_lat(v, radius, vec_field=True)
     return du_dx + dv_dy
-# def horiz_divg(u, v, lat, lon, radius):
-#     """Flow horizontal divergence."""
-#     du_dx = d_dx_from_latlon(u, lat, lon, radius)
-#     dv_dy = d_dy_from_lat(v, lat, radius, vec_field=True)
-#     return du_dx + dv_dy
 
 
 # def divg_spharm(u, v, **kwargs):
@@ -335,16 +330,19 @@ def field_horiz_flux_divg_mass_adj(field, u, v, q, ps, lat, lon,
                                  dp, p, vec_field=vec_field))
 
 
+def d_dx_of_vert_int(arr, radius, dp):
+    return d_dx_from_latlon(int_dp_g(arr, dp), radius)
+
+
+def d_dy_of_vert_int(arr, radius, dp):
+    return d_dy_from_lat(int_dp_g(arr, dp), radius, vec_field=True)
+
+
 def divg_of_vert_int_horiz_flow(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
     u_int = int_dp_g(u, dp)
     v_int = int_dp_g(v, dp)
     return horiz_divg(u_int, v_int, radius)
-# def divg_of_vert_int_horiz_flow(u, v, lat, lon, radius, dp):
-#     """Horizontal divergence of vertically integrated flow."""
-#     u_int = int_dp_g(u, dp)
-#     v_int = int_dp_g(v, dp)
-#     return horiz_divg(u_int, v_int, lat, lon, radius)
 
 
 def divg_of_vert_int_horiz_flow_moist(u, v, evap, precip, lat, lon,
