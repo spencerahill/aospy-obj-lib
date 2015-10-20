@@ -4,59 +4,71 @@ import numpy as np
 from aospy import FiniteDiff
 
 
-def fwd_diff1(fx, x):
+def fwd_diff1(arr, dim):
     """1st order accurate forward differencing approximation of derivative.
 
-    :param fx: Field to take derivative of.
-    :param x: Values of dimension over which derivative is taken.  If a
+    :param arr: Field to take derivative of.
+    :param dim: Values of dimension over which derivative is taken.  If a
               singleton, assumed to be the uniform spacing.  If an array,
               assumed to be the values themselves, not the spacing, and must
-              be the same length as `fx`.
+              be the same length as `arr`.
     :out: Array containing the df/dx approximation, with length in the 0th
           axis one less than that of the input array.
     """
-    if isinstance(x, (float, int)):
-        dx = x
-    else:
-        dx = x[1:] - x[:-1]
-    if not np.all(dx):
-        raise ValueError("`dx` has >=1 zero value")
-    return (fx[1:] - fx[:-1]) / dx
+    return FiniteDiff.fwd_diff_deriv(arr, dim)
+# def fwd_diff1(arr, dim):
+#     """1st order accurate forward differencing approximation of derivative.
+
+#     :param arr: Field to take derivative of.
+#     :param dim: Values of dimension over which derivative is taken.  If a
+#               singleton, assumed to be the uniform spacing.  If an array,
+#               assumed to be the values themselves, not the spacing, and must
+#               be the same length as `arr`.
+#     :out: Array containing the df/dx approximation, with length in the 0th
+#           axis one less than that of the input array.
+#     """
+#     if isinstance(dim, (float, int)):
+#         dx = dim
+#     else:
+#         dx = dim[1:] - dim[:-1]
+#     if not np.all(dx):
+#         raise ValueError("`dx` has >=1 zero value")
+#     return (arr[1:] - arr[:-1]) / dx
 
 
-def fwd_diff2(fx, x):
+def fwd_diff2(arr, dim):
     """2nd order accurate forward differencing approximation of derivative.
 
-    :param fx: Field to take derivative of.
-    :param x: Values of dimension over which derivative is taken.  If a
+    :param arr: Field to take derivative of.
+    :param dim: Values of dimension over which derivative is taken.  If a
               singleton, assumed to be the uniform spacing.  If an array,
               assumed to be the values themselves, not the spacing, and must
-              be the same length as `fx`.
+              be the same length as `arr`.
     :out: Array containing the df/dx approximation, with length in the 0th
           axis two less than that of the input array.
     """
-    if isinstance(x, (float, int)):
-        dx = x
-        return (-fx[2:] +4*fx[1:-1] -3*fx[:-2]) / (2.*dx)
+    if isinstance(dim, (float, int)):
+        dx = dim
+        return (-arr[2:] +4*arr[1:-1] -3*arr[:-2]) / (2.*dx)
     else:
-        df_dx1 = (fx[1:-1] - fx[:-2]) / (x[1:-1] - x[:-2])
-        df_dx2 = (fx[2:]   - fx[:-2]) / (x[2:]   - x[:-2])
+        df_dx1 = (arr[1:-1] - arr[:-2]) / (dim[1:-1] - dim[:-2])
+        df_dx2 = (arr[2:]   - arr[:-2]) / (dim[2:]   - dim[:-2])
         return 2.*df_dx1 - df_dx2
 
 
-def cen_diff2(fx, x):
-    fd = FiniteDiff(fx, positions=x)
-    return fd.cen_diff_deriv(order=2)
+def cen_diff2(arr, dim):
+    return FiniteDiff.cen_diff_deriv(arr, dim, order=2,
+                                     do_edges_one_sided=True)
 
 
-def cen_diff4(fx, x):
+def cen_diff4(arr, dim):
     """4th order accurate centered differencing."""
-    if isinstance(x, (float, int)):
-        dx = x
-        return (8*(fx[3:-1] - fx[1:-3]) - (fx[4:] - fx[:-4])) / (12.*dx)
+    if isinstance(dim, (float, int)):
+        dx = dim
+        return (8*(arr[3:-1] - arr[1:-3]) - (arr[4:] - arr[:-4])) / (12.*dx)
     else:
-        df_dx1 = (fx[3:-1] - fx[1:-3]) / (x[3:-1] - x[1:-3])
-        df_dx2 = (fx[4:] - fx[:-4]) / (x[4:] - x[:-4])
+        df_dx1 = (arr[3:-1] - arr[1:-3]) / (dim[3:-1] - dim[1:-3])
+        df_dx2 = (arr[4:] - arr[:-4]) / (dim[4:] - dim[:-4])
         return (8.*df_dx1 - df_dx2) / 12.
 
 

@@ -8,6 +8,7 @@ from __future__ import division
 
 import scipy.stats
 import numpy as np
+from aospy import FiniteDiff
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
@@ -16,6 +17,8 @@ from aospy.utils import (level_thickness, to_pascal, to_radians,
 from .budget_calcs import *
 from .numerics import fwd_diff1, fwd_diff2, cen_diff2, cen_diff4, upwind_scheme
 
+LON_STR = 'lon'
+LAT_STR = 'lat'
 
 # Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
@@ -26,94 +29,42 @@ def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
         return 1. / (radius*np.cos(to_radians(lat)))
 
 
+def wraparound_lon(arr, num=1):
+    """Append wrap-around points in longitude to the DataArray or Dataset.
+
+    The longitude arraymust span from 0 to 360.  While this will usually be the
+    case, it's not guaranteed.  Some pre-processing step should be implemented
+    in the future that forces this to be the case.
+    """
+    edge_left = arr.isel(**{LON_STR: 0})
+    edge_left[LON_STR] += 360.
+    edge_right = arr.isel(**{LON_STR: -1})
+    edge_right[LON_STR] -= 360.
+    return xray.concat([edge_right, arr, edge_left], dim=LON_STR)
+
+
 def d_dx_from_latlon(f, radius):
-    """Compute \partial(field)/\partial x using centered differencing."""
-    lon = to_radians(f.coords['lon'])
-    lat = to_radians(f.coords['lat'])
+    """Compute \partial f/\partial x using centered differencing."""
+    lon = to_radians(f.coords[LON_STR])
+    lat = to_radians(f.coords[LAT_STR])
     prefactor = latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False)
     # Wrap around at 0/360 degrees longitude.
-    f_extend = np.ma.concatenate((f.T[-2:], f.T, f.T[:2]), axis=0)
-    lon_extend = np.ma.concatenate((lon[-2:] - 2*np.pi, lon,
-                                    2*np.pi + lon[:2]), axis=-1)
-    # Create new dataset w/ the extended longitudes.
-    coords_extend = f.coords.to_dataset().drop('lon')
-    ds_extend = xray.Dataset(coords={'lon': (['lon'], lon_extend)})
-    coords_extend.coords.update(ds_extend)
-
-    # coords_extend.update({'lon': lon_extend})
-    f_ext_arr = xray.DataArray(f_extend, dims=f.dims, coords=coords_extend)
-    df_dx = cen_diff4(f_ext_arr)
+    f_ext = wraparound_lon(f)
+    # Perform the centered differencing.
+    df_dx = FiniteDiff.cen_diff_deriv(f_ext, LON_STR)
     return prefactor*df_dx
-# def d_dx_from_latlon(field, lat, lon, radius):
-#     """Compute \partial(field)/\partial x using centered differencing."""
-#     prefactor = latlon_deriv_prefactor(to_radians(lat), radius)[:,np.newaxis]
-#     lon = to_radians(lon)
-#     # Assume longitude is last axis.  Transpose so that lon is 0th axis.
-#     if field.ndim == 2:
-#         lon = lon[:,np.newaxis]
-#     if field.ndim == 3:
-#         lon = lon[:,np.newaxis,np.newaxis]
-#     elif field.ndim == 4:
-#         lon = lon[:,np.newaxis,np.newaxis,np.newaxis]
-#     f = field.T
-#     # Wrap around at 0/360 degrees longitude.
-#     # f = np.ma.concatenate((f[-1:], f, f[:1]), axis=0)
-#     # lon = np.ma.concatenate((lon[-1:] - 2*np.pi, lon, 2*np.pi + lon[:1]),
-#                             # axis=0)
-#     # df_dx = cen_diff2(f, lon)
-#     f = np.ma.concatenate((f[-2:], f, f[:2]), axis=0)
-#     lon = np.ma.concatenate((lon[-2:] - 2*np.pi, lon, 2*np.pi + lon[:2]),
-#                             axis=0)
-#     df_dx = cen_diff4(f, lon)
-#     # Transpose again to regain original axis order.
-#     return prefactor*df_dx.T
 
 
-def d_dy_from_lat(field, radius, vec_field=False):
+def d_dy_from_lat(f, radius, vec_field=False):
     """Compute \partial(field)/\partial y using centered differencing."""
-    lat = to_radians(field.coord['lat'])
-    latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=(not vec_field))
+    lat = to_radians(f.coords[LAT_STR])
     # Del operator differs in spherical coords for scalar v. vector fields.
+    prefactor = latlon_deriv_prefactor(lat, radius,
+                                       d_dy_of_scalar_field=(not vec_field))
     if vec_field:
         f *= np.cos(lat)
-    df_dy = np.ma.empty(f.shape)
-    # df_dy[1:-1] = cen_diff2(f, lat)
-    df_dy[2:-2] = cen_diff4(f, lat)
-    df_dy[1] = cen_diff2(f[:3], lat[:3])
-    df_dy[-2] = cen_diff2(f[-3:], lat[-3:])
-    df_dy[0] = fwd_diff1(f[:2], lat[:2])
-    df_dy[-1] = fwd_diff1(f[-2:], lat[-2:])
+    df_dy = FiniteDiff.cen_diff_deriv(f, LAT_STR, do_edges_one_sided=True)
     return prefactor*df_dy
-# def d_dy_from_lat(field, lat, radius, vec_field=False):
-#     """Compute \partial(field)/\partial y using centered differencing."""
-#     lat = to_radians(lat)
-#     # Assume latitude and longitude are last two axes.
-#     if field.ndim == 2:
-#         lat = lat[np.newaxis,:]
-#     if field.ndim == 3:
-#         lat = lat[np.newaxis,:,np.newaxis]
-#     elif field.ndim == 4:
-#         lat = lat[np.newaxis,:,np.newaxis,np.newaxis]
-#     f = field.T
-#     prefactor = 1. / radius
-#     # Del operator differs in spherical coords for scalar v. vector fields.
-#     if vec_field:
-#         f *= np.cos(lat)
-#         prefactor /= np.cos(lat)
-#         prefactor = prefactor.T
-#     # Roll lat to be leading axis for broadcasting.
-#     f = np.rollaxis(f, 1, 0)
-#     lat = np.rollaxis(lat, 1, 0)
-#     df_dy = np.ma.empty(f.shape)
-#     # df_dy[1:-1] = cen_diff2(f, lat)
-#     df_dy[2:-2] = cen_diff4(f, lat)
-#     df_dy[1] = cen_diff2(f[:3], lat[:3])
-#     df_dy[-2] = cen_diff2(f[-3:], lat[-3:])
-#     df_dy[0] = fwd_diff1(f[:2], lat[:2])
-#     df_dy[-1] = fwd_diff1(f[-2:], lat[-2:])
-#     # Roll axis and transpose again to regain original axis order.
-#     df_dy = np.rollaxis(df_dy, 0, 2)
-#     return prefactor*df_dy.T
 
 
 def d_dp_from_p(field, p):
@@ -1209,7 +1160,7 @@ def moc_flux(variables, **kwargs):
     elif flux_type == 'moisture':
         flux = L_v*(np.squeeze(variables[0][:,trop]).mean(axis=-1) *
                 (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
             (flux*lev_thick).sum(axis=1))
 
 
@@ -1230,7 +1181,7 @@ def moc_flux_raw(variables, **kwargs):
         flux = np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) * v_znl
     elif flux_type == 'moisture':
         flux = L_v*np.squeeze(variables[0][:,trop]).mean(axis=-1) * v_znl
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
             (flux*lev_thick).sum(axis=1))
 
 
@@ -1250,7 +1201,7 @@ def st_eddy_flux(variables, **kwargs):
     lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
     flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) *
             (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
             (flux*lev_thick).sum(axis=1).mean(axis=-1))
 
 
@@ -1301,7 +1252,7 @@ def mass_flux(variables, **kwargs):
                 lev_thick).cumsum(axis=1)
     flux_pos = np.amax(int_flux, axis=1)
     flux_neg = np.amin(int_flux, axis=1)
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables['lat'][:])) *
+    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
             np.where(flux_pos > - flux_neg, flux_pos, flux_neg))
 
 
