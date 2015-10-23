@@ -6,19 +6,22 @@ vertically defined, (lat, lon).
 """
 from __future__ import division
 
-import scipy.stats
-import numpy as np
 from aospy import FiniteDiff
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v)
 from aospy.utils import (level_thickness, to_pascal, to_radians,
-                         int_dp_g, weight_by_delta)
+                         int_dp_g)
+import numpy as np
+import scipy.stats
+import xray
 
-from .budget_calcs import *
+from .budget_calcs import time_tendency_gfdl
 from .numerics import fwd_diff1, fwd_diff2, cen_diff2, cen_diff4, upwind_scheme
 
 LON_STR = 'lon'
 LAT_STR = 'lat'
+PFULL_STR = 'pfull'
+PLEVEL_STR = 'level'
 
 # Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
@@ -67,25 +70,12 @@ def d_dy_from_lat(f, radius, vec_field=False):
     return prefactor*df_dy
 
 
-def d_dp_from_p(field, p):
-    """Derivative in pressure of a given field."""
-    # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
-    f = field.T
+def d_dp_from_p(arr, p):
+    """Derivative in pressure of a given arr."""
     p = to_pascal(p)
-    # Amend array dimensions as necessary for broadcasting purposes.
-    if p.ndim == 1:
-        p = p[np.newaxis,np.newaxis,:,np.newaxis]
-    elif p.ndim == 3:
-        p = p[np.newaxis,:,:,:].T
-    else:
-        p = p.T
     # One-sided difference at TOA and surface; centered difference elsewhere.
-    df_dp = np.ma.empty(f.shape)
-    df_dp[:,:,1:-1] = (f[:,:,2:] - f[:,:,:-2]) / (p[:,:,2:] - p[:,:,:-2])
-    df_dp[:,:,0]    = (f[:,:,1]  - f[:,:,0])   / (p[:,:,1]  - p[:,:,0])
-    df_dp[:,:,-1]   = (f[:,:,-1] - f[:,:,-2])  / (p[:,:,-1] - p[:,:,-2])
-    # Transpose again to regain original axis order.
-    return df_dp.T
+    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR,
+                                     do_edges_one_sided=True)
 
 
 def zonal_advec_upwind(field, u, lat, lon, radius):
@@ -240,6 +230,39 @@ def field_zero_global_mean(field, sfc_area, dp):
     return field - global_mean[:,np.newaxis,np.newaxis,np.newaxis]
 
 
+def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
+    """d/dx at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    pfull_coord = arr[PFULL_STR]
+    d_dx_const_eta = d_dx_from_latlon(arr, radius)
+    darr_deta = d_deta_from_pfull(arr)
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    d_dx_ps = d_dx_from_latlon(ps, radius)
+
+    return d_dx_const_eta + (darr_deta * bk_at_pfull * d_dx_ps /
+                             (da_deta + db_deta*ps))
+
+def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
+    """d/dy at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    pfull_coord = arr[PFULL_STR]
+    d_dy_const_eta = d_dy_from_latlon(arr, radius, vec_field=vec_field)
+    darr_deta = d_deta_from_pfull(arr)
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    d_dy_ps = d_dy_from_latlon(ps, radius, vec_field=False)
+
+    return d_dy_const_eta + (darr_deta*bk_at_pfull * d_dy_ps /
+                             (da_deta + db_deta*ps))
+
+
 # Advection and divergence functions.
 def zonal_advec(field, u, lat, lon, radius):
     """Zonal advection of the given field."""
@@ -266,6 +289,33 @@ def total_advec(field, u, v, omega, lat, lon, p, radius, vec_field=False):
     """Total advection of the given field."""
     return (horiz_advec(field, u, v, lat, lon, radius, vec_field=vec_field) +
             vert_advec(field, omega, p))
+
+
+def zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk):
+    """Zonal advection at constant pressure of the given scalar field."""
+    return u*d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk)
+
+
+def merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk, vec_field=False):
+    """Meridional advection at constant pressure of the given scalar field."""
+    return v*d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk,
+                                      vec_field=vec_field)
+
+
+def horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
+                                 vec_field=False):
+    """Horizontal advection at constant pressure of the given scalar field."""
+    return (zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk) +
+            merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk,
+                                         vec_field=vec_field))
+
+
+def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk,
+                         vec_field=False):
+    """Total advection of the given scalar field."""
+    return (horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
+                                         vec_field=vec_field) +
+            vert_advec(arr, omega, p))
 
 
 def vert_advec_omega_zero_mean(field, omega, sfc_area, p, dp):
@@ -345,25 +395,12 @@ def divg_of_vert_int_horiz_flow(u, v, radius, dp):
     return horiz_divg(u_int, v_int, radius)
 
 
-def divg_of_vert_int_horiz_flow_moist(u, v, evap, precip, lat, lon,
-                                      radius, dp):
-    """Horizontal divergence of vertically integrated flow."""
-    u_int = int_dp_g(u, dp)[:,np.newaxis,:,:]
-    v_int = int_dp_g(v, dp)[:,np.newaxis,:,:]
-    return horiz_divg(u_int, v_int, lat, lon, radius) + precip - evap
-
-
-def horiz_advec_sfc_pressure(ps, u, v, lat, lon, radius, p, vec_field=False):
+def horiz_advec_sfc_pressure(ps, u, v, radius):
     """Horizontal advection of surface pressure."""
     # Pressure data indexing is surface to TOA; sigma data is opposite.
-    if p.shape[-1] == 1:
-        sfc_index = 0
-    else:
-        sfc_index = -1
-    u_sfc = (u[:,sfc_index])[:,np.newaxis,:,:]
-    v_sfc = (v[:,sfc_index])[:,np.newaxis,:,:]
-    return horiz_advec(ps, u_sfc, v_sfc, lat, lon, radius,
-                       vec_field=vec_field) * (1./grav)
+    u_sfc = u.isel(**{PFULL_STR:-1})
+    v_sfc = v.isel(**{PFULL_STR:-1})
+    return horiz_advec(ps, u_sfc, v_sfc, lat, lon, radius) * (1./grav)
 
 
 def vert_divg(omega, p):
@@ -720,7 +757,7 @@ def field_vert_int_max(field, dp):
     # 2015-05-15: Problem: Sigma data indexing starts at TOA, while pressure
     #             data indexing starts at 1000 hPa.  So for now only do for
     #             sigma data and flip array direction to start from sfc.
-    field_dp_g = weight_by_delta(field, dp)[::-1] / grav
+    field_dp_g = (field*dp)[::-1] / grav
     # Input array dimensions are assumed ([time dims,] level, lat, lon).
     pos_max = np.amax(np.cumsum(field_dp_g, axis=0), axis=-3)
     neg_max = np.amin(np.cumsum(field_dp_g, axis=0), axis=-3)
@@ -745,7 +782,7 @@ def gms_like_ratio(weights, tracer, dp):
     dp = to_pascal(dp)
     denominator = field_vert_int_max(weights, dp)
     # Integrate tracer*weights over whole column and divide.
-    numerator = np.sum(weight_by_delta(weights*tracer, dp), axis=-3) / grav
+    numerator = np.sum(weights*tracer*dp, axis=-3) / grav
     return numerator / denominator
 
 

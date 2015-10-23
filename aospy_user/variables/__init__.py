@@ -1409,19 +1409,6 @@ divg_of_vert_int_horiz_flow = Var(
     units=units.kg_m2_s1_mass,
     colormap='RdBu'
 )
-divg_of_vert_int_horiz_flow_moist = Var(
-    name='divg_of_vert_int_horiz_flow_moist',
-    domain='atmos',
-    description='',
-    variables=(ucomp, vcomp, evap, precip, lat, lon, r_e, 'dp'),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.divg_of_vert_int_horiz_flow_moist,
-    units=units.kg_m2_s1_mass,
-    colormap='RdBu'
-)
 horiz_advec_sfc_pressure = Var(
     name='horiz_advec_sfc_pressure',
     domain='atmos',
@@ -1802,6 +1789,20 @@ q_horiz_advec_mass_adj = Var(
     units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
+q_horiz_advec_const_p_from_eta = Var(
+    name='q_horiz_advec_const_p_from_eta',
+    domain='atmos',
+    description='',
+    variables=(sphum, ucomp, vcomp, ps, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_advec_const_p_from_eta,
+    units=units.s1_spec_mass,
+    colormap='BrBG_r'
+)
+
 q_times_horiz_divg_mass_adj = Var(
     name='q_times_horiz_divg_mass_adj',
     domain='atmos',
@@ -2505,12 +2506,15 @@ master_vars_list = [
     column_mass_integral,
     # divg_spharm,
     horiz_divg_mass_adj, divg_3d,
-    divg_of_vert_int_horiz_flow, divg_of_vert_int_horiz_flow_moist,
-    horiz_advec_sfc_pressure, q_horiz_advec_mass_adj,
-    q_times_horiz_divg_mass_adj, q_horiz_flux_divg_mass_adj,
+    divg_of_vert_int_horiz_flow,
+    horiz_advec_sfc_pressure,
+    q_horiz_advec_mass_adj,
+    q_times_horiz_divg_mass_adj,
+    q_horiz_flux_divg_mass_adj,
     ps_monthly_tendency,
     d_dx_of_vert_int_u,
-    d_dy_of_vert_int_v
+    d_dy_of_vert_int_v,
+    q_horiz_advec_const_p_from_eta
 ]
 
 
