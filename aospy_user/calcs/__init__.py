@@ -9,8 +9,9 @@ from __future__ import division
 from aospy import FiniteDiff
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
                              T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v)
-from aospy.utils import (level_thickness, to_pascal, to_radians,
-                         int_dp_g)
+from aospy.utils import (level_thickness, to_pascal, to_radians, int_dp_g,
+                         d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
+                         to_pfull_from_phalf)
 import numpy as np
 import scipy.stats
 import xray
@@ -22,6 +23,7 @@ LON_STR = 'lon'
 LAT_STR = 'lat'
 PFULL_STR = 'pfull'
 PLEVEL_STR = 'level'
+
 
 # Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
@@ -46,58 +48,52 @@ def wraparound_lon(arr, num=1):
     return xray.concat([edge_right, arr, edge_left], dim=LON_STR)
 
 
-def d_dx_from_latlon(f, radius):
-    """Compute \partial f/\partial x using centered differencing."""
-    lon = to_radians(f.coords[LON_STR])
-    lat = to_radians(f.coords[LAT_STR])
-    prefactor = latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False)
-    # Wrap around at 0/360 degrees longitude.
-    f_ext = wraparound_lon(f)
-    # Perform the centered differencing.
-    df_dx = FiniteDiff.cen_diff_deriv(f_ext, LON_STR, do_edges_one_sided=False)
-    return prefactor*df_dx
+def d_dx_from_latlon(arr, radius):
+    """Compute \partial arr/\partial x using centered differencing."""
+    prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
+                                       radius, d_dy_of_scalar_field=False)
+    arr_ext = wraparound_lon(arr)
+    darr_dx = FiniteDiff.cen_diff_deriv(arr_ext, LON_STR,
+                                        do_edges_one_sided=False)
+    return prefactor*darr_dx
 
 
-def d_dy_from_lat(f, radius, vec_field=False):
+def d_dy_from_lat(arr, radius, vec_field=False):
     """Compute \partial(field)/\partial y using centered differencing."""
-    lat = to_radians(f.coords[LAT_STR])
-    # Del operator differs in spherical coords for scalar v. vector fields.
+    lat = to_radians(arr.coords[LAT_STR])
     prefactor = latlon_deriv_prefactor(lat, radius,
                                        d_dy_of_scalar_field=(not vec_field))
     if vec_field:
-        f *= np.cos(lat)
-    df_dy = FiniteDiff.cen_diff_deriv(f, LAT_STR, do_edges_one_sided=True)
-    return prefactor*df_dy
+        arr *= np.cos(lat)
+    darr_dy = FiniteDiff.cen_diff_deriv(arr, LAT_STR, do_edges_one_sided=True)
+    return prefactor*darr_dy
 
 
-def d_dp_from_p(arr, p):
-    """Derivative in pressure of a given arr."""
-    p = to_pascal(p)
-    # One-sided difference at TOA and surface; centered difference elsewhere.
+def d_dp_from_p(arr):
+    """Derivative in pressure of array defined on fixed pressure levels."""
     return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR,
                                      do_edges_one_sided=True)
 
 
-def zonal_advec_upwind(field, u, lat, lon, radius):
+def d_dp_from_eta(arr, ps, bk, ps):
+    """Derivative in pressure of array defined on hybrid sigma-p coords.
+
+    The array is assumed to be on full (as opposed to half) levels.
+    """
+    pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
+    return (FiniteDiff.cen_diff(arr, PFULL_STR, do_edges_one_sided=True) /
+            FiniteDiff.cen_diff(pfull, PFULL_STR, do_edges_one_sided=True))
+
+
+def zonal_advec_upwind(arr, u, radius):
     """Advection in the zonal direction using upwind differencing."""
-    prefactor = latlon_deriv_prefactor(lat, radius)[:,np.newaxis]
-    # Assume latitude and longitude are last two axes.
-    # Transpose the arrays: lon is 1st axis, lat is 2nd.
-    f = field.T
-    # Wrap around at 0/360 degrees longitude.
-    # Assumes longitude array starts at 0 and goes to 360.
-    # f = np.ma.concatenate((f, f[:2]), axis=0)
-    # lon = to_radians(lon)[:,np.newaxis,np.newaxis,np.newaxis]
-    # lon = np.ma.concatenate((lon, 2*np.pi + lon[:2]), axis=0)
-    # df_fwd = fwd_diff2(f, lon)
-    # df_bwd = np.ma.concatenate((df_fwd[-2:], df_fwd[:-2]), axis=0)
-    f = np.ma.concatenate((f, f[:1]), axis=0)
-    lon = to_radians(lon)[:,np.newaxis,np.newaxis,np.newaxis]
-    lon = np.ma.concatenate((lon, 2*np.pi + lon[:1]), axis=0)
-    df_fwd = fwd_diff1(f, lon)
-    df_bwd = np.ma.concatenate((df_fwd[-1:], df_fwd[:-1]), axis=0)
+    prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
+                                       radius, d_dy_of_scalar_field=False)
+    arr_ext = wraparound_lon(arr)
+    df_fwd = FiniteDiff.fwd_diff1(arr_ext)
+    df_bwd = FiniteDiff.bwd_diff1(arr_ext)
     # Transpose again to regain original axis order.
-    return prefactor*upwind_scheme(df_fwd.T, df_bwd.T, u)
+    return prefactor*upwind_scheme(df_fwd, df_bwd, u)
 
 
 def merid_advec_upwind(field, v, lat, radius, vec_field=False):
@@ -143,7 +139,7 @@ def merid_advec_upwind(field, v, lat, radius, vec_field=False):
 
 
 def horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field=False):
-    return (zonal_advec_upwind(field, u, lat, lon, radius) +
+    return (zonal_advec_upwind(field, u, radius) +
             merid_advec_upwind(field, v, lat, radius, vec_field=vec_field))
 
 
@@ -186,7 +182,7 @@ def column_mass(ps):
     return (1. / grav)*ps
 
 
-def column_mass_integral(_, dp):
+def column_mass_integral(arr, dp):
     """
     Total mass per square meter of atmospheric column.
 
@@ -195,10 +191,8 @@ def column_mass_integral(_, dp):
 
     :param dp: Pressure thickness of the model levels.
     """
-    # `np.ones_like` function retains mask of input array, which is good.
-    mass = int_dp_g(np.ones_like(dp), dp)
-    if np.ndim(mass) == 3:
-        mass = mass[:,np.newaxis,:,:]
+    mass = arr.copy()
+    mass.values = int_dp_g(mass, dp)
     return mass
 
 
@@ -212,22 +206,6 @@ def column_dry_air_mass_tendency(q, u, v, lat, lon, radius, dp):
     dry_air = 1 - q
     dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, lat, lon, radius)
     return -1*int_dp_g(dry_air_flux_divg, dp)
-
-
-def global_integral(field, sfc_area, dp):
-    """Mass-weighted global integral of the given field."""
-    vert_int = int_dp_g(field, dp)
-    vert_int_flat = np.reshape(vert_int, (vert_int.shape[0], -1))
-    # Assume first axis is time.
-    return np.ma.sum(vert_int_flat*sfc_area.ravel(), axis=-3)
-
-
-def field_zero_global_mean(field, sfc_area, dp):
-    """Subtract the global mean value from the given field."""
-    ones = np.ma.ones(np.shape(field), mask=field.mask)
-    global_mean = (global_integral(field, sfc_area, dp) /
-                   global_integral(ones, sfc_area, dp))
-    return field - global_mean[:,np.newaxis,np.newaxis,np.newaxis]
 
 
 def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
@@ -246,18 +224,19 @@ def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
     return d_dx_const_eta + (darr_deta * bk_at_pfull * d_dx_ps /
                              (da_deta + db_deta*ps))
 
+
 def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
     """d/dy at constant pressure of `arr`.
 
     `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
     """
     pfull_coord = arr[PFULL_STR]
-    d_dy_const_eta = d_dy_from_latlon(arr, radius, vec_field=vec_field)
+    d_dy_const_eta = d_dy_from_lat(arr, radius, vec_field=vec_field)
     darr_deta = d_deta_from_pfull(arr)
     bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
     da_deta = d_deta_from_phalf(pk, pfull_coord)
     db_deta = d_deta_from_phalf(bk, pfull_coord)
-    d_dy_ps = d_dy_from_latlon(ps, radius, vec_field=False)
+    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=False)
 
     return d_dy_const_eta + (darr_deta*bk_at_pfull * d_dy_ps /
                              (da_deta + db_deta*ps))
@@ -1475,7 +1454,7 @@ def trop_height(level, T):
     # Get pressure and temperature data.
     p = level[:,np.newaxis,np.newaxis]
     # Compute half levels of pressure^kappa
-    kap = R_d/c_p
+    kap = R_d / c_p
     pkap_half = 0.5*(p[1:]**kap + p[:-1]**kap)
     # Compute lapse rate at half-levels, assuming T linear in pressure^kappa.
     Gamma = ((T[1:] - T[:-1])*(p[:-1]**kap + p[1:]**kap) /
