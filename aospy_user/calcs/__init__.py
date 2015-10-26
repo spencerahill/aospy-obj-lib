@@ -6,9 +6,10 @@ vertically defined, (lat, lon).
 """
 from __future__ import division
 
-from aospy import FiniteDiff
+from aospy import (LAT_STR, LON_STR, PHALF_STR, PFULL_STR, PLEVEL_STR,
+                   TIME_STR, FiniteDiff)
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
-                             T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v)
+                             T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v, R_d)
 from aospy.utils import (level_thickness, to_pascal, to_radians, int_dp_g,
                          d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
                          to_pfull_from_phalf)
@@ -18,11 +19,6 @@ import xray
 
 from .budget_calcs import time_tendency_gfdl
 from .numerics import fwd_diff1, fwd_diff2, cen_diff2, cen_diff4, upwind_scheme
-
-LON_STR = 'lon'
-LAT_STR = 'lat'
-PFULL_STR = 'pfull'
-PLEVEL_STR = 'level'
 
 
 # Functions for derivatives in x, y, and p.
@@ -69,13 +65,12 @@ def d_dy_from_lat(arr, radius, vec_field=False):
     return prefactor*darr_dy
 
 
-def d_dp_from_p(arr):
+def d_dp_from_p(arr, p):
     """Derivative in pressure of array defined on fixed pressure levels."""
-    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR,
-                                     do_edges_one_sided=True)
+    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, do_edges_one_sided=True)
 
 
-def d_dp_from_eta(arr, ps, bk, ps):
+def d_dp_from_eta(arr, ps, bk, pk):
     """Derivative in pressure of array defined on hybrid sigma-p coords.
 
     The array is assumed to be on full (as opposed to half) levels.
@@ -96,26 +91,15 @@ def zonal_advec_upwind(arr, u, radius):
     return prefactor*upwind_scheme(df_fwd, df_bwd, u)
 
 
-def merid_advec_upwind(field, v, lat, radius, vec_field=False):
+def merid_advec_upwind(arr, v, radius, vec_field=False):
     """Advection in the meridional direction using upwind differencing."""
-    lat = to_radians(lat)
-    # Assume latitude and longitude are last two axes.
-    if field.ndim == 2:
-        lat = lat[np.newaxis,:]
-    if field.ndim == 3:
-        lat = lat[np.newaxis,:,np.newaxis]
-    elif field.ndim == 4:
-        lat = lat[np.newaxis,:,np.newaxis,np.newaxis]
-    f = field.T
+    lat = to_radians(arr[LAT_STR])
     prefactor = 1. / radius
     # Del operator differs in spherical coords for scalar v. vector fields.
     if vec_field:
-        f *= np.cos(lat)
+        arr *= np.cos(lat)
         prefactor /= np.cos(lat)
         prefactor = prefactor.T
-    # Roll lat to be leading axis for broadcasting.
-    f = np.rollaxis(f, 1, 0)
-    lat = np.rollaxis(lat, 1, 0)
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
     # df_fwd_except_np = fwd_diff2(f, lat)
@@ -138,15 +122,15 @@ def merid_advec_upwind(field, v, lat, radius, vec_field=False):
     return prefactor*upwind_scheme(df_fwd, df_bwd, v)
 
 
-def horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field=False):
-    return (zonal_advec_upwind(field, u, radius) +
-            merid_advec_upwind(field, v, lat, radius, vec_field=vec_field))
+def horiz_advec_upwind(arr, u, v, radius, vec_field=False):
+    return (zonal_advec_upwind(arr, u, radius) +
+            merid_advec_upwind(arr, v, radius, vec_field=vec_field))
 
 
-def vert_advec_upwind(field, omega, p):
+def vert_advec_upwind(arr, omega, p):
     """Advection in pressure using upwind differencing."""
     # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
-    f = field.T
+    f = arr.T
     p = to_pascal(p)
     # Amend array dimensions as necessary for broadcasting purposes.
     if p.ndim == 1:
@@ -170,10 +154,10 @@ def vert_advec_upwind(field, omega, p):
     return upwind_scheme(df_fwd, df_bwd, omega)
 
 
-def total_advec_upwind(field, u, v, omega, lat, lon, p, radius,
+def total_advec_upwind(arr, u, v, omega, p, radius,
                        vec_field=False):
-    return (horiz_advec_upwind(field, u, v, lat, lon, radius, vec_field) +
-            vert_advec_upwind(field, omega, p))
+    return (horiz_advec_upwind(arr, u, v, radius, vec_field) +
+            vert_advec_upwind(arr, omega, p))
 
 
 # Trenberth mass balance & energy budget quantities
@@ -201,10 +185,10 @@ def column_dry_air_mass(ps, wvp):
     return ps / grav - wvp
 
 
-def column_dry_air_mass_tendency(q, u, v, lat, lon, radius, dp):
+def column_dry_air_mass_tendency(q, u, v, radius, dp):
     """Time tendency of column dry air mass.  Trenberth 1991, Eq. (3)"""
     dry_air = 1 - q
-    dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, lat, lon, radius)
+    dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, radius)
     return -1*int_dp_g(dry_air_flux_divg, dp)
 
 
@@ -243,31 +227,31 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
 
 
 # Advection and divergence functions.
-def zonal_advec(field, u, lat, lon, radius):
+def zonal_advec(arr, u, radius):
     """Zonal advection of the given field."""
-    return u*d_dx_from_latlon(field, lat, lon, radius)
+    return u*d_dx_from_latlon(arr, radius)
 
 
-def merid_advec(field, v, lat, radius, vec_field=False):
+def merid_advec(arr, v, radius, vec_field=False):
     """Meridional advection of the given field."""
-    return v*d_dy_from_lat(field, lat, radius, vec_field=vec_field)
+    return v*d_dy_from_lat(arr, radius, vec_field=vec_field)
 
 
-def horiz_advec(field, u, v, lat, lon, radius, vec_field=False):
+def horiz_advec(arr, u, v, radius, vec_field=False):
     """Horizontal advection of the given field."""
-    return (zonal_advec(field, u, lat, lon, radius) +
-            merid_advec(field, v, lat, radius, vec_field=vec_field))
+    return (zonal_advec(arr, u, radius) +
+            merid_advec(arr, v, radius, vec_field=vec_field))
 
 
-def vert_advec(field, omega, p):
+def vert_advec(arr, omega, p):
     """Vertical advection of the given field."""
-    return omega*d_dp_from_p(field, p)
+    return omega*d_dp_from_p(arr, p)
 
 
-def total_advec(field, u, v, omega, lat, lon, p, radius, vec_field=False):
+def total_advec(arr, u, v, omega, p, radius, vec_field=False):
     """Total advection of the given field."""
-    return (horiz_advec(field, u, v, lat, lon, radius, vec_field=vec_field) +
-            vert_advec(field, omega, p))
+    return (horiz_advec(arr, u, v, radius, vec_field=vec_field) +
+            vert_advec(arr, omega, p))
 
 
 def zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk):
@@ -289,18 +273,17 @@ def horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
                                          vec_field=vec_field))
 
 
+def vert_advec_from_eta(arr, omega, ps, bk, pk):
+    """Vertical advection of the given field."""
+    return omega*d_dp_from_eta(arr, ps, bk, pk)
+
+
 def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk,
                          vec_field=False):
     """Total advection of the given scalar field."""
     return (horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
                                          vec_field=vec_field) +
             vert_advec(arr, omega, p))
-
-
-def vert_advec_omega_zero_mean(field, omega, sfc_area, p, dp):
-    """Vertical advection, with omega adjusted to equal 0 in global mean."""
-    omega_adj = field_zero_global_mean(omega, sfc_area, dp)
-    return omega_adj*d_dp_from_p(field, p)
 
 
 def horiz_divg(u, v, radius):
@@ -332,31 +315,27 @@ def u_or_v_mass_adjusted(uv, q, ps, dp, p):
     return uv - u_or_v_mass_adjustment(uv, q, ps, dp, p)
 
 
-def horiz_divg_mass_adj(u, v, q, ps, lat, lon, radius, dp, p):
+def horiz_divg_mass_adj(u, v, q, ps, radius, dp, p):
     u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
     v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
-    return horiz_divg(u_cor, v_cor, lat, lon, radius)
+    return horiz_divg(u_cor, v_cor, radius)
 
 
-def field_times_horiz_divg_mass_adj(field, u, v, q, ps, lat, lon,
-                                    radius, dp, p):
-    return field*horiz_divg_mass_adj(u, v, q, ps, lat, lon, radius, dp, p)
+def field_times_horiz_divg_mass_adj(arr, u, v, q, ps, radius, dp, p):
+    return arr*horiz_divg_mass_adj(u, v, q, ps, radius, dp, p)
 
 
-def horiz_advec_mass_adj(field, u, v, q, ps, lat, lon, radius, dp,
-                         p, vec_field=False):
+def horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p, vec_field=False):
     u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
     v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
-    return horiz_advec(field, u_cor, v_cor, lat, lon, radius,
-                       vec_field=vec_field)
+    return horiz_advec(arr, u_cor, v_cor, radius, vec_field=vec_field)
 
 
-def field_horiz_flux_divg_mass_adj(field, u, v, q, ps, lat, lon,
-                                   radius, dp, p, vec_field=False):
-    return (field_times_horiz_divg_mass_adj(field, u, v, q, ps, lat, lon,
-                                            radius, dp, p) +
-            horiz_advec_mass_adj(field, u, v, q, ps, lat, lon, radius,
-                                 dp, p, vec_field=vec_field))
+def field_horiz_flux_divg_mass_adj(arr, u, v, q, ps, radius, dp, p,
+                                   vec_field=False):
+    return (field_times_horiz_divg_mass_adj(arr, u, v, q, ps, radius, dp, p) +
+            horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p,
+                                 vec_field=vec_field))
 
 
 def d_dx_of_vert_int(arr, radius, dp):
@@ -377,9 +356,9 @@ def divg_of_vert_int_horiz_flow(u, v, radius, dp):
 def horiz_advec_sfc_pressure(ps, u, v, radius):
     """Horizontal advection of surface pressure."""
     # Pressure data indexing is surface to TOA; sigma data is opposite.
-    u_sfc = u.isel(**{PFULL_STR:-1})
-    v_sfc = v.isel(**{PFULL_STR:-1})
-    return horiz_advec(ps, u_sfc, v_sfc, lat, lon, radius) * (1./grav)
+    u_sfc = u.isel(**{PFULL_STR: -1})
+    v_sfc = v.isel(**{PFULL_STR: -1})
+    return horiz_advec(ps, u_sfc, v_sfc, radius) * (1./grav)
 
 
 def vert_divg(omega, p):
@@ -387,21 +366,21 @@ def vert_divg(omega, p):
     return d_dp_from_p(omega, p)
 
 
-def field_vert_int_bal(field, dp):
+def field_vert_int_bal(arr, dp):
     """Impose vertical balance to the field, i.e. column integral = 0.
 
     Most frequently used for mass flux divergence to impose mass balance.
     """
-    pos = np.ma.where(field > 0, field, 0)
-    neg = np.ma.where(field < 0, field, 0)
+    pos = np.ma.where(arr > 0, arr, 0)
+    neg = np.ma.where(arr < 0, arr, 0)
     pos_int = int_dp_g(pos, dp)[:,np.newaxis,:,:]
     neg_int = int_dp_g(neg, dp)[:,np.newaxis,:,:]
     return pos - (pos_int/neg_int)*neg
 
 
-def horiz_divg_mass_bal(u, v, lat, lon, radius, dp):
+def horiz_divg_mass_bal(u, v, radius, dp):
     """Horizontal divergence with column mass-balance correction applied."""
-    div = horiz_divg(u, v, lat, lon, radius)
+    div = horiz_divg(u, v, radius)
     return field_vert_int_bal(div, dp)
 
 
@@ -411,72 +390,66 @@ def vert_divg_mass_bal(omega, p, dp):
     return field_vert_int_bal(div, dp)
 
 
-def divg_3d(u, v, omega, lat, lon, radius, p):
+def divg_3d(u, v, omega, radius, p):
     """Total (3-D) divergence.  Should nearly equal 0 by continuity."""
-    return horiz_divg(u, v, lat, lon, radius) + vert_divg(omega, p)
+    return horiz_divg(u, v, radius) + vert_divg(omega, p)
 
 
-def field_times_horiz_divg(field, u, v, lat, lon, radius):
+def field_times_horiz_divg(arr, u, v, radius):
     """Scalar field times horizontal divergence."""
-    return field*horiz_divg(u, v, lat, lon, radius)
+    return arr*horiz_divg(u, v, radius)
 
 
-def field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp):
+def field_times_horiz_divg_mass_bal(arr, u, v, radius, dp):
     """Scalar field times horizontal divergence."""
-    return field*horiz_divg_mass_bal(u, v, lat, lon, radius, dp)
+    return arr*horiz_divg_mass_bal(u, v, radius, dp)
 
 
-def field_times_vert_divg_mass_bal(field, omega, p, dp):
+def field_times_vert_divg_mass_bal(arr, omega, p, dp):
     """Scalar field times vertical divergence."""
-    return field*vert_divg_mass_bal(omega, p, dp)
+    return arr*vert_divg_mass_bal(omega, p, dp)
 
 
-def field_horiz_flux_divg(field, u, v, lat, lon, radius):
+def field_horiz_flux_divg(arr, u, v, radius):
     """Horizontal flux divergence of given scalar field."""
-    dfu_dx = d_dx_from_latlon(u*field, lat, lon, radius)
-    dfv_dy = d_dy_from_lat(v*field, lat, radius, vec_field=True)
+    dfu_dx = d_dx_from_latlon(u*arr, radius)
+    dfv_dy = d_dy_from_lat(v*arr, radius, vec_field=True)
     return dfu_dx + dfv_dy
 
 
-def field_vert_flux_divg(field, omega, p):
+def field_vert_flux_divg(arr, omega, p):
     """Vertical flux divergence of a scalar field."""
-    return d_dp_from_p(omega*field, p)
+    return d_dp_from_p(omega*arr, p)
 
 
-def field_horiz_advec_divg_sum(field, u, v, lat, lon, radius, dp):
-    return (
-        # field_times_horiz_divg_mass_bal(field, u, v, lat, lon, radius, dp) +
-        field_times_horiz_divg(field, u, v, lat, lon, radius) +
-        horiz_advec(field, u, v, lat, lon, radius)
-    )
+def field_horiz_advec_divg_sum(arr, u, v, radius, dp):
+    return (field_times_horiz_divg(arr, u, v, radius) +
+            horiz_advec(arr, u, v, radius))
 
 
-def field_total_advec(field, u, v, omega, lat, lon, p, radius):
-    return (horiz_advec(field, u, v, lat, lon, radius) +
-            vert_advec(field, omega, p))
+def field_total_advec(arr, u, v, omega, p, radius):
+    return (horiz_advec(arr, u, v, radius) + vert_advec(arr, omega, p))
 
 
 # Advection, divergence etc. applied to specific fields.
-def mse_horiz_flux_divg(temp, hght, sphum, u, v, lat, lon, radius):
+def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):
     """Horizontal flux convergence of moist static energy."""
-    return field_horiz_flux_divg(mse(temp, hght, sphum),
-                                 u, v, lat, lon, radius)
+    return field_horiz_flux_divg(mse(temp, hght, sphum), u, v, radius)
 
 
-def mse_horiz_advec(temp, hght, sphum, u, v, lat, lon, radius):
+def mse_horiz_advec(temp, hght, sphum, u, v, radius):
     """Horizontal advection of moist static energy."""
-    return horiz_advec(mse(temp, hght, sphum), u, v, lat, lon, radius)
+    return horiz_advec(mse(temp, hght, sphum), u, v, radius)
 
 
-def mse_times_horiz_divg(temp, hght, sphum, u, v, lat, lon, radius, dp):
+def mse_times_horiz_divg(temp, hght, sphum, u, v, radius, dp):
     """Horizontal divergence of moist static energy."""
-    return field_times_horiz_divg_mass_bal(
-        mse(temp, hght, sphum), u, v, lat, lon, radius, dp
-    )
+    return field_times_horiz_divg_mass_bal(mse(temp, hght, sphum),
+                                           u, v, radius, dp)
 
 
-def mse_horiz_advec_divg_sum(T, gz, q, u, v, lat, lon, rad, dp):
-    return field_horiz_advec_divg_sum(mse(T, gz, q), u, v, lat, lon, rad, dp)
+def mse_horiz_advec_divg_sum(T, gz, q, u, v, rad, dp):
+    return field_horiz_advec_divg_sum(mse(T, gz, q), u, v, rad, dp)
 
 
 def mse_vert_flux_divg(T, gz, q, omega, p):
@@ -494,15 +467,14 @@ def mse_times_vert_divg(T, gz, q, omega, p, dp):
     return field_times_vert_divg_mass_bal(mse(T, gz, q), omega, p, dp)
 
 
-def mse_total_advec(temp, hght, sphum, u, v, omega, lat, lon, p, radius):
+def mse_total_advec(temp, hght, sphum, u, v, omega, p, radius):
     mse_ = mse(temp, hght, sphum)
-    return field_total_advec(mse_, u, v, omega, lat, lon, p, radius)
+    return field_total_advec(mse_, u, v, omega, p, radius)
 
 
 
-def mse_horiz_advec_upwind(temp, hght, sphum, u, v, lat, lon, radius,
-                           vec_field=False):
-    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, lat, lon, radius,
+def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius, vec_field=False):
+    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius,
                               vec_field=vec_field)
 
 
@@ -510,20 +482,18 @@ def mse_vert_advec_upwind(temp, hght, sphum, omega, p):
     return vert_advec_upwind(mse(temp, hght, sphum), omega, p)
 
 
-def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, lat, lon, p, radius,
+def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius,
                            vec_field=False):
-    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, lat, lon, p,
-                              radius, vec_field=vec_field)
+    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, p, radius,
+                              vec_field=vec_field)
 
 
-def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega, lat, lon,
+def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega,
                               p, dp, radius, swdn_toa, swup_toa, olr, swup_sfc,
                               swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
     """Residual in vertically integrated MSE budget."""
     mse_ = mse(temp, hght, sphum)
-    transport = field_total_advec(
-        mse_, ucomp, vcomp, omega, lat, lon, p, radius
-    )
+    transport = field_total_advec(mse_, ucomp, vcomp, omega, p, radius)
     trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
     f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                           lwup_sfc, lwdn_sfc, shflx, evap)
@@ -531,57 +501,51 @@ def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega, lat, lon,
 
 
 def fmse_budget_advec_residual(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
-                               lat, lon, p, dp, radius, swdn_toa, swup_toa,
-                               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                               shflx, evap):
+                               p, dp, radius, swdn_toa, swup_toa, olr,
+                               swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+                               evap):
     """Residual in vertically integrated MSE budget."""
     fmse_ = fmse(temp, hght, sphum, ice_wat)
-    transport = field_total_advec(
-        fmse_, ucomp, vcomp, omega, lat, lon, p, radius
-    )
+    transport = field_total_advec(fmse_, ucomp, vcomp, omega, p, radius)
     trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
     f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                           lwup_sfc, lwdn_sfc, shflx, evap)
     return f_net - trans_vert_int
 
-def q_budget_advec_residual(sphum, ucomp, vcomp, omega, lat, lon, p, dp,
-                            radius, evap, precip):
+def q_budget_advec_residual(sphum, ucomp, vcomp, omega, p, dp, radius, evap,
+                            precip):
     """Residual in vertically integrated MSE budget."""
-    transport = field_total_advec(
-        sphum, ucomp, vcomp, omega, lat, lon, p, radius
-    )
+    transport = field_total_advec(sphum, ucomp, vcomp, omega, p, radius)
     trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
     e_minus_p = evap - precip
     return e_minus_p - trans_vert_int
 
-def q_budget_horiz_flux_divg_residual(sphum, ucomp, vcomp, lat, lon, dp,
-                                      radius, evap, precip):
+def q_budget_horiz_flux_divg_residual(sphum, ucomp, vcomp, dp, radius, evap,
+                                      precip):
     """Residual in vertically integrated MSE budget."""
-    transport = field_horiz_flux_divg(sphum, ucomp, vcomp, lat, lon, radius)
+    transport = field_horiz_flux_divg(sphum, ucomp, vcomp, radius)
     trans_vert_int = int_dp_g(transport, dp)[:,np.newaxis,:,:]
     e_minus_p = evap - precip
     return e_minus_p - trans_vert_int
 
 
-def dse_horiz_flux_divg(temp, hght, u, v, lat, lon, radius):
+def dse_horiz_flux_divg(temp, hght, u, v, radius):
     """Horizontal flux convergence of moist static energy."""
-    return field_horiz_flux_divg(dse(temp, hght), u, v, lat, lon, radius)
+    return field_horiz_flux_divg(dse(temp, hght), u, v, radius)
 
 
-def dse_horiz_advec(temp, hght, u, v, lat, lon, radius):
+def dse_horiz_advec(temp, hght, u, v, radius):
     """Horizontal advection of moist static energy."""
-    return horiz_advec(dse(temp, hght), u, v, lat, lon, radius)
+    return horiz_advec(dse(temp, hght), u, v, radius)
 
 
-def dse_times_horiz_divg(temp, hght, u, v, lat, lon, radius, dp):
+def dse_times_horiz_divg(temp, hght, u, v, radius, dp):
     """Horizontal divergence of moist static energy."""
-    return field_times_horiz_divg_mass_bal(
-        dse(temp, hght), u, v, lat, lon, radius, dp
-    )
+    return field_times_horiz_divg_mass_bal(dse(temp, hght), u, v, radius, dp)
 
 
-def dse_horiz_advec_divg_sum(T, gz, u, v, lat, lon, rad, dp):
-    return field_horiz_advec_divg_sum(dse(T, gz), u, v, lat, lon, rad, dp)
+def dse_horiz_advec_divg_sum(T, gz, u, v, rad, dp):
+    return field_horiz_advec_divg_sum(dse(T, gz), u, v, rad, dp)
 
 
 def dse_vert_advec(temp, hght, omega, p):
@@ -730,24 +694,23 @@ def equiv_pot_temp(temp, p, sphum, p0=1000.):
 
 
 # Gross moist stability-related quantities
-def field_vert_int_max(field, dp):
+def field_vert_int_max(arr, dp):
     """Maximum magnitude of integral of a field from surface up."""
     dp = to_pascal(dp)
     # 2015-05-15: Problem: Sigma data indexing starts at TOA, while pressure
     #             data indexing starts at 1000 hPa.  So for now only do for
     #             sigma data and flip array direction to start from sfc.
-    field_dp_g = (field*dp)[::-1] / grav
+    arr_dp_g = (arr*dp)[::-1] / grav
     # Input array dimensions are assumed ([time dims,] level, lat, lon).
-    pos_max = np.amax(np.cumsum(field_dp_g, axis=0), axis=-3)
-    neg_max = np.amin(np.cumsum(field_dp_g, axis=0), axis=-3)
+    pos_max = np.amax(np.cumsum(arr_dp_g, axis=0), axis=-3)
+    neg_max = np.amin(np.cumsum(arr_dp_g, axis=0), axis=-3)
     # Flip sign because integrating from p_sfc up, i.e. with dp negative.
     return -1*np.where(pos_max > -neg_max, pos_max, neg_max)
 
 
-def horiz_divg_vert_int_max(u, v, lat, lon, radius, dp):
+def horiz_divg_vert_int_max(u, v, radius, dp):
     """Maximum magnitude of integral upwards of horizontal divergence."""
-    return field_vert_int_max(horiz_divg_mass_bal(u, v, lat, lon, radius, dp),
-                              dp)
+    return field_vert_int_max(horiz_divg_mass_bal(u, v, radius, dp), dp)
 
 
 def vert_divg_vert_int_max(omega, p, dp):
@@ -765,21 +728,21 @@ def gms_like_ratio(weights, tracer, dp):
     return numerator / denominator
 
 
-def gross_moist_strat(sphum, u, v, lat, lon, radius, dp):
+def gross_moist_strat(sphum, u, v, radius, dp):
     """Gross moisture stratification, in horizontal divergence form."""
-    divg = horiz_divg(u, v, lat, lon, radius)
+    divg = horiz_divg(u, v, radius)
     return L_v*gms_like_ratio(divg, sphum, dp)
 
 
-def gross_dry_stab(temp, hght, u, v, lat, lon, radius, dp):
+def gross_dry_stab(temp, hght, u, v, radius, dp):
     """Gross dry stability, in horizontal divergence form."""
-    divg = horiz_divg(u, v, lat, lon, radius)
+    divg = horiz_divg(u, v, radius)
     return -gms_like_ratio(divg, dse(temp, hght), dp)
 
 
-def gross_moist_stab(temp, hght, sphum, u, v, lat, lon, radius, dp):
+def gross_moist_stab(temp, hght, sphum, u, v, radius, dp):
     """Gross moist stability, in horizontal divergence form."""
-    divg = horiz_divg(u, v, lat, lon, radius)
+    divg = horiz_divg(u, v, radius)
     return -gms_like_ratio(divg, mse(temp, hght, sphum), dp)
 
 
@@ -802,9 +765,6 @@ def toa_sw(swdn_toa, swup_toa):
 def cre_sw(swup_toa, swup_toa_clr):
     """Cloudy-sky TOA net shortwave radiative flux into atmosphere."""
     return  -1*swup_toa + swup_toa_clr
-# def cre_sw(swdn_toa, swup_toa, swdn_toa_clr, swup_toa_clr):
-#     """Cloudy-sky TOA net shortwave radiative flux into atmosphere."""
-#     return swdn_toa - swup_toa - swdn_toa_clr + swup_toa_clr
 
 
 def cre_lw(olr, olr_clr):
@@ -815,9 +775,6 @@ def cre_lw(olr, olr_clr):
 def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
     """Cloudy-sky TOA downward radiative flux."""
     return cre_sw(swup_toa, swup_toa_clr) + cre_lw(olr, olr_clr)
-# def cre_net(swdn_toa, swup_toa, olr, swdn_toa_clr, swup_toa_clr, olr_clr):
-#     """Cloudy-sky TOA downward radiative flux."""
-#     return swdn_toa - swup_toa - olr - swdn_toa_clr + swup_toa_clr + olr_clr
 
 
 def toa_rad(swdn_toa, swup_toa, olr):
@@ -968,9 +925,6 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
 def moist_static_stab(temp, hght, sphum, p):
     mse_ = mse(temp, hght, sphum)
     return d_dp_from_p(mse_, p)
-# def moist_static_stab(temp, p, sphum, p0=1000., lev_dn=925.):
-#     theta_e = equiv_pot_temp(temp, p, sphum, p0=p0)
-#     return (theta_e - theta_e[np.where(p == lev_dn)])
 
 
 def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
@@ -1096,7 +1050,7 @@ def ascent_ls(omega):
     return np.where(omega > 0., omega, 0)
 
 
-def vert_centroid(field, level, p_bot=850., p_top=150.):
+def vert_centroid(arr, level, p_bot=850., p_top=150.):
     """
     Compute the vertical centroid of some vertically defined field.
     """
@@ -1106,14 +1060,14 @@ def vert_centroid(field, level, p_bot=850., p_top=150.):
     level = level[desired_levs]; level = level[:,np.newaxis,np.newaxis]
     lev_thick = lev_thick[desired_levs]
     lev_thick = lev_thick[:,np.newaxis,np.newaxis]
-    field = field[desired_levs]
+    arr = arr[desired_levs]
     # For 1D arrays, have to move the vertical coordinate to leftmost dim.
-    if field.ndim == 1:
-        field = np.atleast_3d(field).swapaxes(0,1)
+    if arr.ndim == 1:
+        arr = np.atleast_3d(arr).swapaxes(0,1)
     else:
-        field = np.atleast_3d(field)
-    return (np.sum(field*level*lev_thick, axis=0) /
-            np.sum(field*lev_thick, axis=0))
+        arr = np.atleast_3d(arr)
+    return (np.sum(arr*level*lev_thick, axis=0) /
+            np.sum(arr*lev_thick, axis=0))
 
 
 # Functions below this line haven't been converted to new argument format.
@@ -1320,7 +1274,7 @@ def hadley_bounds(lats, levs, vcomp):
                 for i in range(3)])
 
 
-def had_bounds(strmfunc, lat, return_max=False):
+def had_bounds(strmfunc, return_max=False):
     """Hadley cell poleward extent and center location."""
 
     # Get data max and min values and indices, such that min is north of max.
@@ -1379,7 +1333,7 @@ def thermal_equator(flux, lat):
             (flux[ind+1] - flux[ind])*flux[ind+1])
 
 
-def itcz_pos(precip, lat, return_indices=False):
+def itcz_pos(precip, return_indices=False):
     """Calculate ITCZ location."""
     # Find the latitude index with maximum precip and calculate dP/d(latitude)
     # for the adjacent grid latitudes.
@@ -1414,7 +1368,7 @@ def itcz_loc(lats, precip):
                                (dP_dphi[i+1] - dP_dphi[i])))
 
 
-def prec_centroid(precip, lat, lat_max=20.):
+def prec_centroid(precip, lat_max=20.):
     """
     Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
     """
