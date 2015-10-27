@@ -14,10 +14,13 @@ from aospy_user import regions as reg
 def plot(plot_params):
     fig = aospy.plotting.Fig(
         plot_params,
-        n_row=3,
-        n_col=2,
+        # n_row=3,
+        # n_col=2,
+        n_row=2,
+        n_col=1,
         n_ax='all',
-        n_plot=2,
+        n_plot=1,
+        # n_plot=2,
         # n_data=[[1, 1, 2]],
         n_data=1,
 
@@ -26,56 +29,67 @@ def plot(plot_params):
         subplot_lims={'left': 0.05, 'right': 0.98, 'wspace': 0.05,
                       'bottom': 0.1, 'top': 0.9, 'hspace': 0.06},
 
-        # plot_type='contourf',
-        plot_type=[['contourf', 'contour']],# 'quiver']],
+        plot_type='contourf',
+        # plot_type=[['contourf', 'contour']],# 'quiver']],
         x_dim='lon',
         y_dim='lat',
 
-        min_cntr=-190,
-        max_cntr=190,
+        min_cntr=-1.9e1,
+        max_cntr=1.9e1,
         num_cntr=19,
         # min_cntr=[[-3.75, 0]],# False]],
         # max_cntr=[[3.75, 20]],# False]],
         # num_cntr=[[15, 10]],# False]],
         # contours_extend='both',  # 'neither' 'min' 'max' 'both'
-        # contour_labels=False,
-        contour_labels=[[False, True]],# False]],
-        # colormap='default',
-        colormap=[['default', False]],# False]],
-        # do_colorbar='all',      # 'all' 'column' 'row' False True
-        do_colorbar=[['all', False]],# False]],
-        cbar_ax_lim=(0.11, 0.06, 0.8, 0.02),
-        # cbar_ticks=False,
-        cbar_ticks=range(-170, -49, 40) + [-10, 10] +  range(50, 171, 40),
+        contour_labels=False,
+        # contour_labels=[[False, True]],# False]],
+        colormap='default',
+        # colormap=[['default', False]],# False]],
+        do_colorbar='all',      # 'all' 'column' 'row' False True
+        # do_colorbar=[['all', False]],# False]],
+        cbar_ax_lim=(0.11, 0.08, 0.8, 0.02),
+        cbar_ticks=False,
+        # cbar_ticks=range(-170, -49, 40) + [-10, 10] +  range(50, 171, 40),
         cbar_ticklabels=False,
         cbar_label='units',
 
-        intvl_in='monthly',
+        # intvl_in='monthly',
+        intvl_in='3hr',
         # intvl_in=['monthly'] + ['3hr']*2,
         intvl_out='jas',
-        dtype_in_time='ts',
+        # dtype_in_time='ts',
+        dtype_in_time='inst',
         # dtype_in_time=['ts'] + ['inst']*2,
         # dtype_in_vert=False,
+        dtype_in_vert='sigma',
         # dtype_in_vert='pressure',
-        dtype_in_vert=[False]*2 + [['pressure', False]]*4,
+        # dtype_in_vert=[False]*2 + [['pressure', False]]*4,
         dtype_out_time='av',
         # dtype_out_time='reg.ts',
-        # dtype_out_vert=False,
+        dtype_out_vert=False,
         # dtype_out_vert='vert_int',
-        dtype_out_vert=[False]*2 + [['vert_int', False]]*4,
+        # dtype_out_vert=[False]*2 + [['vert_int', False]]*4,
         # level=700,
         level=False,
         # date_range='default',
-        date_range=('1983-01-01', '1983-12-31'),
+        # date_range=('1983-01-01', '2012-12-31'),
+        # date_range=('1983-01-01', '1983-12-31'),
+        date_range=('1983-01-01', '1984-12-31'),
 
         # fig_title=False,
-        fig_title=r'Control JAS MSE budget terms',
+        # fig_title=r'AM2.1 1983-1984 JAS column mass budget terms',
+        fig_title=r'AM2.1 1983-1984 JAS column mass budget residual',
+        # fig_title=r'Control JAS MSE budget terms',
         # ax_title=False,
-        ax_title=['AM2.1', 'c48-HiRAM'] + ['']*4,
-        # ax_left_label=False,
-        ax_left_label=[r'$F_\mathrm{net}$', '',
-                       r'$\{\omega\frac{\partial h}{\partial p}\}$', '',
-                       r'$\{\mathbf{v}\cdot\nabla h\}$', ''],
+        ax_title=['Without mass adjustment', 'With mass adjustment'],
+        # ax_title=['AM2.1', 'c48-HiRAM'] + ['']*4,
+        # ax_title=[r'Tendency term',
+                  # r'Transport term',
+                  # r'Residual (Tendency + transport)'],
+        ax_left_label=False,
+        # ax_left_label=[r'$F_\mathrm{net}$', '',
+                       # r'$\{\omega\frac{\partial h}{\partial p}\}$', '',
+                       # r'$\{\mathbf{v}\cdot\nabla h\}$', ''],
         ax_left_label_coords=(-0.02, 0.5),
         ax_left_label_kwargs={
             'verticalalignment': 'center',
@@ -113,16 +127,16 @@ def plot(plot_params):
         # do_mark_y0=True,
         do_mark_y0=False,
 
-        lat_lim=(-5, 35),
+        # lat_lim=(-5, 35),
         # lat_lim=(12.5, 50),
-        # lat_lim=(-50, 50),
+        lat_lim=(-50, 50),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
 
-        lon_lim=(-43, 65),
+        # lon_lim=(-43, 65),
         # lon_lim=(70, 152.5),
-        # lon_lim=(-180, 180),
+        lon_lim=(-180, 180),
         lon_ticks=False,
         lon_ticklabels=False,
         lon_label=False,
@@ -146,8 +160,8 @@ def plot(plot_params):
         map_res='c',
         shiftgrid_start=False,
         shiftgrid_cyclic=360.0,
-        # latlon_rect=(-18, 40, 10, 20),
-        latlon_rect=[[(-18, 40, 10, 20), False]],# False]],
+        latlon_rect=(-18, 40, 10, 20),
+        # latlon_rect=[[(-18, 40, 10, 20), False]],# False]],
         # latlon_rect=[[(100, 122.5, 22.5, 40), False]],
         do_mask_oceans=False,
 
@@ -207,7 +221,7 @@ def plot(plot_params):
 
         do_best_fit_line=True,
         print_best_fit_slope=True,
-        print_corr_coeff = True,
+        print_corr_coeff=True,
 
         do_subtract_mean=True,
     )
@@ -248,7 +262,8 @@ if __name__ == '__main__':
     params = MainParams()
     # params.proj = p.obs
     params.proj = p.aero_3agcm
-    params.model = [m.am2, m.hiram_c48]*3
+    params.model = m.am2
+    # params.model = [m.am2, m.hiram_c48]*3
     # params.model = [[m.am2, m.am3, m.hiram, m.hiram_c48]]
 
     dam2 = aospy.plotting.Operator('-', (r.am2_reyoi_p2, r.am2_reyoi_cont))
@@ -257,8 +272,8 @@ if __name__ == '__main__':
     dc48 = aospy.plotting.Operator('-', (r.hiram_c48_0_p2K, r.hiram_c48_0))
     # params.run = [[dam2, r.am2_reyoi_p2, dam2]]
     # params.run = [[dam2, dam3, dhir, dc48]]
-    params.run = [r.am2_reyoi_cont, r.hiram_c48_0]*3
-    # params.run = r.am2_amip
+    # params.run = [r.am2_reyoi_cont, r.hiram_c48_0]*3
+    params.run = r.am2_reyoi_cont
     # params.run = [[dam2, r.am2_reyoi_cont],
                   # [dam3, r.am3_hc],
                   # [dhir, r.hiram_cont],
@@ -269,12 +284,22 @@ if __name__ == '__main__':
                   # [dc48, r.hiram_c48_0, dc48]]
 
     params.ens_mem = False
+    # params.var = v.u_mass_adjustment
+    params.var = [  # v.mass_budget_tendency_term,
+                    # v.mass_budget_transport_term,
+        v.mass_budget_residual,
+        v.mass_budget_with_adj_residual]
+    # params.var = [v.q_horiz_advec_const_p_from_eta,
+                  # v.q_horiz_advec]
+    # params.var = [v.divg_of_vert_int_horiz_flow,
+                  # v.divg_of_vert_int_mass_adj_horiz_flow]
+                  # v.ps_monthly_tendency]
     # params.var = ([v.column_energy]*2 +
                   # [v.mse_vert_advec_upwind]*2 +
                   # [v.mse_horiz_advec_upwind]*2)
-    params.var = ([[v.toa_rad, v.column_energy]]*2 +
-                  [[v.mse_vert_advec_upwind, v.column_energy]]*2 +
-                  [[v.mse_horiz_advec_upwind, v.column_energy]]*2)
+    # params.var = ([[v.toa_rad, v.column_energy]]*2 +
+                  # [[v.mse_vert_advec_upwind, v.column_energy]]*2 +
+                  # [[v.mse_horiz_advec_upwind, v.column_energy]]*2)
     # params.var = [[v.hght, v.hght, [v.ucomp, v.vcomp]]]
     # params.var = [[v.column_energy, v.column_energy],
                   # [v.mse_vert_advec_upwind, v.column_energy],
