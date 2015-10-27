@@ -1,24 +1,47 @@
 """My library of functions for use in aospy.
 
-Except for helper functions, all assume input variables with the first axis
-denoting time and the subsequent axes either (pressure, lat, lon) or, if not
-vertically defined, (lat, lon).
+Historically, these assumed input variables in the form of numpy arrays or
+masked numpy arrays.  However, as of October 2015, I have switched to assuming
+xray.DataArrays, to coincide with the same switch within aospy.  However, not
+all of the functions in this module have been converted to support this new
+datatype.
 """
 from __future__ import division
 
-from aospy import (LAT_STR, LON_STR, PHALF_STR, PFULL_STR, PLEVEL_STR,
-                   TIME_STR, FiniteDiff)
-from aospy.constants import (c_p, grav, kappa, L_f, L_v, r_e, Omega, p_trip,
-                             T_trip, c_va, c_vv, c_vl, c_vs, R_a, R_v, R_d)
+from aospy.constants import c_p, grav, L_f, L_v, r_e, R_d
+from aospy.numerics import FiniteDiff
 from aospy.utils import (level_thickness, to_pascal, to_radians, int_dp_g,
-                         d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
-                         to_pfull_from_phalf)
+                         integrate, d_deta_from_pfull, d_deta_from_phalf,
+                         pfull_from_ps, to_pfull_from_phalf)
 import numpy as np
 import scipy.stats
 import xray
 
-from .budget_calcs import time_tendency_gfdl
-from .numerics import fwd_diff1, fwd_diff2, cen_diff2, cen_diff4, upwind_scheme
+from .. import (
+    LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
+)
+from .tendencies import (
+    mass_budget_tendency_term, time_tendency, wvp_time_tendency
+)
+from .numerics import (
+    fwd_diff1, fwd_diff2, cen_diff2, cen_diff4, upwind_scheme
+)
+from .thermo import (
+    dse, mse, fmse, pot_temp, virt_pot_temp, equiv_pot_temp,
+    mixing_ratio_from_specific_mass, specific_mass_dry_air,
+    specific_gas_constant_moist_air, heat_capacity_moist_air_constant_volume,
+    specific_entropy_dry_air, specific_entropy_water_vapor
+)
+from .toa_sfc_fluxes import (
+    albedo, sfc_albedo, cre_sw, cre_lw, cre_net, toa_rad, toa_rad_clr, toa_sw,
+    sfc_rad, sfc_rad_cld, sfc_lw, sfc_lw_cld, sfc_sw, sfc_sw_cld, sfc_energy,
+    column_energy, bowen_ratio, evap_frac
+)
+from .stats import (
+    pointwise_corr, pointwise_lin_regr, corr_cre_sw, corr_cre_lw, corr_cre_net,
+    corr_toa_rad_clr, lin_regr_cre_net, lin_regr_toa_rad_clr
+    )
+from .zonal_mean_circ import *
 
 
 # Functions for derivatives in x, y, and p.
@@ -132,25 +155,14 @@ def vert_advec_upwind(arr, omega, p):
     # Assume pressure is 3rd to last axis: ([time,] p, lat, lon)
     f = arr.T
     p = to_pascal(p)
-    # Amend array dimensions as necessary for broadcasting purposes.
-    if p.ndim == 1:
-        p = p[np.newaxis,np.newaxis,:,np.newaxis]
-    elif p.ndim == 3:
-        p = p[np.newaxis,:,:,:].T
-    else:
-        p = p.T
-    # Roll pressure to be leading axis for broadcasting.
-    f = np.rollaxis(f, 2, 0)
-    p = np.rollaxis(p, 2, 0)
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
     df_fwd_partial = fwd_diff1(f, p)
     df_bwd_partial = fwd_diff1(f[::-1], p[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_partial, df_bwd_partial[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
-    # Roll axis and transpose again to regain original axis order.
-    df_fwd = np.rollaxis(df_fwd, 0, -1).T
-    df_bwd = np.rollaxis(df_bwd, 0, -1).T
+    # 2015-10-26 S. Hill: does omega having the opposite sign convention as
+    # normal mean that the forward v. backward differencing should be switched?
     return upwind_scheme(df_fwd, df_bwd, omega)
 
 
@@ -158,38 +170,6 @@ def total_advec_upwind(arr, u, v, omega, p, radius,
                        vec_field=False):
     return (horiz_advec_upwind(arr, u, v, radius, vec_field) +
             vert_advec_upwind(arr, omega, p))
-
-
-# Trenberth mass balance & energy budget quantities
-def column_mass(ps):
-    """Total mass per square meter of atmospheric column."""
-    return (1. / grav)*ps
-
-
-def column_mass_integral(arr, dp):
-    """
-    Total mass per square meter of atmospheric column.
-
-    Explicitly computed by integrating over pressure, rather than implicitly
-    using surface pressure.  Useful for checking if model data conserves mass.
-
-    :param dp: Pressure thickness of the model levels.
-    """
-    mass = arr.copy()
-    mass.values = int_dp_g(mass, dp)
-    return mass
-
-
-def column_dry_air_mass(ps, wvp):
-    """Total mass of dry air in an atmospheric column (from Trenberth 1991)"""
-    return ps / grav - wvp
-
-
-def column_dry_air_mass_tendency(q, u, v, radius, dp):
-    """Time tendency of column dry air mass.  Trenberth 1991, Eq. (3)"""
-    dry_air = 1 - q
-    dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, radius)
-    return -1*int_dp_g(dry_air_flux_divg, dp)
 
 
 def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
@@ -298,6 +278,38 @@ def horiz_divg(u, v, radius):
     # return s.revert_to_raw(s.divergence())
 
 
+# Mass balance & energy budget quantities
+def column_mass(ps):
+    """Total mass per square meter of atmospheric column."""
+    return (1. / grav)*ps
+
+
+def column_mass_integral(arr, dp):
+    """
+    Total mass per square meter of atmospheric column.
+
+    Explicitly computed by integrating over pressure, rather than implicitly
+    using surface pressure.  Useful for checking if model data conserves mass.
+
+    :param dp: Pressure thickness of the model levels.
+    """
+    mass = arr.copy()
+    mass.values = int_dp_g(mass, dp)
+    return mass
+
+
+def column_dry_air_mass(ps, wvp):
+    """Total mass of dry air in an atmospheric column (from Trenberth 1991)"""
+    return ps / grav - wvp
+
+
+def column_dry_air_mass_tendency(q, u, v, radius, dp):
+    """Time tendency of column dry air mass.  Trenberth 1991, Eq. (3)"""
+    dry_air = 1 - q
+    dry_air_flux_divg = field_horiz_flux_divg(dry_air, u, v, radius)
+    return -1*int_dp_g(dry_air_flux_divg, dp)
+
+
 def u_or_v_mass_adjustment(uv, q, ps, dp, p):
     """
     Correction to subtract from outputted u or v to balance mass budget.
@@ -348,9 +360,25 @@ def d_dy_of_vert_int(arr, radius, dp):
 
 def divg_of_vert_int_horiz_flow(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
-    u_int = int_dp_g(u, dp)
-    v_int = int_dp_g(v, dp)
+    print(dp)
+    u_int = integrate(u, dp, PFULL_STR)
+    v_int = integrate(v, dp, PFULL_STR)
     return horiz_divg(u_int, v_int, radius)
+
+
+def mass_budget_transport_term(u, v, q, radius, dp):
+    """Transport term of atmospheric column mass budget.
+
+    E.g. Trenberth 1991, Eq. 9
+    """
+    u_int = integrate((1 - q)*u, dp, PFULL_STR)
+    v_int = integrate((1 - q)*v, dp, PFULL_STR)
+    return horiz_divg(u_int, v_int, radius)
+
+
+def mass_budget_residual(ps, u, v, q, radius, dp):
+    return (mass_budget_tendency_term(ps, q, dp) +
+            mass_budget_transport_term(u, v, q, radius, dp))
 
 
 def horiz_advec_sfc_pressure(ps, u, v, radius):
@@ -563,136 +591,6 @@ def qv(sphum, v):
     return sphum*v
 
 
-# Eddy computations.
-def covariance(array1, array2, axis=None, weights=None):
-    """
-    Average `covariance` along the specified axis of two arrays.
-
-
-    :param array1, array2: The two arrays to compute the covariance of.
-    :type array1 array2: numpy.ndarray or numpy.ma.core.MaskedArray
-    :param axis: Array axis number over which average is taken.
-    :type axis: int or None
-    :param weights: Weights used to perform the average.
-    :type weights: int or None
-    """
-    prod = np.ma.multiply(array1, array2)
-    return np.ma.average(prod, axis=axis, weights=weights)
-
-
-def eddy_component(array, axis=None, weights=None):
-    """Compute the deviation from the average along the specified axis.
-
-    :param array: The array on which to compute the eddy component.
-    :type array: Numpy array.
-    :param axis: The index of the axis on which to compute.
-    :type axis: int
-    :param weights: An array of weights used to compute the average.
-    :type weights: Numpy array or `None`
-    """
-    avg = np.ma.average(array, axis=axis, weights=weights)
-    return np.ma.subtract(array, avg)
-
-
-def eddy_covar_avg(array1, array2, axis=None, weights=None):
-    """Compute the average eddy covariance of two fields.
-
-    :param array1, array2: The two arrays to compute the covariance of.
-    :type array1 array2: numpy.ndarray or numpy.ma.core.MaskedArray
-    :param axis: Array axis number over which average is taken.
-    :type axis: int or None
-    :param weights: Weights used to perform the average.
-    :type weights: int or None
-    """
-    cov1 = eddy_component(array1, axis=axis, weights=weights)
-    cov2 = eddy_component(array2, axis=axis, weights=weights)
-    return covariance(cov1, cov2, axis=axis, weights=weights)
-
-
-# Thermodynamic functions.
-def dse(temp, hght):
-    """Dry static energy.  Units: Joules per kilogram.
-
-    :param temp: Temperature.  Units: Kelvin.
-    :param hght: Geopotential height. Units: meters.
-    """
-    try:
-        ds = c_p*temp + grav*hght
-    except ValueError:
-        # On sigma coords, hght is at half levels; temp and sphum on full.
-        try:
-            ds = c_p*temp + grav*0.5*(hght[:,:-1] + hght[:,1:])
-        except ValueError:
-            ds = c_p*temp + grav*0.5*(hght[:,:,:-1] + hght[:,:,1:])
-    return ds
-
-
-def mse(temp, hght, sphum):
-    """Moist static energy, in Joules per kilogram."""
-    return dse(temp, hght) + L_v*sphum
-
-
-def fmse(temp, hght, sphum, ice_wat):
-    """Frozen moist static energy, in Joules per kilogram."""
-    return mse(temp, hght, sphum) - L_f*ice_wat
-
-
-def mixing_ratio_from_specific_mass(mass):
-    return mass / (1 - mass)
-
-
-def specific_mass_dry_air(q_v, q_l, q_s):
-    """Specific mass of dry air from the specific masses of water phases."""
-    return 1. - q_v - q_l - q_s
-
-
-def specific_gas_constant_moist_air(q_v, q_l, q_s):
-    """Specific gas constant of moist air with the given water masses."""
-    q_a = specific_mass_dry_air(q_v, q_l, q_s)
-    return q_a*R_a + q_v*R_v
-
-
-def heat_capacity_moist_air_constant_volume(q_v, q_l, q_s):
-    """Heat capacity at constant volume of moist air."""
-    q_a = specific_mass_dry_air(q_v, q_l, q_s)
-    return c_va*q_a + c_vv*q_v + c_vl*q_l + c_vs*q_s
-
-
-# def mse_romps(T, q_v, q_s, z):
-#     """Moist static energy defined in Romps 2015, JAS."""
-#     pass
-
-
-def specific_entropy_dry_air(T, p):
-    """Specific entropy of dry air.  From Romps."""
-    return c_p*np.log(T/T_trip) - R_d*np.log(p / p_trip)
-
-
-def specific_entropy_water_vapor(T, p):
-    """Specific entropy of water vapor.  From Romps."""
-    return c_pv*np.log(T/T_trip) - R_d*np.log(p / p_trip)
-
-
-def pot_temp(temp, p, p0=1000.):
-    """Potential temperature.  Units: Kelvin."""
-    return temp*(p0/p[:,np.newaxis,np.newaxis])**kappa
-
-
-def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
-    """Virtual potential temperature, approximating the mixing ratios as
-    specific humidities.
-
-    """
-    return ((temp*(p0/p[:,np.newaxis,np.newaxis])**kappa) *
-            (1. + 0.61*sphum - liq_wat))
-
-
-def equiv_pot_temp(temp, p, sphum, p0=1000.):
-    """Equivalent potential temperature."""
-
-    return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
-
-
 # Gross moist stability-related quantities
 def field_vert_int_max(arr, dp):
     """Maximum magnitude of integral of a field from surface up."""
@@ -746,91 +644,6 @@ def gross_moist_stab(temp, hght, sphum, u, v, radius, dp):
     return -gms_like_ratio(divg, mse(temp, hght, sphum), dp)
 
 
-# Radiative transfer quantities.
-def albedo(swdn_toa, swup_toa):
-    """Net column albedo, i.e. fraction of insolation reflected back."""
-    return np.ma.masked_where(swdn_toa == 0., swup_toa/swdn_toa)
-
-
-def sfc_albedo(swdn_sfc, swup_sfc):
-    """Net surface albedo, i.e. fraction of SW at surface reflected back."""
-    return np.ma.masked_where(swdn_sfc == 0., swup_sfc/swdn_sfc)
-
-
-def toa_sw(swdn_toa, swup_toa):
-    """All-sky TOA net shortwave radiative flux into atmosphere."""
-    return swdn_toa - swup_toa
-
-
-def cre_sw(swup_toa, swup_toa_clr):
-    """Cloudy-sky TOA net shortwave radiative flux into atmosphere."""
-    return  -1*swup_toa + swup_toa_clr
-
-
-def cre_lw(olr, olr_clr):
-    """Cloudy-sky OLR (outgoing longwave radiation, i.e. upwelling longwave radiative flux at TOA."""
-    return -1*olr + olr_clr
-
-
-def cre_net(swup_toa, olr, swup_toa_clr, olr_clr):
-    """Cloudy-sky TOA downward radiative flux."""
-    return cre_sw(swup_toa, swup_toa_clr) + cre_lw(olr, olr_clr)
-
-
-def toa_rad(swdn_toa, swup_toa, olr):
-    """All-sky TOA downward radiative flux."""
-    return swdn_toa - swup_toa - olr
-
-
-def toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr):
-    """Clear-sky TOA downward radiative flux."""
-    return swdn_toa_clr - swup_toa_clr - olr_clr
-
-
-def sfc_sw(swup_sfc, swdn_sfc):
-    """All-sky surface upward shortwave radiative flux."""
-    return swup_sfc - swdn_sfc
-
-
-def sfc_sw_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr):
-    """Cloudy-sky surface upward shortwave radiative flux."""
-    return swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr
-
-
-def sfc_lw(lwup_sfc, lwdn_sfc):
-    """All-sky surface net longwave radiative flux into atmosphere."""
-    return lwup_sfc - lwdn_sfc
-
-
-def sfc_lw_cld(lwup_sfc, lwup_sfc_clr, lwdn_sfc, lwdn_sfc_clr):
-    """Cloudy-sky surface net longwave radiative flux into atmosphere."""
-    return lwup_sfc - lwup_sfc_clr - lwdn_sfc + lwdn_sfc_clr
-
-
-def sfc_rad(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc):
-    """All-sky surface upward radiative flux."""
-    return swup_sfc - swdn_sfc + lwup_sfc -lwdn_sfc
-
-
-def sfc_rad_cld(swup_sfc, swup_sfc_clr, swdn_sfc, swdn_sfc_clr,
-                lwup_sfc, lwup_sfc_clr, lwdn_sfc, lwdn_sfc_clr):
-    """Cloudy-sky upward surface radiative flux."""
-    return (swup_sfc - swup_sfc_clr - swdn_sfc + swdn_sfc_clr +
-            lwup_sfc - lwup_sfc_clr - lwdn_sfc + lwdn_sfc_clr)
-
-
-def sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
-    """All sky net upward surface radiative plus enthalpy flux."""
-    return swup_sfc - swdn_sfc + lwup_sfc - lwdn_sfc + shflx + L_v*evap
-
-
-def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-                  lwup_sfc, lwdn_sfc, shflx, evap):
-    """All sky net TOA and surface radiative and enthalpy flux into atmos."""
-    return (toa_rad(swdn_toa, swup_toa, olr) +
-            sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap))
-
-
 def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls):
     """Net diabatic heating rate."""
     return tdt_lw + tdt_sw + tdt_conv + tdt_ls
@@ -849,16 +662,6 @@ def tdt_sw_cld(tdt_sw, tdt_sw_clr):
 def p_minus_e(precip, evap):
     """Precipitation minus evaporation."""
     return precip - evap
-
-
-def bowen_ratio(shflx, evap):
-    """Bowen ratio: surface SH/LH."""
-    return shflx/(L_v * evap)
-
-
-def evap_frac(evap, shflx):
-    """Evaporative fraction: surface LH/(SH+LH)."""
-    return L_v*evap / (L_v*evap + shflx)
 
 
 # Zonal-mean, meridional circulation and mass transport quantities.
@@ -1070,337 +873,6 @@ def vert_centroid(arr, level, p_bot=850., p_top=150.):
             np.sum(arr*lev_thick, axis=0))
 
 
-# Functions below this line haven't been converted to new argument format.
-def tht(variables, **kwargs):
-    """Total atmospheric plus oceanic northward energy flux."""
-    # Calculate energy balance at each grid point.
-    loc = -1*(variables[0] - variables[1] - variables[2])
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)
-
-
-def oht(variables, **kwargs):
-    """Total oceanic northward energy flux as residual of total minus atmospheric flux."""
-    # Calculate energy balance at each grid point.
-    loc = (variables[0] - variables[1] + variables[2] - variables[3] +   # sfc radiation
-           variables[4] +                                 # sfc SH flux
-           L_f*(variables[5] + variables[6]) + L_v*variables[7])   # column LH flux
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)
-    #return tht(variables, **kwargs) - aht(variables, **kwargs)
-
-
-def moc_flux(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by time and
-    zonal mean flow."""
-    # Specify upper bound of vertical integrals.
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    # Apply mass flux correction to zonal mean data.
-    v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    v_north = np.where(v_znl > 0., v_znl, 0.)
-    v_south = np.where(v_znl < 0., v_znl, 0.)
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis]
-    # Adjustment imposes that column integrated mass flux is zero.
-    mass_adj = -((v_north*lev_thick).sum(axis=1) /
-                 (v_south*lev_thick).sum(axis=1))
-    # Integrate the specified flux by the adjusted v vertically and zonally.
-    flux_type = kwargs['flux_type']
-    if flux_type == 'dse':
-        flux = (np.squeeze(dse(variables[:2])[:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    elif flux_type == 'mse':
-        flux = (np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    elif flux_type == 'moisture':
-        flux = L_v*(np.squeeze(variables[0][:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1))
-
-
-def moc_flux_raw(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by time and zonal mean flow, without applying column mass flux correction."""
-    # Specify upper bound of vertical integrals.
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    # Take zonal mean and calculate grid level thicknesses.
-    v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis]
-    # Integrate the specified flux vertically and zonally.
-    flux_type = kwargs.get('flux_type', 'mse')
-    if flux_type == 'dse':
-        flux = np.squeeze(dse(variables[:2])[:,trop]).mean(axis=-1) * v_znl
-    elif flux_type == 'mse':
-        flux = np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) * v_znl
-    elif flux_type == 'moisture':
-        flux = L_v*np.squeeze(variables[0][:,trop]).mean(axis=-1) * v_znl
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1))
-
-
-def st_eddy_flux(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by stationary eddies."""
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    v = np.squeeze(variables[-1][:,trop])
-    flux_type = kwargs['flux_type']
-    if flux_type == 'dse':
-        m = np.squeeze(dse(variables[:2])[:,trop])
-    elif flux_type == 'mse':
-        m = np.squeeze(mse(variables[:3])[:,trop])
-    elif flux_type == 'moisture':
-        m = np.squeeze(variables[0][:,trop])*L_v
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
-    flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) *
-            (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1).mean(axis=-1))
-
-
-def moc_st_eddy_flux(variables, **kwargs):
-    """Mass weighted column integrated flux by time mean flow."""
-    return moc_flux(variables, **kwargs) + st_eddy_flux(variables, **kwargs)
-
-
-def trans_eddy_flux(variables, **kwargs):
-    """Meridional flux by transient eddies."""
-    return aht(variables[4:], **kwargs) - moc_st_eddy_flux(variables[:4], **kwargs)
-
-
-def eddy_flux(variables, **kwargs):
-    """Meridional flux by stationary and transient eddies."""
-    return aht(variables[4:], **kwargs) - moc_flux(variables[:4], **kwargs)
-
-
-def mse_flux(variables, **kwargs):
-    """Column integrated moist static energy meridional flux."""
-    flux_type = kwargs.get('flux_type', 'moc')
-    if flux_type == 'moc':
-        return moc_flux(variables[:4], **kwargs)
-    elif flux_type == 'st_eddy':
-        return st_eddy_flux(variables[:4], **kwargs)
-    elif flux_type == 'moc_st_eddy':
-        return moc_st_eddy_flux(variables[:4], **kwargs)
-    elif flux_type =='trans_eddy':
-        return trans_eddy_fux(variables, **kwargs)
-    elif flux_type == 'all':
-        return aht(variables[4:], **kwargs)
-    elif flux_type == 'eddy':
-        return eddy_flux(variables, **kwargs)
-
-
-def mass_flux(variables, **kwargs):
-    """Meridional mass flux by time and zonal mean flow."""
-
-    # Apply mass flux correction.
-    lev_thick = level_thickness(nc)[np.newaxis,:,np.newaxis]/grav
-    v_znl = variables[0].mean(axis=-1)
-    v_north = np.where(v_znl > 0., v_znl, 0.)
-    v_south = np.where(v_znl < 0., v_znl, 0.)
-    mass_adj = -((v_north*lev_thick).sum(axis=1) /
-                 (v_south*lev_thick).sum(axis=1))
-    # Integrate vertically and pick level where magnitude maximized.
-    int_flux = ((v_north + v_south*mass_adj[:,np.newaxis,:]) *
-                lev_thick).cumsum(axis=1)
-    flux_pos = np.amax(int_flux, axis=1)
-    flux_neg = np.amin(int_flux, axis=1)
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            np.where(flux_pos > - flux_neg, flux_pos, flux_neg))
-
-
-def gms_moc(variables, **kwargs):
-    """Gross moist stability."""
-    return -moc_flux(variables, **kwargs)/msf_max([variables[-1]], **kwargs)/c_p
-
-
-def gms_msf(variables, **kwargs):
-    """Gross moist stability."""
-    return -(moc_st_eddy_flux(variables, **kwargs) /
-            (msf_max([variables[-1]], **kwargs)*c_p))
-
-
-def total_gms(variables, **kwargs):
-    """Total (mean plus eddy) gross moist stability."""
-    return -(aht(variables[:-1], **kwargs) /
-             msf_max([variables[-1]], **kwargs))/c_p
-
-
-def aht_no_snow(variables, **kwargs):
-    """Total atmospheric northward energy flux."""
-    # Calculate energy balance at each grid point.
-    loc = -1*(variables[0] - variables[1] - variables[2] +             # TOA radiation
-              variables[3] - variables[4] + variables[5] - variables[6] +   # sfc radiation
-              variables[7] +                                 # sfc SH flux
-              L_v*variables[-1])   # column LH flux
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)
-
-
-def hadley_bounds(lats, levs, vcomp):
-    """Poleward extent of Hadley Cell."""
-    # Get meridional mass streamfunction at 500 hPa.
-    p_ind = np.where(levs == 500.)
-    sf = np.squeeze(msf(lats, levs, vcomp)[p_ind])
-    zero_cross = np.where(np.diff(np.sign(sf)))[0]
-    # Hadley Cell center is the zero crossing nearest the equator.
-    ind_cent = np.argmin(np.abs(zero_cross - lats.size/2))
-    # Hadley cell poleward boundaries are the zero crossings on either side.
-    ind = [zero_cross[ind_cent + i] for i in range(-1,2)]
-    # Linearly interpolate to true zero crossings.
-    return np.array([lats[ind[i]+1] - (lats[ind[i]+1] - lats[ind[i]]) /
-                (sf[ind[i]+1] - sf[ind[i]])*sf[ind[i]+1]
-                for i in range(3)])
-
-
-def had_bounds(strmfunc, return_max=False):
-    """Hadley cell poleward extent and center location."""
-
-    # Get data max and min values and indices, such that min is north of max.
-    z_max_ind, y_max_ind = np.where(strmfunc == strmfunc.max())
-    z_max_ind = z_max_ind[0]; y_max_ind=y_max_ind[0]
-    z_min_ind, y_min_ind = np.where(strmfunc[:,y_max_ind:] ==
-                                    strmfunc[:,y_max_ind:].min())
-    z_min_ind = z_min_ind[0]; y_min_ind = y_min_ind[0] + y_max_ind
-    min_north = strmfunc[z_min_ind, y_min_ind]
-    # Return locations and values of Hadley cells' strengths.
-    if return_max:
-        return [z_min_ind, y_min_ind, strmfunc[z_min_ind, y_min_ind],
-                z_max_ind, y_max_ind, strmfunc[z_max_ind, y_max_ind]]
-    # Find latitude where streamfunction at its level of maximum decreases
-    # to 10% of that maximum value.
-    had_max = np.where(np.diff(np.sign(strmfunc[z_max_ind] -
-                                       0.1*strmfunc.max())))[0]
-    had_min = np.where(np.diff(np.sign(strmfunc[z_min_ind] -
-                                       0.1*strmfunc.min())))[0]
-    had_lims = (np.intersect1d(range(y_max_ind), had_max)[-1],
-               np.intersect1d(range(y_min_ind, lat.size), had_min)[0])
-    # Center is streamfunction zero crossing between the two cells at level
-    # halfway between the levels of the two maxima.
-    p_ind = 0.5*(z_min_ind + z_max_ind)
-    zero_cross = np.where(np.diff(np.sign(np.squeeze(
-        strmfunc[p_ind,y_max_ind:y_min_ind]))))[0]
-    had_center = zero_cross[0] + y_max_ind
-    return np.array([lat[had_lims[0]], lat[had_center], lat[had_lims[1]]])
-
-
-def had_bounds500(strmfunc, lat):
-    """Hadley cells extent based on 500 hPa streamfunction zero crossings."""
-
-    # Find latitudes where streamfunction at 500 hPa changes sign.
-    strmfunc = strmfunc[5]
-    zero_cross = np.where(np.diff(np.sign(strmfunc)))[0]
-    # Hadley Cell center is the zero crossing nearest the equator.
-    ind_cent = np.argmin(np.abs(zero_cross - lat.size/2))
-    # Hadley cell poleward boundaries are the zero crossings on either side.
-    ind = [zero_cross[ind_cent + i] for i in range(-1,2)]
-    # Linearly interpolate to true zero crossings.
-    return np.array([lat[ind[i]+1] - (lat[ind[i]+1] - lat[ind[i]]) /
-                    (strmfunc[ind[i]+1] - strmfunc[ind[i]])*strmfunc[ind[i]+1]
-                    for i in range(3)])
-
-
-def thermal_equator(flux, lat):
-    """Location of zero-crossing of energy flux."""
-
-    # Find latitude indices where flux changes sign.
-    zero_cross = np.where(np.diff(np.sign(flux)))[0]
-    # Thermal equator is the zero crossing nearest the equator.
-    ind = zero_cross[np.argmin(np.abs(zero_cross - lat.size/2))]
-    # Linearly interpolate to true zero crossing latitude.
-    return (lat[ind+1] - (lat[ind+1] - lat[ind]) /
-            (flux[ind+1] - flux[ind])*flux[ind+1])
-
-
-def itcz_pos(precip, return_indices=False):
-    """Calculate ITCZ location."""
-    # Find the latitude index with maximum precip and calculate dP/d(latitude)
-    # for the adjacent grid latitudes.
-    ind_max = precip.argmax()
-    if return_indices:
-        return ind_max
-    dP = np.gradient(precip[ind_max-1:ind_max+2])
-    phi = np.deg2rad(lat)[ind_max-1:ind_max+2]
-    dphi = np.gradient(phi)
-    dP_dphi = dP/dphi
-    # Find on which side of the maximum does dP/d(latitude) change sign.
-    i = np.where(np.diff(np.sign(dP)))[0][0]
-    # Linearly interpolate to determine the latitude of max precip.
-    zero_interp = phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) /
-                            (dP_dphi[i+1] - dP_dphi[i]))
-    return np.rad2deg(zero_interp)
-
-
-def itcz_loc(lats, precip):
-    """Calculate ITCZ location."""
-    # Find the latitude index with maximum precip and calculate dP/d(latitude)
-    # for the adjacent grid latitudes.
-    ind_max = precip.argmax()
-    dP = np.gradient(precip[ind_max-1:ind_max+2])
-    phi = np.deg2rad(lats)[ind_max-1:ind_max+2]
-    dphi = np.gradient(phi)
-    dP_dphi = dP/dphi
-    # Find on which side of the maximum does dP/d(latitude) change sign.
-    i = np.where(np.diff(np.sign(dP)))[0][0]
-    # Linearly interpolate to determine the latitude of max precip.
-    return np.deg2rad(phi[i] - (dP_dphi[i]*(phi[i+1] - phi[i]) /
-                               (dP_dphi[i+1] - dP_dphi[i])))
-
-
-def prec_centroid(precip, lat_max=20.):
-    """
-    Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
-    """
-    # Interpolate zonal mean precip to a 0.1 degree latitude grid for 20S-20N
-    trop = np.where(np.abs(lat) < lat_max)
-    lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
-    prec = np.interp(lat_interp, lat[trop], precip[trop])
-    # Integrate area-weighted precip and find median.
-    prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))))
-    return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]))]
-
-
-def precip_centroid(lats, precip, lat_max=20.):
-    """
-    Calculate ITCZ location as the centroid of the area weighted zonal-mean P.
-    """
-    # Interpolate zonal mean P to 0.1 degree latitude grid over desired extent.
-    trop = np.where(np.abs(lats) < lat_max)
-    precip = precip.mean(axis=-1)[trop]
-    lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
-    prec = np.interp(lat_interp, lats[trop], precip)
-    # Integrate area-weighted precip and find median.
-    prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))), axis=0)
-    return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]), axis=0)]
-
-
-def ang_mom(lats, ucomp):
-    """Angular momentum per unit mass."""
-    cos_lat = np.cos(np.deg2rad(lats[np.newaxis,:,np.newaxis]))
-    return (Omega*r_e*cos_lat + ucomp)*r_e*cos_lat
-
-
 def trop_height(level, T):
     """
     Tropopause height of each column, based on Reichler et al 2003 GRL.
@@ -1425,78 +897,3 @@ def trop_height(level, T):
                (Gamma_crit - Gamma[tp-1])/(Gamma[tp] - Gamma[tp-1])))
     # Convert from pressure^kappa to pressure.
     return pkap_tp**(1./kap)
-
-
-def flatten_spatial_dims(data):
-    """Flatten all spatial dimensions of an input array.
-
-    Assumes input array has shape (time, vert, lat, lon).
-    """
-    n_lon, n_lat, n_lev = data.shape[-1], data.shape[-2], data.shape[-3]
-    n_pt = n_lon*n_lat*n_lev
-    return data.reshape((-1, n_pt))
-
-
-def pointwise_corr(x, y):
-    """Pointwise Pearson correlation coefficient in time of two arrays.
-
-    Assumes input arrays have shape (time, vert, lat, lon).
-    """
-    if not np.all(np.shape(x) == np.shape(y)):
-        raise ValueError("x and y must have same shapes")
-    # pearsonr only accepts 1d arrays.  Must flatten, compute, then reshape.
-    orig_shape = np.shape(x)
-    x, y = [flatten_spatial_dims(z) for z in (x, y)]
-    n_pt = x.shape[-1]
-    # pearsonr returns (corr, p_value).  Retain only corr via '[0]'.
-    corr = [scipy.stats.pearsonr(x[:,i], y[:,i])[0] for i in range(n_pt)]
-    # Reshape to original shape, but dropping the time dimension.
-    return np.reshape(corr, orig_shape[1:])
-
-
-def pointwise_lin_regr(x, y):
-    """Pointwise least squares linear regression in time of two arrays.
-
-    Assumes input arrays have shape (time, vert, lat, lon).  The regression is
-    of x against y, i.e. the slope returned is m, where y=mx+b.
-    """
-    if not np.all(np.shape(x) == np.shape(y)):
-        raise ValueError("x and y must have same shapes")
-    # linregress only accepts 1d arrays.  Must flatten, compute, then reshape.
-    orig_shape = np.shape(x)
-    x, y = [flatten_spatial_dims(x) for x in (x, y)]
-    n_pt = x.shape[-1]
-    # linregress returns (slope, ...).  Retain only slope via '[0]'.
-    slope = [scipy.stats.linregress(x[:,i], y[:,i])[0] for i in range(n_pt)]
-    # Reshape to original shape, but dropping the time dimension.
-    return np.reshape(slope, orig_shape[1:])
-
-
-def corr_cre_sw(swup_toa, swup_toa_clr, var2):
-    return pointwise_corr(cre_sw(swup_toa, swup_toa_clr), var2)
-
-
-def corr_cre_lw(olr, olr_clr, var2):
-    return pointwise_corr(cre_lw(olr, olr_clr), var2)
-
-
-def corr_cre_net(swup_toa, olr, swup_toa_clr, olr_clr, var2):
-    return pointwise_corr(cre_net(swup_toa, olr, swup_toa_clr, olr_clr), var2)
-
-
-def corr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
-    return pointwise_corr(
-        toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr), var2
-    )
-
-
-def lin_regr_cre_net(swup_toa, olr, swup_toa_clr, olr_clr, var2):
-    return pointwise_lin_regr(
-        var2, cre_net(swup_toa, olr, swup_toa_clr, olr_clr)
-    )
-
-
-def lin_regr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
-    return pointwise_lin_regr(
-        var2, toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr)
-    )

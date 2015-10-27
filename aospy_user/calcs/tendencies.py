@@ -1,12 +1,9 @@
 """Calculations involved in mass and energy budgets."""
 import numpy as np
+from aospy.constants import grav
+from aospy.utils import coord_to_new_dataarray, int_dp_g
 
-from aospy.utils import (apply_time_offset, coord_to_new_dataarray,
-                         to_pfull_from_phalf, d_deta_from_pfull,
-                         d_deta_from_phalf)
-
-PFULL_STR = 'pfull'
-TIME_STR = 'time'
+from .. import TIME_STR
 
 
 def first_to_last_vals_dur(arr, freq='1M'):
@@ -27,10 +24,15 @@ def time_tendency(arr, freq='1M'):
     return (last - first) / first_to_last_vals_dur(arr, freq)
 
 
-def time_tendency_gfdl(arr, hours=3):
-    """Compute the time tendency of GFDL output, which requires time offset.
+def wvp_time_tendency(q, dp, freq='1M'):
+    """Time tendency of water vapor path."""
+    return time_tendency(int_dp_g(q, dp), freq=freq)
 
-    See `apply_time_offset` docstring for more info re: GFDL data.
+
+def mass_budget_tendency_term(ps, q, dp, freq='1M'):
+    """Combined time-tendency term in column mass budget equation.
+
+    See e.g. Trenberth 1991, Eq. 9.
     """
-    arr[TIME_STR] = apply_time_offset(arr[TIME_STR], hours)
-    return time_tendency(arr)
+    return (time_tendency(ps, freq=freq) -
+            grav.value * wvp_time_tendency(q, dp, freq=freq))
