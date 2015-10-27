@@ -41,7 +41,12 @@ from .stats import (
     pointwise_corr, pointwise_lin_regr, corr_cre_sw, corr_cre_lw, corr_cre_net,
     corr_toa_rad_clr, lin_regr_cre_net, lin_regr_toa_rad_clr
     )
-from .zonal_mean_circ import *
+from .zonal_mean_circ import (
+    msf, msf_max, aht, aht_no_snow, oht, tht, gms_change_est, gms_change_est2,
+    gms_h01, gms_h01est, gms_h01est2, gms_moc, gms_msf, total_gms, ang_mom,
+    hadley_bounds, had_bounds, had_bounds500, thermal_equator, itcz_pos,
+    itcz_loc, prec_centroid, precip_centroid
+)
 
 
 # Functions for derivatives in x, y, and p.
@@ -281,7 +286,7 @@ def horiz_divg(u, v, radius):
 # Mass balance & energy budget quantities
 def column_mass(ps):
     """Total mass per square meter of atmospheric column."""
-    return (1. / grav)*ps
+    return ps / grav.value
 
 
 def column_mass_integral(arr, dp):
@@ -293,6 +298,7 @@ def column_mass_integral(arr, dp):
 
     :param dp: Pressure thickness of the model levels.
     """
+    # 2015-10-27 S. Hill: This is almost definitely incorrect.
     mass = arr.copy()
     mass.values = int_dp_g(mass, dp)
     return mass
@@ -310,27 +316,25 @@ def column_dry_air_mass_tendency(q, u, v, radius, dp):
     return -1*int_dp_g(dry_air_flux_divg, dp)
 
 
-def u_or_v_mass_adjustment(uv, q, ps, dp, p):
-    """
-    Correction to subtract from outputted u or v to balance mass budget.
+def uv_mass_adjustment(uv, q, ps, dp):
+    """Correction to subtract from outputted u or v to balance mass budget.
 
     C.f. Trenberth 1991, J. Climate, equations 9 and 10.
     """
-    numer = int_dp_g((1. - q)*uv, dp)[:,np.newaxis,:,:]
-    pt = p.min(axis=-3)[:,np.newaxis,:,:]
-    denom = (ps - pt)*(1. /grav) - int_dp_g(q, dp)[:,np.newaxis,:,:]
+    wvp = int_dp_g(q, dp)
+    numer = integrate((1. - q)*uv, dp, PFULL_STR)
+    denom = (ps - grav.value * wvp)
     return numer / denom
 
 
-def u_or_v_mass_adjusted(uv, q, ps, dp, p):
+def uv_mass_adjusted(uv, q, ps, dp):
     """Corrected u or v in order to balance mass budget."""
-    return uv - u_or_v_mass_adjustment(uv, q, ps, dp, p)
+    return uv - uv_mass_adjustment(uv, q, ps, dp)
 
 
-def horiz_divg_mass_adj(u, v, q, ps, radius, dp, p):
-    u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
-    v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
-    return horiz_divg(u_cor, v_cor, radius)
+def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
+    return horiz_divg(uv_mass_adjusted(u, q, ps, dp),
+                      uv_mass_adjusted(v, q, ps, dp), radius)
 
 
 def field_times_horiz_divg_mass_adj(arr, u, v, q, ps, radius, dp, p):
@@ -338,8 +342,8 @@ def field_times_horiz_divg_mass_adj(arr, u, v, q, ps, radius, dp, p):
 
 
 def horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p, vec_field=False):
-    u_cor = u_or_v_mass_adjusted(u, q, ps, dp, p)
-    v_cor = u_or_v_mass_adjusted(v, q, ps, dp, p)
+    u_cor = uv_mass_adjusted(u, q, ps, dp, p)
+    v_cor = uv_mass_adjusted(v, q, ps, dp, p)
     return horiz_advec(arr, u_cor, v_cor, radius, vec_field=vec_field)
 
 
@@ -360,7 +364,6 @@ def d_dy_of_vert_int(arr, radius, dp):
 
 def divg_of_vert_int_horiz_flow(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
-    print(dp)
     u_int = integrate(u, dp, PFULL_STR)
     v_int = integrate(v, dp, PFULL_STR)
     return horiz_divg(u_int, v_int, radius)
@@ -377,8 +380,34 @@ def mass_budget_transport_term(u, v, q, radius, dp):
 
 
 def mass_budget_residual(ps, u, v, q, radius, dp):
+    """Residual in the mass budget.
+
+    Theoretically the sum of the tendency and transport terms is exactly zero,
+    however artifacts introduced by numerics and other things yield a
+    residual.
+    """
     return (mass_budget_tendency_term(ps, q, dp) +
             mass_budget_transport_term(u, v, q, radius, dp))
+
+
+def divg_of_vert_int_mass_adj_horiz_flow(u, v, q, ps, radius, dp):
+    """Divergence of vertically integrated, mass-adjusted horizontal wind."""
+    return divg_of_vert_int_horiz_flow(uv_mass_adjusted(u, q, ps, dp),
+                                       uv_mass_adjusted(v, q, ps, dp),
+                                       radius, dp)
+
+
+def mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp):
+    """Transport term of atmospheric column mass budget with adjustment."""
+    u_int = integrate((1 - q)*uv_mass_adjusted(u, q, ps, dp), dp, PFULL_STR)
+    v_int = integrate((1 - q)*uv_mass_adjusted(v, q, ps, dp), dp, PFULL_STR)
+    return horiz_divg(u_int, v_int, radius)
+
+
+def mass_budget_with_adj_residual(ps, u, v, q, radius, dp):
+    """Residual in column mass budget when flow is adjusted for balance."""
+    return (mass_budget_tendency_term(ps, q, dp) +
+            mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp))
 
 
 def horiz_advec_sfc_pressure(ps, u, v, radius):
@@ -664,50 +693,6 @@ def p_minus_e(precip, evap):
     return precip - evap
 
 
-# Zonal-mean, meridional circulation and mass transport quantities.
-def msf(lats, levs, v):
-    """Meridional mass streamfunction."""
-    # Compute half level boundaries and widths.
-    p_top = 5.; p_bot = 1005.
-    p_half = 0.5*(levs[1:] + levs[:-1])
-    p_half = np.insert(np.append(p_half, p_top), 0, p_bot)
-    dp = to_pascal(p_half[:-1] - p_half[1:])[np.newaxis, ::-1, np.newaxis]
-    geom_factor = (2.*np.pi*r_e/grav *
-                   np.cos(np.deg2rad(lats))[np.newaxis, np.newaxis, :])
-    # Integrate from TOA down to surface.
-    msf_ = geom_factor * np.cumsum(v.mean(axis=-1) * dp, axis=1)[::-1]
-    # Average the values calculated at half levels; flip sign by convention.
-    msf_[:,:-1] = -0.5*(msf_[:,1:] + msf_[:,:-1])
-    # Uppermost level goes to 0 hPa (so divide by 2); surface value is zero.
-    msf_[:,-1]*=0.5; msf_[:,0] = 0.
-    return msf_
-
-
-def msf_max(lats, levs, v):
-    """Maximum meridional mass streamfunction magnitude at each latitude."""
-    strmfunc = msf(lats, levs, v)
-    pos_max = np.amax(strmfunc, axis=1)
-    neg_max = np.amin(strmfunc, axis=1)
-    return np.where(pos_max > -neg_max, pos_max, neg_max)
-
-
-def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-        shflx, evap, snow_ls, snow_conv, sfc_area):
-    """Total atmospheric northward energy flux."""
-    # Calculate energy balance at each grid point.
-    local = (column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-                           lwup_sfc, lwdn_sfc, shflx, evap) +
-             L_f*(snow_ls + snow_conv))
-    # Calculate meridional heat transport.
-    local_flat = local.reshape((local.shape[0],-1))
-    global_mean = np.ma.average(loc_flat, weights=sfc_area.ravel(), axis=1)
-    zonal_integral = np.sum(
-        sfc_area * (local_flat - global_mean[:,np.newaxis,np.newaxis]),
-        axis=-1
-    )
-    return np.ma.cumsum(zonal_integral, axis=-1)
-
-
 def gms_up_low(temp, hght, sphum, level, lev_up=400., lev_dn=925.):
     """Gross moist stability. Upper minus lower level MSE."""
     m = mse(temp, hght, sphum)
@@ -728,107 +713,6 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
 def moist_static_stab(temp, hght, sphum, p):
     mse_ = mse(temp, hght, sphum)
     return d_dp_from_p(mse_, p)
-
-
-def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
-    """Gross moist stability. Upper minus lower level MSE with thermodynamic
-    scaling estimate for low level MSE."""
-    m = mse(temp, hght, sphum).mean(axis=-1)
-    return (m[np.where(level == lev_up)] - m[np.where(level == lev_dn)])/c_p
-
-
-def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
-    """
-    Approximation of gross moist stability from Held (2001).
-
-    Near surface MSE diff b/w ITCZ and the given latitude.
-    """
-    # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(precip.mean(axis=-1))
-    m = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)),
-            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
-            np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
-    return (m[itcz_ind] - m)/c_p
-
-
-def gms_h01est(temp, sphum, precip, level, lev_sfc=925.):
-    """
-    Approximation of gross moist stability from Held (2001).
-
-    Near surface MSE diff b/w ITCZ and the given latitude, neglecting the
-    geopotential term.
-    """
-    sphum = np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1))
-    temp = np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1))
-    # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(np.mean(precip, axis=-1))
-    # GMS is difference between surface values
-    return temp[itcz_ind] - temp + L_v*(sphum[itcz_ind] - sphum)/c_p
-
-
-def gms_h01est2(temp, hght, sphum, precip, level, lev_up=200., lev_sfc=925.):
-    """
-    Approximation of gross moist stability from Held (2001).
-
-    MSE diff b/w ITCZ aloft and near surface at the given latitude.
-    """
-    # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(precip.mean(axis=-1))
-    m_up = mse(np.squeeze(temp[np.where(level == lev_up)].mean(axis=-1)),
-            np.squeeze(hght[np.where(level == lev_up)].mean(axis=-1)),
-            np.squeeze(sphum[np.where(level == lev_up)].mean(axis=-1)))
-    m_sfc = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)),
-            np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
-            np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
-    return (m_up[itcz_ind] - m_sfc)/c_p
-
-
-def gms_change_est(T_cont, T_pert, q_cont, precip, level, lev_sfc=925.):
-    """
-    Gross moist stability change estimate.
-
-    Near surface MSE difference between ITCZ and local latitude, neglecting
-    geopotential term and applying a thermodynamic scaling for the moisture
-    term.
-    """
-    # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(precip.mean(axis=-1))
-    # Need temperature change at
-    T_pert = np.squeeze(T_pert[np.where(level == lev_sfc)].mean(axis=-1))
-    T_cont = np.squeeze(T_cont[np.where(level == lev_sfc)].mean(axis=-1))
-    dT = T_pert - T_cont
-    dT_itcz = T_pert[itcz_ind] - T_cont[itcz_ind]
-    q_cont = np.squeeze(q_cont[np.where(level == lev_sfc)].mean(axis=-1))
-    # GMS is difference between surface
-    alpha = 0.07
-    return ((c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
-            (c_p + L_v*alpha*q_cont)*dT)/c_p
-
-
-def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
-                    lev_sfc=925., gamma=1.):
-    """
-    Gross moist stability change estimate.
-
-    Near surface MSE difference between ITCZ and local latitude, neglecting
-    geopotential term and applying a thermodynamic scaling for the moisture
-    term, and multiplying the ITCZ terms by cos(lat) and a fixed fraction gamma
-    to account for deviation of upper level MSE from the near surface ITCZ
-    value.
-    """
-    # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(precip.mean(axis=-1))
-    # Need temperature change at
-    T_pert = np.squeeze(T_pert[np.where(level == lev_sfc)].mean(axis=-1))
-    T_cont = np.squeeze(T_cont[np.where(level == lev_sfc)].mean(axis=-1))
-    dT = T_pert - T_cont
-    dT_itcz = T_pert[itcz_ind] - T_cont[itcz_ind]
-    q_cont = np.squeeze(q_cont[np.where(level == lev_sfc)].mean(axis=-1))
-    # GMS is difference between surface
-    alpha = 0.07
-    return (np.cos(np.deg2rad(lat))**2*gamma*
-            (c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
-            (c_p + L_v*alpha*q_cont)*dT)/c_p
 
 
 def prec_conv_frac(prec_conv, precip, prec_ls=False):

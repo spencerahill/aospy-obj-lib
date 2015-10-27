@@ -1407,6 +1407,21 @@ divg_of_vert_int_horiz_flow = Var(
               '\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
+divg_of_vert_int_mass_adj_horiz_flow = Var(
+    name='divg_of_vert_int_mass_adj_horiz_flow',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, sphum, ps, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.divg_of_vert_int_mass_adj_horiz_flow,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '\mathbf{v}_\mathrm{adj}\,\mathrm{d}p$'),
+    colormap='RdBu'
+)
 horiz_advec_sfc_pressure = Var(
     name='horiz_advec_sfc_pressure',
     domain='atmos',
@@ -1465,7 +1480,7 @@ mass_budget_transport_term = Var(
     colormap='RdBu'
 )
 mass_budget_residual = Var(
-    name='mass_budget_transport_term',
+    name='mass_budget_residual',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1475,6 +1490,36 @@ mass_budget_residual = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mass_budget_residual,
+    units=units.Pa_s1_mass,
+    colormap='RdBu'
+)
+mass_budget_with_adj_transport_term = Var(
+    name='mass_budget_with_adj_transport_term',
+    domain='atmos',
+    description=('Divergence of vertical integral of (one minus specific '
+                 'humidity) times horizontal flow.'),
+    variables=(ucomp, vcomp, sphum, ps, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_budget_with_adj_transport_term,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '(1-q)\mathbf{v}\,\mathrm{d}p$'),
+    colormap='RdBu'
+)
+mass_budget_with_adj_residual = Var(
+    name='mass_budget_with_adj_residual',
+    domain='atmos',
+    description=('Divergence of vertical integral of (one minus specific '
+                 'humidity) times horizontal flow.'),
+    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_budget_with_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
@@ -2426,6 +2471,30 @@ t_surf_precip_lin_regr = Var(
     func=calcs.pointwise_lin_regr,
     units=units.unitless
 )
+u_mass_adjustment = Var(
+    name='u_mass_adjustment',
+    domain='atmos',
+    description='',
+    variables=(ucomp, sphum, ps, 'dp'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.uv_mass_adjustment,
+    units=units.m_s1
+)
+u_mass_adjusted = Var(
+    name='u_mass_adjusted',
+    domain='atmos',
+    description='',
+    variables=(ucomp, sphum, ps, 'dp'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.uv_mass_adjusted,
+    units=units.m_s1
+)
 vert_divg = Var(
     name='vert_divg',
     domain='atmos',
@@ -2539,5 +2608,11 @@ master_vars_list = [
     d_dy_of_vert_int_v,
     q_horiz_advec_const_p_from_eta,
     wvp_monthly_tendency,
-    mass_budget_tendency_term
+    mass_budget_tendency_term,
+    mass_budget_transport_term,
+    mass_budget_residual,
+    u_mass_adjustment,
+    divg_of_vert_int_mass_adj_horiz_flow,
+    mass_budget_with_adj_transport_term,
+    mass_budget_with_adj_residual
 ]
