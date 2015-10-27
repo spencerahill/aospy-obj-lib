@@ -111,6 +111,8 @@ Pa_s1 = Units(
 )
 Pa_s1_mass = Units(
     units=r'Pa s$^{-1}$',
-    plot_units=kg_m2_s1_mass.plot_units,
-    plot_units_conv=100. / grav.value
+    # plot_units=kg_m2_s1_mass.plot_units,
+    # plot_units_conv=100. / grav.value
+    plot_units=r'hPa month$^{-1}$',
+    plot_units_conv=seconds_in_day.value * (365. / 12.) / 100.
 )
