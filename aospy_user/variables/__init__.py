@@ -1402,7 +1402,9 @@ divg_of_vert_int_horiz_flow = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.divg_of_vert_int_horiz_flow,
-    units=units.kg_m2_s1_mass,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
 horiz_advec_sfc_pressure = Var(
@@ -1430,6 +1432,51 @@ horiz_divg_vert_int_max = Var(
     def_lon=True,
     func=calcs.horiz_divg_vert_int_max,
     units=units.kg_m2_s1_mass
+)
+mass_budget_tendency_term = Var(
+    name='mass_budget_tendency_term',
+    domain='atmos',
+    description=('Monthly time-tendency of surface pressure minus gravity '
+                 'times water vapor path monthly time tendency.'),
+    variables=(ps, sphum, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_budget_tendency_term,
+    units=units.Pa_s1_mass,
+    math_str=r'$\partial p_s/\partial t - g\partial \mathrm{WVP}/\partial t$',
+    colormap='RdBu_r'
+)
+mass_budget_transport_term = Var(
+    name='mass_budget_transport_term',
+    domain='atmos',
+    description=('Divergence of vertical integral of (one minus specific '
+                 'humidity) times horizontal flow.'),
+    variables=(ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_budget_transport_term,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '(1-q)\mathbf{v}\,\mathrm{d}p$'),
+    colormap='RdBu'
+)
+mass_budget_residual = Var(
+    name='mass_budget_transport_term',
+    domain='atmos',
+    description=('Divergence of vertical integral of (one minus specific '
+                 'humidity) times horizontal flow.'),
+    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_budget_residual,
+    units=units.Pa_s1_mass,
+    colormap='RdBu'
 )
 moist_static_stab = Var(
     name='moist_static_stab',
@@ -1569,7 +1616,6 @@ mse_total_advec = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
-
 mse_budget_advec_residual = Var(
     name='mse_budget_advec_residual',
     domain='atmos',
@@ -1705,7 +1751,7 @@ ps_monthly_tendency = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.time_tendency_gfdl,
+    func=calcs.time_tendency,
     units=units.Pa_s1_mass
 )
 q_zonal_advec = Var(
@@ -1773,7 +1819,6 @@ q_horiz_advec_const_p_from_eta = Var(
     units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
-
 q_times_horiz_divg_mass_adj = Var(
     name='q_times_horiz_divg_mass_adj',
     domain='atmos',
@@ -2430,6 +2475,18 @@ virt_pot_temp = Var(
     func=calcs.virt_pot_temp,
     units=units.K
 )
+wvp_monthly_tendency = Var(
+    name='wvp_monthly_tendency',
+    domain='atmos',
+    description='Monthly tendency of water vapor path.',
+    variables=(sphum, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.wvp_time_tendency,
+    units=units.kg_m2_s1_mass
+)
 
 master_vars_list = [
     alb_sfc, cld_amt, divg, esf, evap, hght, high_cld_amt, ice_wat, liq_wat,
@@ -2480,11 +2537,7 @@ master_vars_list = [
     ps_monthly_tendency,
     d_dx_of_vert_int_u,
     d_dy_of_vert_int_v,
-    q_horiz_advec_const_p_from_eta
+    q_horiz_advec_const_p_from_eta,
+    wvp_monthly_tendency,
+    mass_budget_tendency_term
 ]
-
-
-class variables(object):
-    def __init__(self, vars_list):
-        for var in vars_list:
-            setattr(self, var.name, var)
