@@ -1,4 +1,7 @@
 """aospy_user: Library of user-defined aospy objects."""
+from aospy import (LAT_STR, LON_STR, PHALF_STR, PFULL_STR, PLEVEL_STR,
+                   TIME_STR, TIME_STR_IDEALIZED)
+
 from . import regions
 from . import units
 from . import calcs
