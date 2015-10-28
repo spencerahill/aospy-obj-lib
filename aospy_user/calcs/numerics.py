@@ -1,6 +1,7 @@
 """Finite differencing and other numerical methods."""
 from aospy import FiniteDiff
-from aospy.utils import pfull_from_ps, to_radians
+from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, int_dp_g,
+                         pfull_from_ps, to_pfull_from_phalf, to_radians)
 import numpy as np
 import xray
 
@@ -111,6 +112,48 @@ def d_dy_from_lat(arr, radius, vec_field=False):
         arr *= np.cos(lat)
     darr_dy = FiniteDiff.cen_diff_deriv(arr, LAT_STR, do_edges_one_sided=True)
     return prefactor*darr_dy
+
+
+def d_dx_of_vert_int(arr, radius, dp):
+    return d_dx_from_latlon(int_dp_g(arr, dp), radius)
+
+
+def d_dy_of_vert_int(arr, radius, dp):
+    return d_dy_from_lat(int_dp_g(arr, dp), radius, vec_field=True)
+
+
+def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
+    """d/dx at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    pfull_coord = arr[PFULL_STR]
+    d_dx_const_eta = d_dx_from_latlon(arr, radius)
+    darr_deta = d_deta_from_pfull(arr)
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    d_dx_ps = d_dx_from_latlon(ps, radius)
+
+    return d_dx_const_eta + (darr_deta * bk_at_pfull * d_dx_ps /
+                             (da_deta + db_deta*ps))
+
+
+def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
+    """d/dy at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    pfull_coord = arr[PFULL_STR]
+    d_dy_const_eta = d_dy_from_lat(arr, radius, vec_field=vec_field)
+    darr_deta = d_deta_from_pfull(arr)
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=False)
+
+    return d_dy_const_eta + (darr_deta*bk_at_pfull * d_dy_ps /
+                             (da_deta + db_deta*ps))
 
 
 def d_dp_from_p(arr, p):

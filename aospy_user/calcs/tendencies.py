@@ -1,7 +1,6 @@
 """Calculations involved in mass and energy budgets."""
 import numpy as np
-from aospy.constants import grav
-from aospy.utils import coord_to_new_dataarray, int_dp_g
+from aospy.utils import coord_to_new_dataarray
 
 from .. import TIME_STR
 
@@ -22,17 +21,3 @@ def time_tendency(arr, freq='1M'):
     first = arr.resample(freq, TIME_STR, how='first')
     last = arr.resample(freq, TIME_STR, how='last')
     return (last - first) / first_to_last_vals_dur(arr, freq)
-
-
-def wvp_time_tendency(q, dp, freq='1M'):
-    """Time tendency of water vapor path."""
-    return time_tendency(int_dp_g(q, dp), freq=freq)
-
-
-def mass_budget_tendency_term(ps, q, dp, freq='1M'):
-    """Combined time-tendency term in column mass budget equation.
-
-    See e.g. Trenberth 1991, Eq. 9.
-    """
-    return (time_tendency(ps, freq=freq) -
-            grav.value * wvp_time_tendency(q, dp, freq=freq))
