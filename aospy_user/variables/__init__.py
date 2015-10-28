@@ -1512,8 +1512,8 @@ mass_budget_with_adj_transport_term = Var(
 mass_budget_with_adj_residual = Var(
     name='mass_budget_with_adj_residual',
     domain='atmos',
-    description=('Divergence of vertical integral of (one minus specific '
-                 'humidity) times horizontal flow.'),
+    description=('Residual of mass budget with explicit correction applied '
+                 'to transport term'),
     variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
     def_time=True,
     def_vert=False,
@@ -1522,6 +1522,19 @@ mass_budget_with_adj_residual = Var(
     func=calcs.mass_budget_with_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
+)
+moisture_column_divg = Var(
+    name='moisture_column_divg',
+    domain='atmos',
+    description=('Column divergence of water vapor.  No mass adjustment.'),
+    variables=(sphum, ucomp, vcomp, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_flux_divg,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
 )
 moist_static_stab = Var(
     name='moist_static_stab',
@@ -2614,5 +2627,6 @@ master_vars_list = [
     u_mass_adjustment,
     divg_of_vert_int_mass_adj_horiz_flow,
     mass_budget_with_adj_transport_term,
-    mass_budget_with_adj_residual
+    mass_budget_with_adj_residual,
+    moisture_column_divg,
 ]
