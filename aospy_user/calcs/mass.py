@@ -1,6 +1,7 @@
 """Mass budget-related quantities."""
 from aospy.constants import grav
-from aospy.utils import int_dp_g, integrate
+from aospy.utils import dp_from_ps, int_dp_g, integrate
+
 
 from .. import PFULL_STR
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
@@ -25,28 +26,56 @@ def divg_3d(u, v, omega, radius, p):
     return horiz_divg(u, v, radius) + vert_divg(omega, p)
 
 
-def divg_of_vert_int_horiz_flow(u, v, radius, dp):
+def dp(ps, bk, pk, arr):
+    """Pressure thickness of hybrid coordinate levels from surface pressure."""
+    return dp_from_ps(bk, pk, ps, arr[PFULL_STR])
+
+
+def column_mass_divg(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
     u_int = integrate(u, dp, PFULL_STR)
     v_int = integrate(v, dp, PFULL_STR)
     return horiz_divg(u_int, v_int, radius)
 
 
-def column_flux_divg(arr, u, v, radius, dp):
-    """Column flux divergence of the field."""
-    u_int = int_dp_g(arr*u, dp)
-    v_int = int_dp_g(arr*v, dp)
-    return horiz_divg(u_int, v_int, radius)
+def uv_mass_adjustment(uv, q, ps, dp):
+    """Correction to subtract from outputted u or v to balance mass budget.
+
+    C.f. Trenberth 1991, J. Climate, equations 9 and 10.
+    """
+    wvp = int_dp_g(q, dp)
+    numer = integrate((1. - q)*uv, dp, PFULL_STR)
+    denom = (ps - grav.value * wvp)
+    return numer / denom
 
 
-def divg_of_vert_int_mass_adj_horiz_flow(u, v, q, ps, radius, dp):
+def uv_mass_adjusted(uv, q, ps, dp):
+    """Corrected u or v in order to balance mass budget."""
+    return uv - uv_mass_adjustment(uv, q, ps, dp)
+
+
+def column_mass_divg_with_adj(u, v, q, ps, radius, dp):
     """Divergence of vertically integrated, mass-adjusted horizontal wind."""
-    return divg_of_vert_int_horiz_flow(uv_mass_adjusted(u, q, ps, dp),
-                                       uv_mass_adjusted(v, q, ps, dp),
-                                       radius, dp)
+    return column_mass_divg(uv_mass_adjusted(u, q, ps, dp),
+                            uv_mass_adjusted(v, q, ps, dp), radius, dp)
 
 
-# Mass balance & energy budget quantities
+def column_flux_divg(arr, u, v, radius, dp):
+    """Column flux divergence, with the field defined per unit mass of air."""
+    return horiz_divg(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
+
+
+def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
+    return horiz_divg(uv_mass_adjusted(u, q, ps, dp),
+                      uv_mass_adjusted(v, q, ps, dp), radius)
+
+
+def horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p, vec_field=False):
+    u_cor = uv_mass_adjusted(u, q, ps, dp, p)
+    v_cor = uv_mass_adjusted(v, q, ps, dp, p)
+    return horiz_advec(arr, u_cor, v_cor, radius, vec_field=vec_field)
+
+
 def column_mass(ps):
     """Total mass per square meter of atmospheric column."""
     return ps / grav.value
@@ -72,52 +101,13 @@ def column_dry_air_mass(ps, wvp):
     return ps / grav - wvp
 
 
-def uv_mass_adjustment(uv, q, ps, dp):
-    """Correction to subtract from outputted u or v to balance mass budget.
-
-    C.f. Trenberth 1991, J. Climate, equations 9 and 10.
-    """
-    wvp = int_dp_g(q, dp)
-    numer = integrate((1. - q)*uv, dp, PFULL_STR)
-    denom = (ps - grav.value * wvp)
-    return numer / denom
-
-
-def uv_mass_adjusted(uv, q, ps, dp):
-    """Corrected u or v in order to balance mass budget."""
-    return uv - uv_mass_adjustment(uv, q, ps, dp)
-
-
-def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
-    return horiz_divg(uv_mass_adjusted(u, q, ps, dp),
-                      uv_mass_adjusted(v, q, ps, dp), radius)
-
-
-def horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p, vec_field=False):
-    u_cor = uv_mass_adjusted(u, q, ps, dp, p)
-    v_cor = uv_mass_adjusted(v, q, ps, dp, p)
-    return horiz_advec(arr, u_cor, v_cor, radius, vec_field=vec_field)
-
-
-# def horiz_divg_mass_bal(u, v, radius, dp):
-#     """Horizontal divergence with column mass-balance correction applied."""
-#     div = horiz_divg(u, v, radius)
-#     return field_vert_int_bal(div, dp)
-
-
-# def vert_divg_mass_bal(omega, p, dp):
-#     """Vertical divergence with column mass-balance correction applied."""
-#     div = vert_divg(omega, p)
-#     return field_vert_int_bal(div, dp)
-
-
 def mass_budget_tendency_term(ps, q, dp, freq='1M'):
     """Combined time-tendency term in column mass budget equation.
 
     See e.g. Trenberth 1991, Eq. 9.
     """
     return (time_tendency(ps, freq=freq) -
-            grav.value * time_tendency(int_dp_g(q, dp), dp, freq=freq))
+            grav.value * time_tendency(int_dp_g(q, dp), freq=freq))
 
 
 def mass_budget_transport_term(u, v, q, radius, dp):
@@ -125,8 +115,8 @@ def mass_budget_transport_term(u, v, q, radius, dp):
 
     E.g. Trenberth 1991, Eq. 9
     """
-    u_int = integrate((1 - q)*u, dp, PFULL_STR)
-    v_int = integrate((1 - q)*v, dp, PFULL_STR)
+    u_int = integrate((1. - q)*u, dp, PFULL_STR)
+    v_int = integrate((1. - q)*v, dp, PFULL_STR)
     return horiz_divg(u_int, v_int, radius)
 
 
