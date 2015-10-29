@@ -745,7 +745,35 @@ level = Var(
     name='level',
     units=units.hPa,
     domain='atmos',
-    description='Pressure level.',
+    description='Pressure level for data interpolated to uniform pressures.',
+    def_time=False,
+    def_vert=True,
+    def_lat=False,
+    def_lon=False,
+    in_nc_grid=True
+)
+pfull = Var(
+    name='pfull',
+    units=units.hPa,
+    domain='atmos_level',
+    description=('Reference pressure of model native coordinate full levels. '
+                 'Importantly, NOT the actual value at a particular lat, lon, '
+                 'or time, which depends on the spatiotemporally varying '
+                 'surface pressure.'),
+    def_time=False,
+    def_vert=True,
+    def_lat=False,
+    def_lon=False,
+    in_nc_grid=False
+)
+phalf = Var(
+    name='phalf',
+    units=units.hPa,
+    domain='atmos_level',
+    description=('Reference pressure of model native coordinate half levels. '
+                 'Importantly, NOT the actual value at a particular lat, lon, '
+                 'or time, which depends on the spatiotemporally varying '
+                 'surface pressure.'),
     def_time=False,
     def_vert=True,
     def_lat=False,
@@ -958,12 +986,29 @@ divg_mass_bal = Var(
 #     func=calcs.divg_spharm,
 #     units=units.s1
 # )
+dp = Var(
+    name='dp',
+    domain='atmos',
+    description=('Pressure thickness of model levels.  For data interpolated '
+                 'to uniform pressure levels, this does not vary in time or '
+                 'space.  For data on model native coordinates, this varies '
+                 'in space and time due to the spatiotemporal variations in '
+                 'surface pressure.'),
+    variables=(ps, bk, pk, temp),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False,
+    func=calcs.dp,
+    units=units.Pa,
+)
 dry_static_stab = Var(
     name='dry_static_stab',
     domain='atmos',
     description=('Local upper minus lower level DSE for fixed lower level and '
                  'varying upper level over all levels.'),
-    variables=('temp', 'hght', 'p'),
+    variables=(temp, hght, 'p'),
     def_time=True,
     def_vert=True,
     def_lat=True,
@@ -1368,8 +1413,8 @@ horiz_divg_mass_adj = Var(
     units=units.s1,
     colormap='RdBu'
 )
-divg_of_vert_int_horiz_flow = Var(
-    name='divg_of_vert_int_horiz_flow',
+column_mass_divg = Var(
+    name='column_mass_divg',
     domain='atmos',
     description='',
     variables=(ucomp, vcomp, r_e, 'dp'),
@@ -1377,14 +1422,14 @@ divg_of_vert_int_horiz_flow = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.divg_of_vert_int_horiz_flow,
+    func=calcs.column_mass_divg,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-divg_of_vert_int_mass_adj_horiz_flow = Var(
-    name='divg_of_vert_int_mass_adj_horiz_flow',
+column_mass_divg_with_adj = Var(
+    name='column_mass_divg_with_adj',
     domain='atmos',
     description='',
     variables=(ucomp, vcomp, sphum, ps, r_e, 'dp'),
@@ -1392,7 +1437,7 @@ divg_of_vert_int_mass_adj_horiz_flow = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.divg_of_vert_int_mass_adj_horiz_flow,
+    func=calcs.column_mass_divg_with_adj,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '\mathbf{v}_\mathrm{adj}\,\mathrm{d}p$'),
@@ -1502,7 +1547,7 @@ mass_budget_with_adj_residual = Var(
 moisture_column_divg = Var(
     name='moisture_column_divg',
     domain='atmos',
-    description=('Column divergence of water vapor.  No mass adjustment.'),
+    description='Column flux divergence of water vapor.  No mass adjustment.',
     variables=(sphum, ucomp, vcomp, r_e, 'dp'),
     def_time=True,
     def_vert=False,
@@ -1737,6 +1782,17 @@ mass_flux = Var(
     def_lon=False,
     func=calcs.msf_max,
     units=units.kg_s1
+)
+p = Var(
+    name='p',
+    units=units.Pa,
+    domain='atmos',
+    description='Pressure of model half levels.',
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
 )
 p_minus_e = Var(
     name='p-e',
@@ -2520,6 +2576,8 @@ master_vars_list = [
     cld_amt,
     column_energy,
     column_mass,
+    column_mass_divg,
+    column_mass_divg_with_adj,
     column_mass_integral,
     cre_lw,
     cre_lw_precip_corr,
@@ -2532,8 +2590,6 @@ master_vars_list = [
     d_dy_of_vert_int_v,
     divg,
     divg_mass_bal,
-    divg_of_vert_int_horiz_flow,
-    divg_of_vert_int_mass_adj_horiz_flow,
     # divg_spharm,
     dry_static_stab,
     dse,
@@ -2613,6 +2669,8 @@ master_vars_list = [
     olr_clr,
     omega,
     p_minus_e,
+    pfull,
+    phalf,
     pk,
     pot_temp,
     prec_conv,
