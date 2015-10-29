@@ -1,4 +1,5 @@
 """Functions related to statistical methods."""
+from aospy.utils import level_thickness
 import numpy as np
 import scipy
 
@@ -78,3 +79,23 @@ def lin_regr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
     return pointwise_lin_regr(
         var2, toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr)
     )
+
+
+def vert_centroid(arr, level, p_bot=850., p_top=150.):
+    """
+    Compute the vertical centroid of some vertically defined field.
+    """
+    desired_levs = np.where((level <= p_bot) & (level >= p_top))
+    lev_thick = level_thickness(level)/100.
+    # Add axes for later broadcasting and truncate to desired vertical levels.
+    level = level[desired_levs]; level = level[:,np.newaxis,np.newaxis]
+    lev_thick = lev_thick[desired_levs]
+    lev_thick = lev_thick[:,np.newaxis,np.newaxis]
+    arr = arr[desired_levs]
+    # For 1D arrays, have to move the vertical coordinate to leftmost dim.
+    if arr.ndim == 1:
+        arr = np.atleast_3d(arr).swapaxes(0,1)
+    else:
+        arr = np.atleast_3d(arr)
+    return (np.sum(arr*level*lev_thick, axis=0) /
+            np.sum(arr*lev_thick, axis=0))

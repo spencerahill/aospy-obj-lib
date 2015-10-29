@@ -6,11 +6,6 @@ xray.DataArrays, to coincide with the same switch within aospy.  However, not
 all of the functions in this module have been converted to support this new
 datatype.
 """
-from aospy.constants import c_p, grav, R_d
-from aospy.utils import level_thickness, int_dp_g
-import numpy as np
-
-
 from .tendencies import (
     first_to_last_vals_dur,
     time_tendency
@@ -18,8 +13,8 @@ from .tendencies import (
 from .numerics import (
     fwd_diff1,
     fwd_diff2,
-    cen_diff2,
-    cen_diff4,
+    # cen_diff2,
+    # cen_diff4,
     upwind_scheme,
     latlon_deriv_prefactor,
     wraparound_lon,
@@ -31,55 +26,6 @@ from .numerics import (
     d_dy_of_vert_int,
     d_dp_from_p,
     d_dp_from_eta
-)
-
-from .advection import (
-    zonal_advec,
-    merid_advec,
-    vert_advec,
-    horiz_advec,
-    total_advec,
-    zonal_advec_upwind,
-    merid_advec_upwind,
-    vert_advec_upwind,
-    horiz_advec_upwind,
-    total_advec_upwind,
-    zonal_advec_const_p_from_eta,
-    merid_advec_const_p_from_eta,
-    horiz_advec_const_p_from_eta,
-    vert_advec_from_eta,
-    total_advec_from_eta,
-    horiz_advec_sfc_pressure
-)
-from .mass import (
-    horiz_divg,
-    vert_divg,
-    divg_3d,
-    divg_of_vert_int_horiz_flow,
-    column_flux_divg,
-    divg_of_vert_int_mass_adj_horiz_flow,
-    column_mass,
-    column_mass_integral,
-    column_dry_air_mass,
-    uv_mass_adjustment,
-    uv_mass_adjusted,
-    horiz_divg_mass_adj,
-    horiz_advec_mass_adj,
-    mass_budget_tendency_term,
-    mass_budget_transport_term,
-    mass_budget_residual,
-    mass_budget_with_adj_transport_term,
-    mass_budget_with_adj_residual
-)
-from .transport import (
-    field_horiz_flux_divg,
-    field_vert_flux_divg,
-    field_times_horiz_divg,
-    field_horiz_advec_divg_sum,
-    field_total_advec,
-    field_vert_int_bal,
-    field_times_horiz_divg_mass_adj,
-    field_horiz_flux_divg_mass_adj,
 )
 from .thermo import (
     dse,
@@ -115,6 +61,55 @@ from .toa_sfc_fluxes import (
     bowen_ratio,
     evap_frac
 )
+from .advection import (
+    zonal_advec,
+    merid_advec,
+    vert_advec,
+    horiz_advec,
+    total_advec,
+    zonal_advec_upwind,
+    merid_advec_upwind,
+    vert_advec_upwind,
+    horiz_advec_upwind,
+    total_advec_upwind,
+    zonal_advec_const_p_from_eta,
+    merid_advec_const_p_from_eta,
+    horiz_advec_const_p_from_eta,
+    vert_advec_from_eta,
+    total_advec_from_eta,
+    horiz_advec_sfc_pressure
+)
+from .mass import (
+    horiz_divg,
+    vert_divg,
+    divg_3d,
+    dp,
+    column_dry_air_mass,
+    column_flux_divg,
+    column_mass,
+    column_mass_divg,
+    column_mass_divg_with_adj,
+    column_mass_integral,
+    uv_mass_adjustment,
+    uv_mass_adjusted,
+    horiz_divg_mass_adj,
+    horiz_advec_mass_adj,
+    mass_budget_tendency_term,
+    mass_budget_transport_term,
+    mass_budget_residual,
+    mass_budget_with_adj_transport_term,
+    mass_budget_with_adj_residual
+)
+from .transport import (
+    field_horiz_flux_divg,
+    field_vert_flux_divg,
+    field_times_horiz_divg,
+    field_horiz_advec_divg_sum,
+    field_total_advec,
+    field_vert_int_bal,
+    field_times_horiz_divg_mass_adj,
+    field_horiz_flux_divg_mass_adj,
+)
 from .energy import (
     mse_horiz_flux_divg,
     mse_horiz_advec,
@@ -145,7 +140,8 @@ from .stats import (
     corr_cre_net,
     corr_toa_rad_clr,
     lin_regr_cre_net,
-    lin_regr_toa_rad_clr
+    lin_regr_toa_rad_clr,
+    vert_centroid
     )
 from .water import (
     moisture_budget_lhs,
@@ -193,51 +189,6 @@ from .zonal_mean_circ import (
     itcz_pos,
     itcz_loc,
     prec_centroid,
-    precip_centroid
+    precip_centroid,
+    trop_height
 )
-
-
-def vert_centroid(arr, level, p_bot=850., p_top=150.):
-    """
-    Compute the vertical centroid of some vertically defined field.
-    """
-    desired_levs = np.where((level <= p_bot) & (level >= p_top))
-    lev_thick = level_thickness(level)/100.
-    # Add axes for later broadcasting and truncate to desired vertical levels.
-    level = level[desired_levs]; level = level[:,np.newaxis,np.newaxis]
-    lev_thick = lev_thick[desired_levs]
-    lev_thick = lev_thick[:,np.newaxis,np.newaxis]
-    arr = arr[desired_levs]
-    # For 1D arrays, have to move the vertical coordinate to leftmost dim.
-    if arr.ndim == 1:
-        arr = np.atleast_3d(arr).swapaxes(0,1)
-    else:
-        arr = np.atleast_3d(arr)
-    return (np.sum(arr*level*lev_thick, axis=0) /
-            np.sum(arr*lev_thick, axis=0))
-
-
-def trop_height(level, T):
-    """
-    Tropopause height of each column, based on Reichler et al 2003 GRL.
-    """
-    # Get pressure and temperature data.
-    p = level[:,np.newaxis,np.newaxis]
-    # Compute half levels of pressure^kappa
-    kap = R_d / c_p
-    pkap_half = 0.5*(p[1:]**kap + p[:-1]**kap)
-    # Compute lapse rate at half-levels, assuming T linear in pressure^kappa.
-    Gamma = ((T[1:] - T[:-1])*(p[:-1]**kap + p[1:]**kap) /
-            ((T[1:] + T[:-1])*(p[:-1]**kap - p[1:]**kap)))*kap*grav/R_d
-    # Find levels of continuous Gamma where dT/dz > -2 K/km.
-    Gamma_crit = -2e-3
-    Gamma_good = np.where(Gamma > Gamma_crit, Gamma, 0)
-    # Check that avg dT/dz in 2 km above > -2 K/km.
-    Gam_slope = (Gamma[1:] - Gamma[:-1]) / (pkap_half[1:] - pkap_half[:-1])
-    # Take lowest level satisfying these criteria.
-    tp = 8
-    # Linearly interpolate to pressure level of critical Gamma value.
-    pkap_tp = (pkap_half[tp-1] + ((pkap_half[tp] - pkap_half[tp-1]) *
-               (Gamma_crit - Gamma[tp-1])/(Gamma[tp] - Gamma[tp-1])))
-    # Convert from pressure^kappa to pressure.
-    return pkap_tp**(1./kap)
