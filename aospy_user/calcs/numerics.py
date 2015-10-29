@@ -42,9 +42,9 @@ def fwd_diff2(arr, dim):
         return 2.*df_dx1 - df_dx2
 
 
-def cen_diff2(arr, dim):
-    return FiniteDiff.cen_diff_deriv(arr, dim, order=2,
-                                     do_edges_one_sided=True)
+# def cen_diff2(arr, dim):
+    # return FiniteDiff.cen_diff_deriv(arr, dim, order=2,
+                                     # do_edges_one_sided=True)
 
 
 def cen_diff4(arr, dim):
@@ -71,46 +71,54 @@ def upwind_scheme(df_fwd, df_bwd, a):
 
 
 # Functions for derivatives in x, y, and p.
-def latlon_deriv_prefactor(lat, radius, d_dy_of_scalar_field=False):
+def latlon_deriv_prefactor(lat, radius, radians=True,
+                           d_dy_of_scalar_field=False):
     """Factor that multiplies del operations in spherical coordinates."""
     if d_dy_of_scalar_field:
         return 1. / radius
     else:
-        return 1. / (radius*np.cos(to_radians(lat)))
+        lat_rad = lat if radians else np.deg2rad(lat)
+        return 1. / (radius*np.cos(lat_rad))
 
 
-def wraparound_lon(arr, num=1):
+def wraparound_lon(arr, n=1, radians=True):
     """Append wrap-around points in longitude to the DataArray or Dataset.
 
     The longitude arraymust span from 0 to 360.  While this will usually be the
     case, it's not guaranteed.  Some pre-processing step should be implemented
     in the future that forces this to be the case.
     """
+    circumf = 2*np.pi if radians else 360.
     edge_left = arr.isel(**{LON_STR: 0})
-    edge_left[LON_STR] += 360.
+    edge_left[LON_STR] += circumf
     edge_right = arr.isel(**{LON_STR: -1})
-    edge_right[LON_STR] -= 360.
+    edge_right[LON_STR] -= circumf
     return xray.concat([edge_right, arr, edge_left], dim=LON_STR)
 
 
 def d_dx_from_latlon(arr, radius):
     """Compute \partial arr/\partial x using centered differencing."""
-    prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
-                                       radius, d_dy_of_scalar_field=False)
-    arr_ext = wraparound_lon(arr)
-    darr_dx = FiniteDiff.cen_diff_deriv(arr_ext, LON_STR,
-                                        do_edges_one_sided=False)
+    lon_rad = to_radians(arr[LON_STR])
+    prefactor = latlon_deriv_prefactor(arr[LAT_STR], radius, radians=False)
+    arr_ext = wraparound_lon(arr, n=1, radians=False)
+    lon_rad = to_radians(arr_ext[LON_STR])
+    darr_dx = (FiniteDiff.cen_diff(arr_ext, LON_STR, is_coord=False) /
+               FiniteDiff.cen_diff(lon_rad, LON_STR, is_coord=False))
     return prefactor*darr_dx
 
 
 def d_dy_from_lat(arr, radius, vec_field=False):
     """Compute \partial(field)/\partial y using centered differencing."""
-    lat = to_radians(arr.coords[LAT_STR])
-    prefactor = latlon_deriv_prefactor(lat, radius,
-                                       d_dy_of_scalar_field=(not vec_field))
+    lat_rad = to_radians(arr[LAT_STR])
+    prefactor = latlon_deriv_prefactor(lat_rad, radius, radians=True,
+                                       d_dy_of_scalar_field=False)
     if vec_field:
-        arr *= np.cos(lat)
-    darr_dy = FiniteDiff.cen_diff_deriv(arr, LAT_STR, do_edges_one_sided=True)
+        arr = arr * np.cos(lat_rad)
+    darr_dy = (
+        FiniteDiff.cen_diff(arr, LAT_STR, do_edges_one_sided=True) /
+        FiniteDiff.cen_diff(lat_rad, LAT_STR, do_edges_one_sided=True,
+                            is_coord=False)
+    )
     return prefactor*darr_dy
 
 
