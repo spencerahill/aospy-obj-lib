@@ -1,5 +1,4 @@
 """Calculations involved in mass and energy budgets."""
-from __future__ import print_function
 import numpy as np
 from aospy.utils import coord_to_new_dataarray
 
