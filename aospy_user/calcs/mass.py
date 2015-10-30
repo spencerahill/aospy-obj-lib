@@ -65,6 +65,13 @@ def column_flux_divg(arr, u, v, radius, dp):
     return horiz_divg(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
 
 
+def column_flux_divg_with_adj(arr, u, v, q, ps, radius, dp):
+    """Column flux divergence, with the field defined per unit mass of air."""
+    u_adj = uv_mass_adjusted(u, q, ps, dp)
+    v_adj = uv_mass_adjusted(v, q, ps, dp)
+    return horiz_divg(int_dp_g(arr*u_adj, dp), int_dp_g(arr*v_adj, dp), radius)
+
+
 def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
     return horiz_divg(uv_mass_adjusted(u, q, ps, dp),
                       uv_mass_adjusted(v, q, ps, dp), radius)
@@ -81,7 +88,7 @@ def column_mass(ps):
     return ps / grav.value
 
 
-def column_mass_integral(arr, dp):
+def column_mass_integral(bk, pk, ps):
     """
     Total mass per square meter of atmospheric column.
 
@@ -90,10 +97,8 @@ def column_mass_integral(arr, dp):
 
     :param dp: Pressure thickness of the model levels.
     """
-    # 2015-10-27 S. Hill: This is almost definitely incorrect.
-    mass = arr.copy()
-    mass.values = int_dp_g(mass, dp)
-    return mass
+    dp = dp_from_ps(bk, pk, ps)
+    return dp.sum(dim=PFULL_STR)
 
 
 def column_dry_air_mass(ps, wvp):
@@ -101,7 +106,7 @@ def column_dry_air_mass(ps, wvp):
     return ps / grav - wvp
 
 
-def mass_budget_tendency_term(ps, q, dp, freq='1M'):
+def dry_mass_budget_tendency_term(ps, q, dp, freq='1M'):
     """Combined time-tendency term in column mass budget equation.
 
     See e.g. Trenberth 1991, Eq. 9.
@@ -110,7 +115,7 @@ def mass_budget_tendency_term(ps, q, dp, freq='1M'):
             grav.value * time_tendency(int_dp_g(q, dp), freq=freq))
 
 
-def mass_budget_transport_term(u, v, q, radius, dp):
+def dry_mass_budget_transport_term(u, v, q, radius, dp):
     """Transport term of atmospheric column mass budget.
 
     E.g. Trenberth 1991, Eq. 9
@@ -120,18 +125,18 @@ def mass_budget_transport_term(u, v, q, radius, dp):
     return horiz_divg(u_int, v_int, radius)
 
 
-def mass_budget_residual(ps, u, v, q, radius, dp):
+def dry_mass_budget_residual(ps, u, v, q, radius, dp):
     """Residual in the mass budget.
 
     Theoretically the sum of the tendency and transport terms is exactly zero,
     however artifacts introduced by numerics and other things yield a
     residual.
     """
-    return (mass_budget_tendency_term(ps, q, dp) +
-            mass_budget_transport_term(u, v, q, radius, dp))
+    return (dry_mass_budget_tendency_term(ps, q, dp) +
+            dry_mass_budget_transport_term(u, v, q, radius, dp))
 
 
-def mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp):
+def dry_mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp):
     """Transport term of atmospheric column mass budget with adjustment.
 
     Based on Trenberth 1991 J. Climate, but in the limit that the mass
@@ -142,7 +147,12 @@ def mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp):
     return horiz_divg(u_int, v_int, radius)
 
 
-def mass_budget_with_adj_residual(ps, u, v, q, radius, dp):
+def dry_mass_budget_with_adj_residual(ps, u, v, q, radius, dp):
     """Residual in column mass budget when flow is adjusted for balance."""
-    return (mass_budget_tendency_term(ps, q, dp) +
-            mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp))
+    return (dry_mass_budget_tendency_term(ps, q, dp) +
+            dry_mass_budget_with_adj_transport_term(u, v, q, ps, radius, dp))
+
+
+def column_mass_source(evap, precip):
+    """Source term of column mass budget."""
+    return grav.value * (evap - precip)
