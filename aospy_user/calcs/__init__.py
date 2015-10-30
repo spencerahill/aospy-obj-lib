@@ -39,7 +39,7 @@ from .thermo import (
     specific_gas_constant_moist_air,
     heat_capacity_moist_air_constant_volume,
     specific_entropy_dry_air,
-    specific_entropy_water_vapor
+    specific_entropy_water_vapor,
 )
 from .toa_sfc_fluxes import (
     albedo,
@@ -59,7 +59,7 @@ from .toa_sfc_fluxes import (
     sfc_energy,
     column_energy,
     bowen_ratio,
-    evap_frac
+    evap_frac,
 )
 from .advection import (
     zonal_advec,
@@ -77,7 +77,7 @@ from .advection import (
     horiz_advec_const_p_from_eta,
     vert_advec_from_eta,
     total_advec_from_eta,
-    horiz_advec_sfc_pressure
+    horiz_advec_sfc_pressure,
 )
 from .mass import (
     horiz_divg,
@@ -86,19 +86,21 @@ from .mass import (
     dp,
     column_dry_air_mass,
     column_flux_divg,
+    column_flux_divg_with_adj,
     column_mass,
     column_mass_divg,
     column_mass_divg_with_adj,
     column_mass_integral,
+    column_mass_source,
+    dry_mass_budget_tendency_term,
+    dry_mass_budget_transport_term,
+    dry_mass_budget_residual,
+    dry_mass_budget_with_adj_transport_term,
+    dry_mass_budget_with_adj_residual,
     uv_mass_adjustment,
     uv_mass_adjusted,
     horiz_divg_mass_adj,
     horiz_advec_mass_adj,
-    mass_budget_tendency_term,
-    mass_budget_transport_term,
-    mass_budget_residual,
-    mass_budget_with_adj_transport_term,
-    mass_budget_with_adj_residual
 )
 from .transport import (
     field_horiz_flux_divg,
@@ -130,7 +132,7 @@ from .energy import (
     dse_vert_advec,
     tdt_diab,
     tdt_lw_cld,
-    tdt_sw_cld
+    tdt_sw_cld,
     )
 from .stats import (
     pointwise_corr,
@@ -141,11 +143,13 @@ from .stats import (
     corr_toa_rad_clr,
     lin_regr_cre_net,
     lin_regr_toa_rad_clr,
-    vert_centroid
+    vert_centroid,
     )
 from .water import (
+    wvp_time_tendency,
     moisture_budget_lhs,
     moisture_budget_with_adj_lhs,
+    moisture_column_divg_with_adj2,
     p_minus_e,
     prec_conv_frac,
     q_budget_advec_residual,
@@ -164,7 +168,7 @@ from .gms import (
     gms_up_low,
     gms_each_level,
     dry_static_stab,
-    moist_static_stab
+    moist_static_stab,
 )
 from .zonal_mean_circ import (
     msf,
@@ -190,5 +194,5 @@ from .zonal_mean_circ import (
     itcz_loc,
     prec_centroid,
     precip_centroid,
-    trop_height
+    trop_height,
 )
