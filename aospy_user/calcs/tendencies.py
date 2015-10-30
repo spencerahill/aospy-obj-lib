@@ -1,4 +1,5 @@
 """Calculations involved in mass and energy budgets."""
+from __future__ import print_function
 import numpy as np
 from aospy.utils import coord_to_new_dataarray
 
@@ -18,6 +19,6 @@ def first_to_last_vals_dur(arr, freq='1M'):
 
 def time_tendency(arr, freq='1M'):
     """Monthly time tendency of the given field."""
-    first = arr.resample(freq, TIME_STR, how='first')
-    last = arr.resample(freq, TIME_STR, how='last')
+    first = arr.resample(freq, TIME_STR, how='first').dropna(TIME_STR)
+    last = arr.resample(freq, TIME_STR, how='last').dropna(TIME_STR)
     return (last - first) / first_to_last_vals_dur(arr, freq)
