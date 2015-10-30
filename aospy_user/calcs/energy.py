@@ -10,6 +10,11 @@ from .thermo import dse, mse, fmse
 from .toa_sfc_fluxes import column_energy
 
 
+def kinetic_energy(u, v):
+    """Kinetic energy, neglecting vertical motion."""
+    return 0.5*(u*u + v*v)
+
+
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):
     """Horizontal flux convergence of moist static energy."""
     return field_horiz_flux_divg(mse(temp, hght, sphum), u, v, radius)
