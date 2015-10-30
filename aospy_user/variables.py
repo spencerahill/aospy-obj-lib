@@ -2,7 +2,7 @@
 from aospy.constants import r_e
 from aospy.var import Var
 
-from .. import calcs, units
+from . import calcs, units
 
 
 alb_sfc = Var(
@@ -865,6 +865,20 @@ bowen_ratio = Var(
     func=calcs.bowen_ratio,
     units=units.unitless
 )
+column_mass_source = Var(
+    name='column_mass_source',
+    domain='atmos',
+    description='',
+    variables=(evap, precip),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_mass_source,
+    units=units.Pa_s1_mass,
+    math_str=r'$g(E-P)$',
+    colormap='RdBu'
+)
 column_energy = Var(
     name='column_energy',
     math_str=r'$F_\mathrm{net}$',
@@ -1469,8 +1483,8 @@ horiz_divg_vert_int_max = Var(
     func=calcs.horiz_divg_vert_int_max,
     units=units.kg_m2_s1_mass
 )
-mass_budget_tendency_term = Var(
-    name='mass_budget_tendency_term',
+dry_mass_budget_tendency_term = Var(
+    name='dry_mass_budget_tendency_term',
     domain='atmos',
     description=('Monthly time-tendency of surface pressure minus gravity '
                  'times water vapor path monthly time tendency.'),
@@ -1479,13 +1493,13 @@ mass_budget_tendency_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_budget_tendency_term,
+    func=calcs.dry_mass_budget_tendency_term,
     units=units.Pa_s1_mass,
     math_str=r'$\partial p_s/\partial t - g\partial \mathrm{WVP}/\partial t$',
     colormap='RdBu_r'
 )
-mass_budget_transport_term = Var(
-    name='mass_budget_transport_term',
+dry_mass_budget_transport_term = Var(
+    name='dry_mass_budget_transport_term',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1494,14 +1508,14 @@ mass_budget_transport_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_budget_transport_term,
+    func=calcs.dry_mass_budget_transport_term,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '(1-q)\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-mass_budget_residual = Var(
-    name='mass_budget_residual',
+dry_mass_budget_residual = Var(
+    name='dry_mass_budget_residual',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1510,12 +1524,12 @@ mass_budget_residual = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_budget_residual,
+    func=calcs.dry_mass_budget_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
-mass_budget_with_adj_transport_term = Var(
-    name='mass_budget_with_adj_transport_term',
+dry_mass_budget_with_adj_transport_term = Var(
+    name='dry_mass_budget_with_adj_transport_term',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1524,14 +1538,14 @@ mass_budget_with_adj_transport_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_budget_with_adj_transport_term,
+    func=calcs.dry_mass_budget_with_adj_transport_term,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '(1-q)\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-mass_budget_with_adj_residual = Var(
-    name='mass_budget_with_adj_residual',
+dry_mass_budget_with_adj_residual = Var(
+    name='dry_mass_budget_with_adj_residual',
     domain='atmos',
     description=('Residual of mass budget with explicit correction applied '
                  'to transport term'),
@@ -1540,7 +1554,7 @@ mass_budget_with_adj_residual = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_budget_with_adj_residual,
+    func=calcs.dry_mass_budget_with_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
@@ -1554,6 +1568,49 @@ moisture_column_divg = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.column_flux_divg,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
+moisture_column_divg_with_adj = Var(
+    name='moisture_column_divg_with_adj',
+    domain='atmos',
+    description=('Column flux divergence of water vapor.  '
+                 'Uses mass adjusted winds.'),
+    variables=(sphum, ucomp, vcomp, sphum, ps, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_flux_divg_with_adj,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
+moisture_column_divg_with_adj2 = Var(
+    name='moisture_column_divg_with_adj2',
+    domain='atmos',
+    description=('Column flux divergence of water vapor.  '
+                 'Mass adjusted by subtracting off column mass residual times '
+                 'column average specific humidity.'),
+    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_column_divg_with_adj2,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
+moisture_budget_lhs = Var(
+    name='moisture_budget_lhs',
+    domain='atmos',
+    description=('Left-hand-side of moisture budget with applied mass '
+                 'correction, where LHS = time tendency plus transport.'),
+    variables=(ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_budget_lhs,
     units=units.kg_m2_s1,
     colormap='BrBG_r'
 )
@@ -2528,6 +2585,30 @@ u_mass_adjusted = Var(
     func=calcs.uv_mass_adjusted,
     units=units.m_s1
 )
+v_mass_adjustment = Var(
+    name='v_mass_adjustment',
+    domain='atmos',
+    description='',
+    variables=(vcomp, sphum, ps, 'dp'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.uv_mass_adjustment,
+    units=units.m_s1
+)
+v_mass_adjusted = Var(
+    name='v_mass_adjusted',
+    domain='atmos',
+    description='',
+    variables=(vcomp, sphum, ps, 'dp'),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.uv_mass_adjusted,
+    units=units.m_s1
+)
 vert_divg = Var(
     name='vert_divg',
     domain='atmos',
@@ -2565,6 +2646,19 @@ virt_pot_temp = Var(
     func=calcs.virt_pot_temp,
     units=units.K
 )
+wvp_monthly_tendency = Var(
+    name='wvp_monthly_tendency',
+    domain='atmos',
+    description='Monthly time-tendency of column-integrated water vapor.',
+    variables=(sphum, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.wvp_time_tendency,
+    units=units.kg_m2_s1
+)
+
 
 master_vars_list = [
     aht,
@@ -2574,6 +2668,7 @@ master_vars_list = [
     bk,
     bowen_ratio,
     cld_amt,
+    column_mass_source,
     column_energy,
     column_mass,
     column_mass_divg,
@@ -2591,6 +2686,11 @@ master_vars_list = [
     divg,
     divg_mass_bal,
     # divg_spharm,
+    dry_mass_budget_residual,
+    dry_mass_budget_tendency_term,
+    dry_mass_budget_transport_term,
+    dry_mass_budget_with_adj_residual,
+    dry_mass_budget_with_adj_transport_term,
     dry_static_stab,
     dse,
     dse_horiz_advec,
@@ -2639,11 +2739,6 @@ master_vars_list = [
     lwdn_sfc_clr,
     lwup_sfc,
     lwup_sfc_clr,
-    mass_budget_residual,
-    mass_budget_tendency_term,
-    mass_budget_transport_term,
-    mass_budget_with_adj_residual,
-    mass_budget_with_adj_transport_term,
     mass_flux,
     mc,
     mc_full,
@@ -2652,6 +2747,8 @@ master_vars_list = [
     moist_static_stab,
     moisture_budget_with_adj_lhs,
     moisture_column_divg,
+    moisture_column_divg_with_adj,
+    moisture_column_divg_with_adj2,
     mse,
     mse_budget_advec_residual,
     mse_horiz_advec,
@@ -2753,7 +2850,10 @@ master_vars_list = [
     toa_sw,
     tot_cld_amt,
     total_gms,
+    u_mass_adjusted,
     u_mass_adjustment,
+    v_mass_adjusted,
+    v_mass_adjustment,
     u_ref,
     ucomp,
     v_ref,
@@ -2763,4 +2863,5 @@ master_vars_list = [
     virt_pot_temp,
     vort,
     wvp,
+    wvp_monthly_tendency
 ]
