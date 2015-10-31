@@ -171,7 +171,11 @@ def main(main_params):
     # Instantiate objects and load default/all models, runs, and regions.
     cs = CalcSuite(MainParamsParser(main_params))
     cs.print_params()
-    cs.prompt_user_verify()
+    try:
+        cs.prompt_user_verify()
+    except IOError as e:
+        print(e)
+        return
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
     return calcs
@@ -182,22 +186,45 @@ if __name__ == '__main__':
     mp.model = 'am2'
     mp.run = ['reyoi_cont']
     mp.ens_mem = [False]
-    # mp.var = ['q_horiz_advec_const_p_from_eta']#, 'q_horiz_advec']
-    # mp.var = ['mass_budget_tendency_term', 'mass_budget_transport_term',
-              # 'mass_budget_residual']
-    mp.var = ['mass_budget_transport_term',
-              'mass_budget_residual']
+    mp.var = [
+        # 'energy_column_tendency',
+        # 'energy_column_divg',
+        # 'energy_column_divg_with_adj',
+        # 'energy_column_divg_with_adj2',
+        'energy_column_source',
+        # 'mass_column_tendency',
+        # 'mass_column_divg',
+        # 'mass_column_divg_with_adj',
+        # 'mass_column_source',
+        # 'mass_column_budget_lhs',
+        # 'mass_column_budget_with_adj_lhs',
+        # 'mass_column_budget_residual',
+        # 'moisture_column_source',
+        # 'moisture_column_tendency',
+        # 'moisture_column_divg'
+        # 'moisture_column_divg_with_adj'
+        # 'moisture_column_budget_lhs',
+        # 'moisture_column_budget_with_adj_lhs',
+        # 'moisture_column_budget_with_adj2_lhs',
+        # 'moisture_column_budget_residual',
+        # 'dry_mass_column_tendency',
+        # 'dry_mass_column_divg',
+        # 'dry_mass_column_divg_with_adj',
+        # 'dry_mass_column_budget_residual'
+        # 'dry_mass_column_budget_with_adj_residual'
+    ]
+    # mp.var = ['p_minus_e']
     # mp.date_range = [('1983-01-01', '2012-12-31')]
     mp.date_range = [('1983-01-01', '1984-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
-    # mp.intvl_in = ['monthly']
-    mp.intvl_in = ['3hr']
+    mp.intvl_in = ['monthly']
+    # mp.intvl_in = ['3hr']
     mp.intvl_out = ['jas']
-    # mp.dtype_in_time = ['ts']
-    mp.dtype_in_time = ['inst']
-    # mp.dtype_in_vert = [False]
-    mp.dtype_in_vert = ['sigma']
+    mp.dtype_in_time = ['ts']
+    # mp.dtype_in_time = ['inst']
+    mp.dtype_in_vert = [False]
+    # mp.dtype_in_vert = ['sigma']
     # mp.dtype_in_vert = ['pressure']
     # mp.dtype_out_time = [('av', 'eddy.av', 'eddy.reg.av', 'reg.av')]
     mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
