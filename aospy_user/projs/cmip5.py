@@ -1,11 +1,10 @@
 """Spencer Hill's aospy.Proj object for CMIP5 data."""
 from aospy.proj import Proj
-from aospy_user import regions, models, variables
+from aospy_user import regions, models
 
 
 cmip5 = Proj(
     'cmip5',
-    vars=variables.master_vars_list,
     direc_out='/archive/s1h/cmip5/',
     nc_dir_struc='one_dir',
     models=(
