@@ -3,31 +3,9 @@ from aospy.constants import grav
 from aospy.utils import int_dp_g
 import numpy as np
 
-from .mass import column_flux_divg, dry_mass_budget_residual
-from .transport import field_horiz_flux_divg, field_total_advec
 from .tendencies import time_tendency
-
-
-def wvp_time_tendency(q, dp):
-    return time_tendency(int_dp_g(q, dp), freq='1M')
-
-
-def moisture_budget_lhs(u, v, q, radius, dp):
-    return wvp_time_tendency(q, dp) + column_flux_divg(q, u, v, radius, dp)
-
-
-def moisture_budget_with_adj_lhs(ps, u, v, q, radius, dp):
-    moist_lhs = moisture_budget_lhs(u, v, q, radius, dp)
-    dry_mass_resid = dry_mass_budget_residual(ps, u, v, q, radius, dp)
-    wvp = int_dp_g(q, dp)
-    return moist_lhs - dry_mass_resid * grav.value * wvp / ps
-
-
-def moisture_column_divg_with_adj2(ps, u, v, q, radius, dp):
-    raw_flux_divg = column_flux_divg(q, u, v, radius, dp)
-    dry_mass_resid = dry_mass_budget_residual(ps, u, v, q, radius, dp)
-    wvp = int_dp_g(q, dp)
-    return raw_flux_divg - dry_mass_resid * grav.value * wvp / ps
+from .mass import (column_flux_divg, column_flux_divg_with_adj,
+                   budget_residual, dry_mass_column_budget_residual)
 
 
 def p_minus_e(precip, evap):
@@ -46,29 +24,52 @@ def prec_conv_frac(prec_conv, precip, prec_ls=False):
         return prec_conv/precip
 
 
-def q_budget_advec_residual(sphum, ucomp, vcomp, omega, p, dp, radius, evap,
-                            precip):
+def moisture_column_source(precip, evap):
+    return evap - precip
+
+
+def moisture_column_tendency(q, dp, freq='1M'):
+    """Time tendency of column-integrated water vapor."""
+    return time_tendency(int_dp_g(q, dp), freq=freq)
+
+
+def moisture_column_budget_lhs(u, v, q, radius, dp, freq='1M'):
+    """Transport plus tendency terms of column-integrated water vapor.
+
+    Equivalently, the left-hand-side of the budget, where the right-hand-side
+    is the source term, namely evaporation minus precipitation.
+    """
+    tendency = moisture_column_tendency(q, dp)
+    transport = column_flux_divg(q, u, v, radius, dp)
+    return budget_residual(tendency, transport, freq=freq)
+
+
+def moisture_column_budget_with_adj_lhs(ps, u, v, q, radius, dp, freq='1M'):
+    """Column moisture budget LHS, with mass-balance adjustment applied.
+
+    The mass adjustment: subtract off the column mass residual (deduced from
+    the column dry mass budget) times the column average specific humidity.
+    """
+    moist_lhs = moisture_column_budget_lhs(u, v, q, radius, dp, freq=freq)
+    dry_mass_resid = dry_mass_column_budget_residual(ps, u, v, q, radius, dp)
+    wvp = int_dp_g(q, dp)
+    return moist_lhs - dry_mass_resid * grav.value * wvp / ps
+
+
+def moisture_column_budget_with_adj2_lhs(ps, u, v, q, radius, dp, freq='1M'):
+    """Column moisture budget LHS, with mass-balance adjustment applied.
+
+    In this case the mass-adjusted wind at each level is inserted into the
+    column flux divergence computation.
+    """
+    return (moisture_column_tendency(q, dp, freq=freq) +
+            column_flux_divg_with_adj(q, u, v, q, ps, radius, dp))
+
+
+def moisture_column_budget_residual(q, u, v, dp, radius, evap, precip,
+                                    freq='1M'):
     """Residual in vertically integrated MSE budget."""
-    transport = field_total_advec(sphum, ucomp, vcomp, omega, p, radius)
-    trans_vert_int = int_dp_g(transport, dp)
-    e_minus_p = evap - precip
-    return e_minus_p - trans_vert_int
-
-
-def q_budget_horiz_flux_divg_residual(sphum, ucomp, vcomp, dp, radius, evap,
-                                      precip):
-    """Residual in vertically integrated MSE budget."""
-    transport = field_horiz_flux_divg(sphum, ucomp, vcomp, radius)
-    trans_vert_int = int_dp_g(transport, dp)
-    e_minus_p = evap - precip
-    return e_minus_p - trans_vert_int
-
-
-def qu(sphum, u):
-    """"Zonal moisture flux."""
-    return sphum*u
-
-
-def qv(sphum, v):
-    """Meridional moisture flux."""
-    return sphum*v
+    tendency = moisture_column_tendency(q, dp)
+    transport = column_flux_divg(q, u, v, radius, dp)
+    source = -1*p_minus_e(precip, evap)
+    return budget_residual(tendency, transport, source=source, freq=freq)
