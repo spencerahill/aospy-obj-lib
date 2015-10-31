@@ -813,6 +813,17 @@ sfc_area = Var(
     def_lon=True,
     in_nc_grid=False
 )
+zsurf = Var(
+    name='zsurf',
+    units=units.m,
+    domain=None,
+    description='Surface elevation.',
+    def_time=False,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=True
+)
 
 # Calculations involving one or more model-native variables.
 aht = Var(
@@ -865,20 +876,6 @@ bowen_ratio = Var(
     func=calcs.bowen_ratio,
     units=units.unitless
 )
-column_mass_source = Var(
-    name='column_mass_source',
-    domain='atmos',
-    description='',
-    variables=(evap, precip),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.column_mass_source,
-    units=units.Pa_s1_mass,
-    math_str=r'$g(E-P)$',
-    colormap='RdBu'
-)
 column_energy = Var(
     name='column_energy',
     math_str=r'$F_\mathrm{net}$',
@@ -892,39 +889,6 @@ column_energy = Var(
     def_lon=True,
     func=calcs.column_energy,
     units=units.W_m2,
-    colormap='RdBu_r'
-)
-column_mass = Var(
-    name='column_mass',
-    math_str=r'$p_s/g$',
-    domain='atmos',
-    description=('Total mass per square meter of the atmospheric column, '
-                 'based on surface pressure.'),
-    variables=(ps,),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.column_mass,
-    func_input_dtype='numpy',
-    units=units.kg_m2,
-    colormap='RdBu_r'
-)
-column_mass_integral = Var(
-    name='column_mass_integral',
-    math_str=r'$\int^{p_s}_{p_t}\,\mathrm{d}p/g$',
-    domain='atmos',
-    description=('Total mass per square meter of the atmospheric column,'
-                 'computed by explicitly integrating pressure.  Temperature '
-                 'variable (temp) is a dummy -- aospy.Calc needs at '
-                 'least one netCDF variable per aospy.Var.'),
-    variables=(temp, 'dp',),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.column_mass_integral,
-    units=units.kg_m2,
     colormap='RdBu_r'
 )
 cre_lw = Var(
@@ -1427,36 +1391,6 @@ horiz_divg_mass_adj = Var(
     units=units.s1,
     colormap='RdBu'
 )
-column_mass_divg = Var(
-    name='column_mass_divg',
-    domain='atmos',
-    description='',
-    variables=(ucomp, vcomp, r_e, 'dp'),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.column_mass_divg,
-    units=units.Pa_s1_mass,
-    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
-              '\mathbf{v}\,\mathrm{d}p$'),
-    colormap='RdBu'
-)
-column_mass_divg_with_adj = Var(
-    name='column_mass_divg_with_adj',
-    domain='atmos',
-    description='',
-    variables=(ucomp, vcomp, sphum, ps, r_e, 'dp'),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.column_mass_divg_with_adj,
-    units=units.Pa_s1_mass,
-    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
-              '\mathbf{v}_\mathrm{adj}\,\mathrm{d}p$'),
-    colormap='RdBu'
-)
 horiz_advec_sfc_pressure = Var(
     name='horiz_advec_sfc_pressure',
     domain='atmos',
@@ -1483,8 +1417,8 @@ horiz_divg_vert_int_max = Var(
     func=calcs.horiz_divg_vert_int_max,
     units=units.kg_m2_s1_mass
 )
-dry_mass_budget_tendency_term = Var(
-    name='dry_mass_budget_tendency_term',
+dry_mass_column_tendency = Var(
+    name='dry_mass_column_tendency',
     domain='atmos',
     description=('Monthly time-tendency of surface pressure minus gravity '
                  'times water vapor path monthly time tendency.'),
@@ -1493,13 +1427,13 @@ dry_mass_budget_tendency_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_budget_tendency_term,
+    func=calcs.dry_mass_column_tendency,
     units=units.Pa_s1_mass,
     math_str=r'$\partial p_s/\partial t - g\partial \mathrm{WVP}/\partial t$',
     colormap='RdBu_r'
 )
-dry_mass_budget_transport_term = Var(
-    name='dry_mass_budget_transport_term',
+dry_mass_column_divg = Var(
+    name='dry_mass_column_divg',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1508,14 +1442,14 @@ dry_mass_budget_transport_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_budget_transport_term,
+    func=calcs.dry_mass_column_divg,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '(1-q)\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-dry_mass_budget_residual = Var(
-    name='dry_mass_budget_residual',
+dry_mass_column_budget_residual = Var(
+    name='dry_mass_column_budget_residual',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1524,12 +1458,12 @@ dry_mass_budget_residual = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_budget_residual,
+    func=calcs.dry_mass_column_budget_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
-dry_mass_budget_with_adj_transport_term = Var(
-    name='dry_mass_budget_with_adj_transport_term',
+dry_mass_column_divg_with_adj = Var(
+    name='dry_mass_column_divg_with_adj',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1538,14 +1472,14 @@ dry_mass_budget_with_adj_transport_term = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_budget_with_adj_transport_term,
+    func=calcs.dry_mass_column_divg_with_adj,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '(1-q)\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-dry_mass_budget_with_adj_residual = Var(
-    name='dry_mass_budget_with_adj_residual',
+dry_mass_column_budget_with_adj_residual = Var(
+    name='dry_mass_column_budget_with_adj_residual',
     domain='atmos',
     description=('Residual of mass budget with explicit correction applied '
                  'to transport term'),
@@ -1554,9 +1488,224 @@ dry_mass_budget_with_adj_residual = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_budget_with_adj_residual,
+    func=calcs.dry_mass_column_budget_with_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
+)
+energy_column_source = Var(
+    name='energy_column_source',
+    math_str=r'$F_\mathrm{net}$',
+    domain='atmos',
+    description='Net energy flux into atmosphere at surface and at TOA.',
+    variables=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+               lwup_sfc, lwdn_sfc, shflx, evap),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_source,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_divg = Var(
+    name='energy_column_divg',
+    domain='atmos',
+    description='Column flux divergence of energy.  No mass adjustment.',
+    variables=(temp, hght, sphum, ucomp, vcomp, 'dp', r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+energy_column_divg_with_adj = Var(
+    name='energy_column_divg_with_adj',
+    domain='atmos',
+    description='Column flux divergence of energy, with mass adjustment.',
+    variables=(temp, hght, sphum, ucomp, vcomp, ps, 'dp', r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_with_adj,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+energy_column_divg_with_adj2 = Var(
+    name='energy_column_divg_with_adj2',
+    domain='atmos',
+    description='Column flux divergence of energy, with mass adjustment.',
+    variables=(temp, hght, sphum, ucomp, vcomp, ps, 'dp', r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_with_adj2,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+energy_column_tendency = Var(
+    name='energy_column_tendency',
+    domain='atmos',
+    description='Monthly time-tendency of column integrated energy.',
+    variables=(temp, hght, sphum, ucomp, vcomp, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_tendency,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+mass_column = Var(
+    name='mass_column',
+    math_str=r'$p_s/g$',
+    domain='atmos',
+    description=('Total mass per square meter of the atmospheric column, '
+                 'based on surface pressure.'),
+    variables=(ps,),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column,
+    func_input_dtype='numpy',
+    units=units.kg_m2,
+    colormap='RdBu_r'
+)
+mass_column_integral = Var(
+    name='mass_column_integral',
+    math_str=r'$\int^{p_s}_{p_t}\,\mathrm{d}p/g$',
+    domain='atmos',
+    description=('Total mass per square meter of the atmospheric column,'
+                 'computed by explicitly integrating pressure.  Temperature '
+                 'variable (temp) is a dummy -- aospy.Calc needs at '
+                 'least one netCDF variable per aospy.Var.'),
+    variables=(temp, 'dp',),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_integral,
+    units=units.kg_m2,
+    colormap='RdBu_r'
+)
+mass_column_divg = Var(
+    name='mass_column_divg',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_divg,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '\mathbf{v}\,\mathrm{d}p$'),
+    colormap='RdBu'
+)
+mass_column_divg_with_adj = Var(
+    name='mass_column_divg_with_adj',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, sphum, ps, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_divg_with_adj,
+    units=units.Pa_s1_mass,
+    math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
+              '\mathbf{v}_\mathrm{adj}\,\mathrm{d}p$'),
+    colormap='RdBu'
+)
+mass_column_source = Var(
+    name='mass_column_source',
+    domain='atmos',
+    description='',
+    variables=(evap, precip),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_source,
+    units=units.Pa_s1_mass,
+    math_str=r'$g(E-P)$',
+    colormap='RdBu'
+)
+mass_column_tendency = Var(
+    name='mass_column_tendency',
+    domain='atmos',
+    description='Monthly time-tendency of surface pressure.',
+    variables=(ps,),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.time_tendency,
+    units=units.Pa_s1_mass,
+    colormap='RdBu_r'
+)
+mass_column_budget_lhs = Var(
+    name='mass_column_budget_lhs',
+    domain='atmos',
+    description=(
+        'Tendency plus flux divergence of column integrated mass.'
+    ),
+    variables=(ps, ucomp, vcomp, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_budget_lhs,
+    units=units.Pa_s1_mass,
+    colormap='RdBu_r'
+)
+mass_column_budget_with_adj_lhs = Var(
+    name='mass_column_budget_with_adj_lhs',
+    domain='atmos',
+    description=(
+        'Tendency plus flux divergence of column integrated mass.'
+    ),
+    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_budget_with_adj_lhs,
+    units=units.Pa_s1_mass,
+    colormap='RdBu_r'
+)
+mass_column_budget_residual = Var(
+    name='mass_column_budget_residual',
+    domain='atmos',
+    description=(
+        'Residual in vertically integrated mass budget.'
+    ),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_budget_residual,
+    units=units.Pa_s1_mass,
+    colormap='RdBu_r'
+)
+moisture_column_source = Var(
+    name='moisture_column_source',
+    domain='atmos',
+    description='Column water vapor source, i.e. evap minus precip.',
+    variables=(precip, evap),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_column_source,
+    units=units.kg_m2_s1,
+    colormap='BrBG'
 )
 moisture_column_divg = Var(
     name='moisture_column_divg',
@@ -1585,8 +1734,48 @@ moisture_column_divg_with_adj = Var(
     units=units.kg_m2_s1,
     colormap='BrBG_r'
 )
-moisture_column_divg_with_adj2 = Var(
-    name='moisture_column_divg_with_adj2',
+moisture_column_tendency = Var(
+    name='moisture_column_tendency',
+    domain='atmos',
+    description='Monthly time-tendency of column-integrated water vapor.',
+    variables=(sphum, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_column_tendency,
+    units=units.kg_m2_s1
+)
+moisture_column_budget_lhs = Var(
+    name='moisture_column_budget_lhs',
+    domain='atmos',
+    description=('Left-hand-side of moisture budget with applied mass '
+                 'correction, where LHS = time tendency plus transport.'),
+    variables=(ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_column_budget_lhs,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
+moisture_column_budget_with_adj_lhs = Var(
+    name='moisture_column_budget_with_adj_lhs',
+    domain='atmos',
+    description=('Left-hand-side of moisture budget with applied mass '
+                 'correction, where LHS = time tendency plus transport.'),
+    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moisture_column_budget_with_adj_lhs,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
+moisture_column_budget_with_adj2_lhs = Var(
+    name='moisture_column_divg_with_adj2_lhs',
     domain='atmos',
     description=('Column flux divergence of water vapor.  '
                  'Mass adjusted by subtracting off column mass residual times '
@@ -1596,35 +1785,22 @@ moisture_column_divg_with_adj2 = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.moisture_column_divg_with_adj2,
+    func=calcs.moisture_column_budget_with_adj2_lhs,
     units=units.kg_m2_s1,
     colormap='BrBG_r'
 )
-moisture_budget_lhs = Var(
-    name='moisture_budget_lhs',
+moisture_column_budget_residual = Var(
+    name='moisture_column_budget_residual',
     domain='atmos',
-    description=('Left-hand-side of moisture budget with applied mass '
-                 'correction, where LHS = time tendency plus transport.'),
-    variables=(ucomp, vcomp, sphum, r_e, 'dp'),
+    description=(
+        'Residual in vertically integrated moisture budget.'
+    ),
+    variables=(sphum, ucomp, vcomp, omega, 'dp', r_e, evap, precip),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.moisture_budget_lhs,
-    units=units.kg_m2_s1,
-    colormap='BrBG_r'
-)
-moisture_budget_with_adj_lhs = Var(
-    name='moisture_budget_with_adj_lhs',
-    domain='atmos',
-    description=('Left-hand-side of moisture budget with applied mass '
-                 'correction, where LHS = time tendency plus transport.'),
-    variables=(ps, ucomp, vcomp, sphum, r_e, 'dp'),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.moisture_budget_with_adj_lhs,
+    func=calcs.moisture_column_budget_residual,
     units=units.kg_m2_s1,
     colormap='BrBG_r'
 )
@@ -1890,18 +2066,6 @@ prec_conv_frac = Var(
     func=calcs.prec_conv_frac,
     units=units.unitless
 )
-ps_monthly_tendency = Var(
-    name='ps_monthly_tendency',
-    domain='atmos',
-    description='Monthly time-tendency of surface pressure.',
-    variables=(ps,),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.time_tendency,
-    units=units.Pa_s1_mass
-)
 q_zonal_advec = Var(
     name='q_zonal_advec',
     domain='atmos',
@@ -2154,48 +2318,6 @@ q_total_advec = Var(
     func=calcs.field_total_advec,
     units=units.s1_spec_mass,
     colormap='BrBG_r'
-)
-q_budget_advec_residual = Var(
-    name='q_budget_advec_residual',
-    domain='atmos',
-    description=(
-        'Residual in vertically integrated moisture budget, with moisture '
-        'transport computed as sum of horizontal and vertical advection '
-        'terms.'
-    ),
-    variables=(sphum, ucomp, vcomp, omega, 'p', 'dp',
-               r_e, evap, precip),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.q_budget_advec_residual,
-    units=units.kg_m2_s1,
-    colormap='BrBG_r'
-)
-qu = Var(
-    name='qu',
-    domain='atmos',
-    description='Zonal specific humidity flux.',
-    variables=(sphum, ucomp),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.qu,
-    units=units.m_s1
-)
-qv = Var(
-    name='qv',
-    domain='atmos',
-    description='Meridional specific humidity flux.',
-    variables=(sphum, vcomp),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.qv,
-    units=units.m_s1
 )
 sfc_albedo = Var(
     name='sfc_albedo',
@@ -2646,222 +2768,3 @@ virt_pot_temp = Var(
     func=calcs.virt_pot_temp,
     units=units.K
 )
-wvp_monthly_tendency = Var(
-    name='wvp_monthly_tendency',
-    domain='atmos',
-    description='Monthly time-tendency of column-integrated water vapor.',
-    variables=(sphum, 'dp'),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.wvp_time_tendency,
-    units=units.kg_m2_s1
-)
-
-
-master_vars_list = [
-    aht,
-    alb_sfc,
-    albedo,
-    ang_mom,
-    bk,
-    bowen_ratio,
-    cld_amt,
-    column_mass_source,
-    column_energy,
-    column_mass,
-    column_mass_divg,
-    column_mass_divg_with_adj,
-    column_mass_integral,
-    cre_lw,
-    cre_lw_precip_corr,
-    cre_net,
-    cre_net_precip_corr,
-    cre_net_precip_lin_regr,
-    cre_sw,
-    cre_sw_precip_corr,
-    d_dx_of_vert_int_u,
-    d_dy_of_vert_int_v,
-    divg,
-    divg_mass_bal,
-    # divg_spharm,
-    dry_mass_budget_residual,
-    dry_mass_budget_tendency_term,
-    dry_mass_budget_transport_term,
-    dry_mass_budget_with_adj_residual,
-    dry_mass_budget_with_adj_transport_term,
-    dry_static_stab,
-    dse,
-    dse_horiz_advec,
-    dse_horiz_advec_divg_sum,
-    dse_horiz_flux_divg,
-    dse_times_horiz_divg,
-    du_dx,
-    dv_dy,
-    equiv_pot_temp,
-    esf,
-    esf,
-    evap,
-    evap_frac,
-    evap_precip_corr,
-    fmse,
-    fmse_budget_advec_residual,
-    gms_change_est,
-    gms_change_est2,
-    gms_each_level,
-    gms_h01,
-    gms_h01est,
-    gms_h01est2,
-    gms_moc,
-    gms_msf,
-    gms_up_low,
-    gross_dry_stab,
-    gross_moist_stab,
-    gross_moist_strat,
-    hght,
-    hght_horiz_advec,
-    hght_horiz_advec_divg_sum,
-    hght_horiz_flux_divg,
-    hght_times_horiz_divg,
-    high_cld_amt,
-    horiz_advec_sfc_pressure,
-    horiz_divg,
-    horiz_divg_mass_adj, divg_3d,
-    horiz_divg_vert_int_max,
-    ice_wat,
-    lat,
-    level,
-    liq_wat,
-    lon,
-    low_cld_amt,
-    lwdn_sfc,
-    lwdn_sfc_clr,
-    lwup_sfc,
-    lwup_sfc_clr,
-    mass_flux,
-    mc,
-    mc_full,
-    mc_half,
-    mid_cld_amt,
-    moist_static_stab,
-    moisture_budget_with_adj_lhs,
-    moisture_column_divg,
-    moisture_column_divg_with_adj,
-    moisture_column_divg_with_adj2,
-    mse,
-    mse_budget_advec_residual,
-    mse_horiz_advec,
-    mse_horiz_advec_divg_sum,
-    mse_horiz_advec_upwind,
-    mse_horiz_flux_divg,
-    mse_times_horiz_divg,
-    mse_total_advec,
-    mse_total_advec_upwind,
-    mse_vert_advec,
-    mse_vert_advec_upwind,
-    mse_vert_flux_divg,
-    msf,
-    olr,
-    olr_clr,
-    omega,
-    p_minus_e,
-    pfull,
-    phalf,
-    pk,
-    pot_temp,
-    prec_conv,
-    prec_conv_frac,
-    prec_ls,
-    precip,
-    ps,
-    ps_monthly_tendency,
-    pv,
-    q_budget_advec_residual,
-    q_horiz_advec,
-    q_horiz_advec_const_p_from_eta,
-    q_horiz_advec_divg_sum,
-    q_horiz_advec_mass_adj,
-    q_horiz_advec_upwind,
-    q_horiz_flux_divg,
-    q_horiz_flux_divg_mass_adj,
-    q_merid_advec,
-    q_merid_advec_upwind,
-    q_times_horiz_divg,
-    q_times_horiz_divg_mass_adj,
-    q_total_advec,
-    q_total_advec_upwind,
-    q_vert_advec,
-    q_vert_advec_upwind,
-    q_vert_flux_divg,
-    q_zonal_advec,
-    q_zonal_advec_upwind,
-    qu,
-    qv,
-    rh,
-    rh_ref,
-    sfc_albedo,
-    sfc_albedo,
-    sfc_area,
-    sfc_energy,
-    sfc_lw, sfc_lw_cld, sfc_rad, sfc_rad_cld,
-    sfc_rad_clr,
-    sfc_sw,
-    sfc_sw_cld,
-    shflx,
-    slp,
-    snow_conv,
-    snow_ls,
-    soil_liq,
-    soil_moisture,
-    sphum,
-    sst,
-    swdn_sfc,
-    swdn_sfc_clr,
-    swdn_toa,
-    swdn_toa_clr,
-    swup_sfc,
-    swup_sfc_clr,
-    swup_toa,
-    swup_toa_clr,
-    t_surf,
-    t_surf_precip_corr,
-    t_surf_precip_lin_regr,
-    tdt_conv,
-    tdt_diab,
-    tdt_ls,
-    tdt_lw,
-    tdt_lw_cld,
-    tdt_lw_clr,
-    tdt_sw,
-    tdt_sw_cld,
-    tdt_sw_clr,
-    tdt_vdif,
-    temp,
-    temp_horiz_advec,
-    temp_horiz_advec_divg_sum,
-    temp_horiz_flux_divg,
-    temp_times_horiz_divg,
-    temp_vert_advec,
-    toa_rad,
-    toa_rad_clr,
-    toa_rad_clr_precip_corr,
-    toa_rad_clr_precip_lin_regr,
-    toa_sw,
-    tot_cld_amt,
-    total_gms,
-    u_mass_adjusted,
-    u_mass_adjustment,
-    v_mass_adjusted,
-    v_mass_adjustment,
-    u_ref,
-    ucomp,
-    v_ref,
-    vcomp,
-    vert_divg,
-    vert_divg_vert_int_max,
-    virt_pot_temp,
-    vort,
-    wvp,
-    wvp_monthly_tendency
-]
