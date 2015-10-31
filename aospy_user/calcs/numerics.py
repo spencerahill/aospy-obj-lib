@@ -1,11 +1,11 @@
 """Finite differencing and other numerical methods."""
-from aospy import FiniteDiff
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, int_dp_g,
                          pfull_from_ps, to_pfull_from_phalf, to_radians)
 import numpy as np
 import xray
 
 from .. import LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
+from .. import FiniteDiff
 
 
 def fwd_diff1(arr, dim):
