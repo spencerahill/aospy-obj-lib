@@ -21,3 +21,13 @@ def time_tendency(arr, freq='1M'):
     first = arr.resample(freq, TIME_STR, how='first').dropna(TIME_STR)
     last = arr.resample(freq, TIME_STR, how='last').dropna(TIME_STR)
     return (last - first) / first_to_last_vals_dur(arr, freq)
+
+
+def time_tendency_each_timestep(arr):
+    """Time tendency of the given field between each timestep.
+
+    The last or first timestep will not have a tendency, due to the finite
+    differencing.  So the output array will have length one less.
+    """
+    return (arr.diff(dim=TIME_STR, label='upper') /
+            arr[TIME_STR].diff(dim=TIME_STR, label='upper'))
