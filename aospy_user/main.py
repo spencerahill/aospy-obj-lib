@@ -3,10 +3,10 @@
 from __future__ import print_function
 import itertools
 
+import aospy
 import colorama
 
-import aospy
-import aospy_user
+from aospy_user import projs, variables
 
 
 class MainParams(object):
@@ -17,20 +17,18 @@ class MainParams(object):
 class MainParamsParser(object):
     """Interface between specified parameters and resulting CalcSuite."""
     def str_to_aospy_obj(self, proj, model, var, region):
-        proj_out = aospy_user.to_proj(proj)
-        model_out = aospy_user.to_model(model, proj_out)
-        var_out = aospy_user.to_var(var)
-        region_out = aospy_user.to_region(region, proj=proj_out)
+        proj_out = aospy.to_proj(proj, self.projs)
+        model_out = aospy.to_model(model, proj_out, self.projs)
+        var_out = aospy.to_var(var, variables)
+        region_out = aospy.to_region(region, self.projs, proj=proj_out)
         return proj_out, model_out, var_out, region_out
 
     def aospy_obj_to_iterable(self, proj, model, var, region):
-        return [aospy_user.to_iterable(obj)
-                for obj in (proj, model, var, region)]
+        return [aospy.to_iterable(obj) for obj in (proj, model, var, region)]
 
     def str_to_aospy_iterable(self, proj, model, var, region):
-        projo, modelo, varo, regiono = self.str_to_aospy_obj(proj, model,
-                                                             var, region)
-        return self.aospy_obj_to_iterable(projo, modelo, varo, regiono)
+        p, m, v, r = self.str_to_aospy_obj(proj, model, var, region)
+        return self.aospy_obj_to_iterable(p, m, v, r)
 
     def create_child_run_obj(self, models, runs, proj):
         """Create child Run object(s) for each Model object."""
@@ -38,7 +36,7 @@ class MainParamsParser(object):
         for model in models:
             for run in runs:
                 try:
-                    run_objs.append(aospy_user.to_run(run, model, proj))
+                    run_objs.append(aospy.to_run(run, model, proj, self.projs))
                 except AttributeError as ae:
                     print(ae)
         # If flat list, return the list.  If nested, then flatten it.
@@ -47,9 +45,10 @@ class MainParamsParser(object):
         else:
             return list(itertools.chain.from_iterable(run_objs))
 
-    def __init__(self, main_params):
+    def __init__(self, main_params, projs):
         """Turn all inputs into aospy-ready objects."""
         self.__dict__ = vars(main_params)
+        self.projs = projs
         self.proj, self.model, self.var, self.region = (
             self.str_to_aospy_iterable(main_params.proj, main_params.model,
                                        main_params.var, main_params.region)
@@ -169,7 +168,7 @@ class CalcSuite(object):
 def main(main_params):
     """Main script for interfacing with aospy."""
     # Instantiate objects and load default/all models, runs, and regions.
-    cs = CalcSuite(MainParamsParser(main_params))
+    cs = CalcSuite(MainParamsParser(main_params, projs))
     cs.print_params()
     try:
         cs.prompt_user_verify()
