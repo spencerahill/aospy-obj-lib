@@ -1,5 +1,6 @@
 from aospy.units import Units
-from aospy.constants import c_p, grav, seconds_in_day
+from aospy.constants import c_p, seconds_in_day
+
 
 unitless = Units(units='')
 specific_mass = Units(
