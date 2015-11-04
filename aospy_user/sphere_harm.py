@@ -1,4 +1,6 @@
 """Interface with windspharm/spharm for spherical harmonics analyses."""
+import logging
+
 from aospy.constants import r_e
 import numpy as np
 import spharm
@@ -28,8 +30,10 @@ class SpharmInterface(object):
 
     @staticmethod
     def flag_flip_lat(arr, out_north_to_south=True):
+        # Input could be xray.DataArray or a numpy array
         try:
-            lat = arr[LAT_STR]
+            # xray has bugs re: diff-ing coords.  So grab the numpy array.
+            lat = arr[LAT_STR].values
         except AttributeError:
             lat = arr
         in_south_to_north = all(lat[1:] - lat[:-1])
@@ -40,6 +44,7 @@ class SpharmInterface(object):
     def flip_lat_order(cls, arr, out_north_to_south=True):
         """Flip latitude order from S-N to N-S or vice versa, as specified."""
         if cls.flag_flip_lat(arr, out_north_to_south=out_north_to_south):
+            logging.debug("Flipping latitude order of: {}".format(arr))
             return arr.isel(**{LAT_STR: slice(-1, None, -1)})
         return arr.copy()
 
