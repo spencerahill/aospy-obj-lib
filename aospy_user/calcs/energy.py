@@ -6,7 +6,8 @@ from .tendencies import time_tendency
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind)
 from .mass import (column_flux_divg, column_flux_divg_with_adj,
-                   dry_mass_column_budget_residual, budget_residual)
+                   dry_mass_column_budget_residual, budget_residual,
+                   mass_column_divg_with_adj)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -44,17 +45,39 @@ def energy_column_budget_lhs(temp, z, q, u, v, ps, dp, radius, freq='1M'):
     return budget_residual(tendency, transport, freq=freq)
 
 
-def energy_column_divg_with_adj(temp, z, q, u, v, ps, dp, radius):
-    return column_flux_divg_with_adj(energy(temp, z, q, u, v), u, v, q,
-                                     ps, radius, dp)
+def energy_column_divg_with_adj(temp, z, q, ps, u, v, evap,
+                                precip, radius, dp):
+    return column_flux_divg_with_adj(energy(temp, z, q, u, v), ps, u, v, evap,
+                                     precip, radius, dp)
 
 
-def energy_column_divg_with_adj2(temp, z, q, u, v, ps, dp, radius, freq='1M'):
-    lhs = energy_column_budget_lhs(temp, z, q, u, v, ps, dp, radius, freq=freq)
-    dry_mass_resid = dry_mass_column_budget_residual(ps, u, v, q, radius, dp,
-                                                     freq=freq)
-    energy_col = energy_column(temp, z, q, u, v, dp)
-    return lhs - dry_mass_resid * grav.value * energy_col / ps
+def energy_column_divg_with_adj2(temp, z, q, ps, u, v, evap, precip, radius,
+                                 dp, freq='1M'):
+    """Column flux divergence, with the field defined per unit mass of air."""
+    en = energy(temp, z, q, u, v)
+    col_energy_divg = column_flux_divg_with_adj(en, ps, u, v, evap, precip,
+                                                radius, dp)
+    col_mass_divg = mass_column_divg_with_adj(ps, u, v, evap, precip, radius,
+                                              dp, freq=freq)
+    return col_energy_divg - col_mass_divg * int_dp_g(en, dp) / ps
+
+
+def energy_column_divg_with_adj3(temp, z, q, ps, u, v, evap, precip, radius,
+                                 dp, freq='1M'):
+    """Column flux divergence, with the field defined per unit mass of air."""
+    en = energy(temp, z, q, u, v)
+    col_energy_divg = column_flux_divg(en, u, v, radius, dp)
+    col_mass_divg = mass_column_divg_with_adj(ps, u, v, evap, precip, radius,
+                                              dp, freq=freq)
+    return col_energy_divg - col_mass_divg * int_dp_g(en, dp) / ps
+
+
+# def energy_column_divg_with_adj2(temp, z, q, u, v, ps, dp, radius, freq='1M'):
+#     lhs = energy_column_budget_lhs(temp, z, q, u, v, ps, dp, radius, freq=freq)
+#     dry_mass_resid = dry_mass_column_budget_residual(ps, u, v, q, radius, dp,
+#                                                      freq=freq)
+#     energy_col = energy_column(temp, z, q, u, v, dp)
+#     return lhs - dry_mass_resid * grav.value * energy_col / ps
 
 
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):

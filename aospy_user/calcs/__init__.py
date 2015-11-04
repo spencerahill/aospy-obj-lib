@@ -81,6 +81,7 @@ from .advection import (
 )
 from .mass import (
     horiz_divg,
+    horiz_divg_spharm,
     vert_divg,
     divg_3d,
     dp,
@@ -89,6 +90,7 @@ from .mass import (
     column_flux_divg_with_adj,
     mass_column,
     mass_column_divg,
+    mass_column_divg_spharm,
     mass_column_divg_with_adj,
     mass_column_integral,
     mass_column_source,
@@ -123,6 +125,7 @@ from .energy import (
     energy_column_divg,
     energy_column_divg_with_adj,
     energy_column_divg_with_adj2,
+    energy_column_divg_with_adj3,
     energy_column_source,
     mse_horiz_flux_divg,
     mse_horiz_advec,
@@ -161,6 +164,7 @@ from .water import (
     prec_conv_frac,
     moisture_column_source,
     moisture_column_tendency,
+    moisture_column_divg_with_adj2,
     moisture_column_budget_lhs,
     moisture_column_budget_with_adj_lhs,
     moisture_column_budget_with_adj2_lhs,

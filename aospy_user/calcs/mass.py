@@ -1,9 +1,10 @@
 """Mass budget-related quantities."""
 from aospy.constants import grav
 from aospy.utils import dp_from_ps, int_dp_g, integrate
-
+import numpy as np
 
 from .. import PFULL_STR, TIME_STR
+from ..sphere_harm import SpharmInterface
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
 from .advection import horiz_advec
 from .tendencies import time_tendency
@@ -14,6 +15,13 @@ def horiz_divg(u, v, radius):
     du_dx = d_dx_from_latlon(u, radius)
     dv_dy = d_dy_from_lat(v, radius, vec_field=True)
     return du_dx + dv_dy
+
+
+def horiz_divg_spharm(u, v, radius):
+    sph_int = SpharmInterface(u, v, rsphere=radius)
+    sph_int.make_vectorwind()
+    divg = sph_int.vectorwind.divergence()
+    return sph_int.to_xray(divg)
 
 
 def vert_divg(omega, p):
@@ -77,10 +85,17 @@ def mass_column_divg(u, v, radius, dp):
     return horiz_divg(u_int, v_int, radius)
 
 
-def mass_column_divg_with_adj(u, v, q, ps, radius, dp):
-    """Divergence of vertically integrated, mass-adjusted horizontal wind."""
-    return mass_column_divg(uv_mass_adjusted(u, q, ps, dp),
-                            uv_mass_adjusted(v, q, ps, dp), radius, dp)
+def mass_column_divg_spharm(u, v, radius, dp):
+    """Horizontal divergence of vertically integrated flow."""
+    u_int = integrate(u, dp, PFULL_STR)
+    v_int = integrate(v, dp, PFULL_STR)
+    return horiz_divg_spharm(u_int, v_int, radius)
+
+
+# def mass_column_divg_with_adj(u, v, q, ps, radius, dp):
+#     """Divergence of vertically integrated, mass-adjusted horizontal wind."""
+#     return mass_column_divg(uv_mass_adjusted(u, q, ps, dp),
+#                             uv_mass_adjusted(v, q, ps, dp), radius, dp)
 
 
 def mass_column_budget_lhs(ps, u, v, radius, dp, freq='1M'):
@@ -115,21 +130,53 @@ def mass_column_budget_residual(ps, u, v, evap, precip, radius, dp, freq='1M'):
     yield a residual.
     """
     tendency = time_tendency(ps, freq=freq)
-    transport = mass_column_divg(u, v, radius, dp)
+    tendency[:]=0.0
+    transport = mass_column_divg_spharm(u, v, radius, dp)
+    # transport = mass_column_divg(u, v, radius, dp)
     source = mass_column_source(evap, precip)
+    source[:]=0.0
     return budget_residual(tendency, transport, source, freq=freq)
+
+
+def mass_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    # residual = mass_column_budget_residual(ps, u, v, evap, precip, radius, dp,
+                                           # freq=freq)
+    residual = mass_column_divg_spharm(u, v, radius, dp)
+    sph_int = SpharmInterface(u, v, rsphere=radius)
+    sph_int.make_spharmt()
+    resid = SpharmInterface.prep_for_spharm(residual)
+    resid_spectral = sph_int.spharmt.grdtospec(resid)
+    # Assume residual stems entirely from divergent flow.
+    vort_spectral = np.zeros_like(resid_spectral)
+    u_adj, v_adj = sph_int.spharmt.getuv(vort_spectral, resid_spectral)
+    # Create new SpharmInterface that's not defined vertically.
+    sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius)
+    u_arr = sph_int.to_xray(u_adj)
+    v_arr = sph_int.to_xray(v_adj)
+    return u_arr / ps, v_arr / ps
+
+
+def mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    u_adj, v_adj = mass_adj(ps, u, v, evap, precip, radius, dp, freq='1M')
+    return u - u_adj, v - v_adj
+
+
+def mass_column_divg_with_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+    return mass_column_divg_spharm(u_adj, v_adj, radius, dp)
 
 
 def column_flux_divg(arr, u, v, radius, dp):
     """Column flux divergence, with the field defined per unit mass of air."""
-    return horiz_divg(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
+    return horiz_divg_spharm(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
 
 
-def column_flux_divg_with_adj(arr, u, v, q, ps, radius, dp):
+def column_flux_divg_with_adj(arr, ps, u, v, evap, precip, radius, dp,
+                              freq='1M'):
     """Column flux divergence, with the field defined per unit mass of air."""
-    u_adj = uv_mass_adjusted(u, q, ps, dp)
-    v_adj = uv_mass_adjusted(v, q, ps, dp)
-    return horiz_divg(int_dp_g(arr*u_adj, dp), int_dp_g(arr*v_adj, dp), radius)
+    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+    return horiz_divg_spharm(int_dp_g(arr*u_adj, dp), int_dp_g(arr*v_adj, dp),
+                             radius)
 
 
 def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
@@ -174,8 +221,8 @@ def budget_residual(tendency, transport, source=None, freq='1M'):
     tendencies are computed at monthly intervals while the transport is much
     higher frequencies (e.g. 3- or 6-hourly).
     """
-    resid = tendency + transport.resample(freq, TIME_STR,
-                                          how='mean').dropna(TIME_STR)
+    resid = (tendency +
+             transport.resample(freq, TIME_STR, how='mean').dropna(TIME_STR))
     if source is not None:
         resid -= source.resample(freq, TIME_STR, how='mean').dropna(TIME_STR)
     return resid
