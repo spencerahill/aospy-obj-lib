@@ -3,7 +3,7 @@ from aospy.constants import grav
 from aospy.utils import int_dp_g
 import numpy as np
 
-from .tendencies import time_tendency
+from .tendencies import time_tendency_first_to_last
 from .mass import (column_flux_divg, column_flux_divg_with_adj,
                    budget_residual, dry_mass_column_budget_residual,
                    mass_column_divg_with_adj)
@@ -31,7 +31,7 @@ def moisture_column_source(precip, evap):
 
 def moisture_column_tendency(q, dp, freq='1M'):
     """Time tendency of column-integrated water vapor."""
-    return time_tendency(int_dp_g(q, dp), freq=freq)
+    return time_tendency_first_to_last(int_dp_g(q, dp), freq=freq)
 
 
 def moisture_column_budget_lhs(u, v, q, radius, dp, freq='1M'):

@@ -1,13 +1,11 @@
 """Energy budget-related fields"""
-from aospy.constants import grav
 from aospy.utils import int_dp_g
 
-from .tendencies import time_tendency
+from .tendencies import time_tendency_first_to_last
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind)
 from .mass import (column_flux_divg, column_flux_divg_with_adj,
-                   dry_mass_column_budget_residual, budget_residual,
-                   mass_column_divg_with_adj)
+                   budget_residual, mass_column_divg_with_adj)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -29,7 +27,8 @@ def energy_column(temp, z, q, u, v, dp):
 
 
 def energy_column_tendency(temp, z, q, u, v, dp, freq='1M'):
-    return time_tendency(energy_column(temp, z, q, u, v, dp), freq=freq)
+    return time_tendency_first_to_last(energy_column(temp, z, q, u, v, dp),
+                                       freq=freq)
 
 
 energy_column_source = column_energy

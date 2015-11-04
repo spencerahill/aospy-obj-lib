@@ -1,6 +1,7 @@
 """Calculations involved in mass and energy budgets."""
-import numpy as np
 from aospy.utils import coord_to_new_dataarray
+from finite_diff import FiniteDiff
+import numpy as np
 
 from .. import TIME_STR
 
@@ -16,18 +17,21 @@ def first_to_last_vals_dur(arr, freq='1M'):
     return delta_time
 
 
-def time_tendency(arr, freq='1M'):
-    """Monthly time tendency of the given field."""
+def time_tendency_first_to_last(arr, freq='1M'):
+    """Time tendency of the given field over given time interval."""
     first = arr.resample(freq, TIME_STR, how='first').dropna(TIME_STR)
     last = arr.resample(freq, TIME_STR, how='last').dropna(TIME_STR)
     return (last - first) / first_to_last_vals_dur(arr, freq)
 
 
 def time_tendency_each_timestep(arr):
-    """Time tendency of the given field between each timestep.
+    """Time tendency of the given field at each timestep.
 
-    The last or first timestep will not have a tendency, due to the finite
-    differencing.  So the output array will have length one less.
+    Compute via centered differencing at interior timesteps, one-sided
+    differencing at endpoints.
     """
-    return (arr.diff(dim=TIME_STR, label='upper') /
-            arr[TIME_STR].diff(dim=TIME_STR, label='upper'))
+    time = arr[TIME_STR].copy()
+    # Force time units to be seconds.
+    time = (time - np.datetime64(0, 's')) / np.timedelta64(1, 's')
+    return (FiniteDiff.cen_diff(arr, TIME_STR, do_edges_one_sided=True) /
+            FiniteDiff.cen_diff(time, TIME_STR, do_edges_one_sided=True))

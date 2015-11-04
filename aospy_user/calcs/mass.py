@@ -7,7 +7,7 @@ from .. import PFULL_STR, TIME_STR
 from ..sphere_harm import SpharmInterface
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
 from .advection import horiz_advec
-from .tendencies import time_tendency
+from .tendencies import time_tendency_first_to_last
 
 
 def horiz_divg(u, v, radius):
@@ -105,7 +105,7 @@ def mass_column_budget_lhs(ps, u, v, radius, dp, freq='1M'):
     the source term, however artifacts introduced by numerics and other things
     yield a residual.
     """
-    tendency = time_tendency(ps)
+    tendency = time_tendency_first_to_last(ps)
     transport = mass_column_divg(u, v, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
 
@@ -117,7 +117,7 @@ def mass_column_budget_with_adj_lhs(ps, u, v, q, radius, dp, freq='1M'):
     the source term, however artifacts introduced by numerics and other things
     yield a residual.
     """
-    tendency = time_tendency(ps, freq=freq)
+    tendency = time_tendency_first_to_last(ps, freq=freq)
     transport = mass_column_divg_with_adj(u, v, q, ps, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
 
@@ -129,7 +129,7 @@ def mass_column_budget_residual(ps, u, v, evap, precip, radius, dp, freq='1M'):
     the source term, however artifacts introduced by numerics and other things
     yield a residual.
     """
-    tendency = time_tendency(ps, freq=freq)
+    tendency = time_tendency_first_to_last(ps, freq=freq)
     tendency[:]=0.0
     transport = mass_column_divg_spharm(u, v, radius, dp)
     # transport = mass_column_divg(u, v, radius, dp)
@@ -200,8 +200,9 @@ def dry_mass_column_tendency(ps, q, dp, freq='1M'):
 
     See e.g. Trenberth 1991, Eq. 9.
     """
-    return (time_tendency(ps, freq=freq) -
-            grav.value * time_tendency(int_dp_g(q, dp), freq=freq))
+    return (time_tendency_first_to_last(ps, freq=freq) -
+            grav.value * time_tendency_first_to_last(int_dp_g(q, dp),
+                                                     freq=freq))
 
 
 def dry_mass_column_divg(u, v, q, radius, dp):

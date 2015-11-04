@@ -8,7 +8,8 @@ datatype.
 """
 from .tendencies import (
     first_to_last_vals_dur,
-    time_tendency
+    time_tendency_first_to_last,
+    time_tendency_each_timestep,
 )
 from .numerics import (
     fwd_diff1,

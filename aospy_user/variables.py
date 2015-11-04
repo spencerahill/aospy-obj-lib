@@ -1693,7 +1693,7 @@ mass_column_tendency = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.time_tendency,
+    func=calcs.time_tendency_first_to_last,
     units=units.Pa_s1_mass,
     colormap='RdBu_r'
 )
