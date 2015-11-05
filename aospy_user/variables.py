@@ -71,6 +71,7 @@ dp = Var(
                  'space.  For data on model native coordinates, this varies '
                  'in space and time due to the spatiotemporal variations in '
                  'surface pressure.'),
+    # Last arg is just dummy variable from which to get the pfull coordinate.
     variables=(ps, bk, pk, temp),
     def_time=True,
     def_vert=True,
