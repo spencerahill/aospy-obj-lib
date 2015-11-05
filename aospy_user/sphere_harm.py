@@ -22,6 +22,21 @@ class SpharmInterface(object):
     package's built-in tools.
     """
     @staticmethod
+    def squeeze(arr):
+        """Remove dimensions and excess coordinates with only one value."""
+        # DataArray.squeeze() handles the dims.
+        arr = arr.squeeze()
+        # Have to loop through the coords.
+        for name, coord in arr.coords.iteritems():
+            if coord.size in (0, 1):
+                try:
+                    arr = arr.drop(name)
+                # Generates KeyError if the variable needs that coord.
+                except KeyError:
+                    pass
+        return arr
+
+    @staticmethod
     def fill_mask(arr, fill_value=0.):
         """Replace masked entries with the specified fill value."""
         arr_filled = arr.to_masked_array()
@@ -76,8 +91,10 @@ class SpharmInterface(object):
 
     def __init__(self, u, v, gridtype='regular', rsphere=r_e,
                  legfunc='computed', make_vectorwind=False,
-                 make_spharmt=False):
+                 make_spharmt=False, squeeze=False):
         """Create a SpharmInterface object."""
+        if squeeze:
+            u, v = self.squeeze(u), self.squeeze(v)
         self._u = u
         self._v = v
         try:
