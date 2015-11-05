@@ -40,22 +40,6 @@ def dp(ps, bk, pk, arr):
     return dp_from_ps(bk, pk, ps, arr[PFULL_STR])
 
 
-def uv_mass_adjustment(uv, q, ps, dp):
-    """Correction to subtract from outputted u or v to balance mass budget.
-
-    C.f. Trenberth 1991, J. Climate, equations 9 and 10.
-    """
-    wvp = int_dp_g(q, dp)
-    numer = integrate((1. - q)*uv, dp, PFULL_STR)
-    denom = (ps - grav.value * wvp)
-    return numer / denom
-
-
-def uv_mass_adjusted(uv, q, ps, dp):
-    """Corrected u or v in order to balance mass budget."""
-    return uv - uv_mass_adjustment(uv, q, ps, dp)
-
-
 def mass_column(ps):
     """Total mass per square meter of atmospheric column."""
     return ps / grav.value
@@ -128,7 +112,7 @@ def mass_column_budget_with_adj_lhs(ps, u, v, q, radius, dp, freq='1M'):
     yield a residual.
     """
     tendency = time_tendency_first_to_last(ps, freq=freq)
-    transport = mass_column_divg_with_adj(u, v, q, ps, radius, dp)
+    transport = mass_column_divg_adj(u, v, q, ps, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
 
 
@@ -147,38 +131,71 @@ def mass_column_budget_residual(ps, u, v, evap, precip, radius, dp, freq='1M'):
     # return budget_residual(tendency, transport, source, freq=freq)
 
 
-def mass_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
-    # residual = mass_column_budget_residual(ps, u, v, evap, precip, radius, dp,
-                                           # freq=freq)
-    residual = mass_column_divg_spharm(u, v, radius, dp)
-    sph_int = SpharmInterface(u, v, rsphere=radius)
-    sph_int.make_spharmt()
-    resid = SpharmInterface.prep_for_spharm(residual)
-    resid_spectral = sph_int.spharmt.grdtospec(resid)
+def uv_column_budget_adjustment(u, v, residual, col_integral, radius):
+    """Generic column budget conservation adjustment to apply to horiz wind."""
+    sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius,
+                              make_spharmt=True, squeeze=True)
     # Assume residual stems entirely from divergent flow.
+    resid_spectral = SpharmInterface.prep_for_spharm(residual)
+    resid_spectral = sph_int.spharmt.grdtospec(resid_spectral)
     vort_spectral = np.zeros_like(resid_spectral)
+
     u_adj, v_adj = sph_int.spharmt.getuv(vort_spectral, resid_spectral)
-    # Create new SpharmInterface that's not defined vertically.
-    sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius)
-    u_arr = sph_int.to_xray(u_adj)
-    v_arr = sph_int.to_xray(v_adj)
-    return u_arr / ps, v_arr / ps
+    u_arr, v_arr = sph_int.to_xray(u_adj), sph_int.to_xray(v_adj)
+    return u_arr / col_integral, v_arr / col_integral
 
 
-def mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
-    u_adj, v_adj = mass_adj(ps, u, v, evap, precip, radius, dp, freq='1M')
+def uv_mass_adjustment(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Adjustment to horizontal winds to enforce column mass budget closure."""
+    residual = mass_column_budget_residual(ps, u, v, evap, precip, radius, dp,
+                                           freq=freq)
+    return uv_column_budget_adjustment(u, v, residual, ps, radius)
+
+
+def uv_mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Horizontal winds adjusted to impose column mass budget closure."""
+    u_adj, v_adj = uv_mass_adjustment(ps, u, v, evap, precip, radius, dp,
+                                      freq='1M')
     return u - u_adj, v - v_adj
 
 
-def mass_column_divg_with_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
-    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+def u_mass_adjustment(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Adjustment to zonal wind to enforce column mass budget closure."""
+    u_adj, _ = uv_mass_adjustment(ps, u, v, evap, precip, radius, dp,
+                                  freq='1M')
+    return u_adj
+
+
+def v_mass_adjustment(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Adjustment to meridional wind to enforce column mass budget closure."""
+    _, v_adj = uv_mass_adjustment(ps, u, v, evap, precip, radius, dp,
+                                  freq='1M')
+    return v_adj
+
+
+def u_mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Zonal wind adjusted to impose column mass budget closure."""
+    u_adj, _ = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M')
+    return u_adj
+
+
+def v_mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    """Meridional wind adjusted to impose column mass budget closure."""
+    _, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M')
+    return v_adj
+
+
+def mass_column_divg_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
+                                    freq=freq)
     return mass_column_divg_spharm(u_adj, v_adj, radius, dp)
 
 
 def mass_column_budget_adj_residual(ps, u, v, evap, precip, radius, dp,
                                     freq='1M'):
     tendency = time_tendency_each_timestep(ps)
-    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
+                                    freq=freq)
     transport = mass_column_divg_spharm(u_adj, v_adj, radius, dp)
     source = mass_column_source(evap, precip)
     return tendency + transport - source
@@ -189,10 +206,11 @@ def column_flux_divg(arr, u, v, radius, dp):
     return horiz_divg_spharm(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
 
 
-def column_flux_divg_with_adj(arr, ps, u, v, evap, precip, radius, dp,
+def column_flux_divg_adj(arr, ps, u, v, evap, precip, radius, dp,
                               freq='1M'):
     """Column flux divergence, with the field defined per unit mass of air."""
-    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
+                                    freq=freq)
     return horiz_divg_spharm(int_dp_g(arr*u_adj, dp), int_dp_g(arr*v_adj, dp),
                              radius)
 

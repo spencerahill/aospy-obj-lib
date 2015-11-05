@@ -7,9 +7,8 @@ from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind)
-from .mass import (column_flux_divg, column_flux_divg_with_adj,
-                   budget_residual, mass_column_divg_with_adj,
-                   mass_adjusted)
+from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
+                   uv_column_budget_adjustment)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -68,22 +67,8 @@ def uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
         swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    # Get the residual in terms of its spectral coefficients.  Grab only one
-    # level of u, v since the residual is not defined vertically.
-    sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius,
-                              make_spharmt=True, squeeze=True)
-    resid_spectral = SpharmInterface.prep_for_spharm(residual)
-    resid_spectral = sph_int.spharmt.grdtospec(resid_spectral)
-
-    # Assume residual stems entirely from divergent flow.
-    vort_spectral = np.zeros_like(resid_spectral)
-    u_adj, v_adj = sph_int.spharmt.getuv(vort_spectral, resid_spectral)
-
-    u_arr = sph_int.to_xray(u_adj)
-    v_arr = sph_int.to_xray(v_adj)
-
     col_energy = int_dp_g(energy(temp, z, q, q_ice, u, v), dp)
-    return u_arr / col_energy, v_arr / col_energy
+    return uv_column_budget_adjustment(u, v, residual, col_energy, radius)
 
 
 def u_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -139,11 +124,82 @@ def v_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     return v - v_adj
 
 
+def uv_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                              swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+                              evap, precip, ps, dp, radius, freq='1M'):
+    """Horiz wind adjustments to impose column mass and energy balance."""
+    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
+                                              dp, freq=freq)
+    residual = energy_column_budget_residual(
+        temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
+        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
+    )
+    col_energy = int_dp_g(energy(temp, z, q, q_ice, u_mass_adj, v_mass_adj),
+                          dp)
+    return uv_column_budget_adjustment(u_mass_adj, v_mass_adj, residual,
+                                       col_energy, radius)
+
+
+def u_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                             swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+                             evap, precip, ps, dp, radius, freq='1M'):
+    """Zonal wind adjustment to impose column mass and energy balance."""
+    u_adj, _ = uv_mass_energy_adjustment(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        )
+    return u_adj
+
+
+def v_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                             swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+                             evap, precip, ps, dp, radius, freq='1M'):
+    """Meridional wind adjustment to impose column mass and energy balance."""
+    _, v_adj = uv_mass_energy_adjustment(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        )
+    return v_adj
+
+
+def uv_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+                            evap, precip, ps, dp, radius):
+    """Horizontal wind components with column energy balance-adjustment."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    return u - u_adj, v - v_adj
+
+
+def u_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                           swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                           precip, ps, dp, radius):
+    """Zonal wind with column energy balance-adjustment applied."""
+    u_adj, _ = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    return u - u_adj
+
+
+def v_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                           swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                           precip, ps, dp, radius):
+    """Meridional wind with column energy balance-adjustment applied."""
+    v_adj, _ = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    return v - v_adj
+
+
 def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                            precip, ps, dp, radius, freq='1M'):
-    u_mass_adj, v_mass_adj = mass_adjusted(ps, u, v, evap, precip, radius,
-                                           dp, freq=freq)
+    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
+                                              dp, freq=freq)
     u_en_adj, v_en_adj = uv_energy_adjusted(
         temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius

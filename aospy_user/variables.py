@@ -1657,17 +1657,16 @@ mass_column_divg_spharm = Var(
               '\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-mass_column_divg_with_adj = Var(
-    name='mass_column_divg_with_adj',
+mass_column_divg_adj = Var(
+    name='mass_column_divg_adj',
     domain='atmos',
     description='',
-    # variables=(ucomp, vcomp, sphum, ps, r_e, dp),
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.mass_column_divg_with_adj,
+    func=calcs.mass_column_divg_adj,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '\mathbf{v}_\mathrm{adj}\,\mathrm{d}p$'),
@@ -1797,7 +1796,7 @@ moisture_column_divg_with_adj = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.column_flux_divg_with_adj,
+    func=calcs.column_flux_divg_adj,
     units=units.kg_m2_s1,
     colormap='BrBG_r'
 )
@@ -2785,24 +2784,52 @@ u_mass_adjustment = Var(
     name='u_mass_adjustment',
     domain='atmos',
     description='',
-    variables=(ucomp, sphum, ps, dp),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.uv_mass_adjustment,
+    func=calcs.u_mass_adjustment,
     units=units.m_s1
 )
 u_mass_adjusted = Var(
     name='u_mass_adjusted',
     domain='atmos',
     description='',
-    variables=(ucomp, sphum, ps, dp),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.uv_mass_adjusted,
+    func=calcs.u_mass_adjusted,
+    units=units.m_s1
+)
+u_mass_energy_adjustment = Var(
+    name='u_mass_energy_adjustment',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.u_mass_energy_adjustment,
+    units=units.m_s1
+)
+u_mass_energy_adjusted = Var(
+    name='u_mass_energy_adjusted',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.u_mass_energy_adjusted,
     units=units.m_s1
 )
 v_energy_adjustment = Var(
@@ -2837,24 +2864,52 @@ v_mass_adjustment = Var(
     name='v_mass_adjustment',
     domain='atmos',
     description='',
-    variables=(vcomp, sphum, ps, dp),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.uv_mass_adjustment,
+    func=calcs.v_mass_adjustment,
     units=units.m_s1
 )
 v_mass_adjusted = Var(
     name='v_mass_adjusted',
     domain='atmos',
     description='',
-    variables=(vcomp, sphum, ps, dp),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.uv_mass_adjusted,
+    func=calcs.v_mass_adjusted,
+    units=units.m_s1
+)
+v_mass_energy_adjustment = Var(
+    name='v_mass_energy_adjustment',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.v_mass_energy_adjustment,
+    units=units.m_s1
+)
+v_mass_energy_adjusted = Var(
+    name='v_mass_energy_adjusted',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.v_mass_energy_adjusted,
     units=units.m_s1
 )
 vert_divg = Var(
