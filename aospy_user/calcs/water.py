@@ -4,9 +4,9 @@ from aospy.utils import int_dp_g
 import numpy as np
 
 from .tendencies import time_tendency_first_to_last
-from .mass import (column_flux_divg, column_flux_divg_with_adj,
+from .mass import (column_flux_divg, column_flux_divg_adj,
                    budget_residual, dry_mass_column_budget_residual,
-                   mass_column_divg_with_adj)
+                   mass_column_divg_adj)
 
 
 def p_minus_e(precip, evap):
@@ -57,10 +57,10 @@ def moisture_column_budget_residual(q, u, v, dp, radius, evap, precip,
 def moisture_column_divg_with_adj2(q, ps, u, v, evap, precip, radius, dp,
                                    freq='1M'):
     """Column flux divergence, with the field defined per unit mass of air."""
-    col_moist_divg = column_flux_divg_with_adj(q, ps, u, v, evap, precip,
-                                               radius, dp)
-    col_mass_divg = mass_column_divg_with_adj(ps, u, v, evap, precip, radius,
-                                              dp, freq=freq)
+    col_moist_divg = column_flux_divg_adj(q, ps, u, v, evap, precip,
+                                          radius, dp)
+    col_mass_divg = mass_column_divg_adj(ps, u, v, evap, precip, radius,
+                                         dp, freq=freq)
     return col_moist_divg - col_mass_divg * int_dp_g(q, dp) / ps
 
 
@@ -83,4 +83,4 @@ def moisture_column_budget_with_adj2_lhs(ps, u, v, q, radius, dp, freq='1M'):
     column flux divergence computation.
     """
     return (moisture_column_tendency(q, dp, freq=freq) +
-            column_flux_divg_with_adj(q, u, v, q, ps, radius, dp))
+            column_flux_divg_adj(q, u, v, q, ps, radius, dp))
