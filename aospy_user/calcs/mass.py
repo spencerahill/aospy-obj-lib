@@ -1,10 +1,13 @@
 """Mass budget-related quantities."""
+try:
+    from animal_spharm import SpharmInterface
+except ImportError:
+    pass
 from aospy.constants import grav
 from aospy.utils import dp_from_ps, int_dp_g, integrate
 import numpy as np
 
 from .. import PFULL_STR, TIME_STR
-from ..sphere_harm import SpharmInterface
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
 from .advection import horiz_advec
 from .tendencies import (time_tendency_first_to_last,

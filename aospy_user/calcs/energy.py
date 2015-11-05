@@ -1,8 +1,6 @@
 """Energy budget-related fields"""
 from aospy.utils import int_dp_g
-import numpy as np
 
-from ..sphere_harm import SpharmInterface
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
