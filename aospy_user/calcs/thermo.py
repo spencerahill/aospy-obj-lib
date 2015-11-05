@@ -10,15 +10,7 @@ def dse(temp, hght):
     :param temp: Temperature.  Units: Kelvin.
     :param hght: Geopotential height. Units: meters.
     """
-    try:
-        ds = c_p*temp + grav*hght
-    except ValueError:
-        # On sigma coords, hght is at half levels; temp and sphum on full.
-        try:
-            ds = c_p*temp + grav*0.5*(hght[:,:-1] + hght[:,1:])
-        except ValueError:
-            ds = c_p*temp + grav*0.5*(hght[:,:,:-1] + hght[:,:,1:])
-    return ds
+    return c_p*temp + grav*hght
 
 
 def mse(temp, hght, sphum):
@@ -31,25 +23,21 @@ def fmse(temp, hght, sphum, ice_wat):
     return mse(temp, hght, sphum) - L_f*ice_wat
 
 
-
 def pot_temp(temp, p, p0=1000.):
     """Potential temperature.  Units: Kelvin."""
-    return temp*(p0/p[:,np.newaxis,np.newaxis])**kappa
+    return temp*(p0/p)**kappa
 
 
 def virt_pot_temp(temp, p, sphum, liq_wat, p0=1000.):
     """Virtual potential temperature, approximating the mixing ratios as
     specific humidities.
-
     """
-    return ((temp*(p0/p[:,np.newaxis,np.newaxis])**kappa) *
-            (1. + 0.61*sphum - liq_wat))
+    return pot_temp(temp, p, p0=p0) * (1. + 0.61*sphum - liq_wat)
 
 
 def equiv_pot_temp(temp, p, sphum, p0=1000.):
     """Equivalent potential temperature."""
-
-    return (temp + L_v*sphum/c_p)*(p0/p[:,np.newaxis,np.newaxis])**kappa
+    return pot_temp(temp + L_v*sphum/c_p, p, p0=p0)
 
 
 def mixing_ratio_from_specific_mass(mass):
