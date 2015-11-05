@@ -68,8 +68,8 @@ def merid_advec_upwind(arr, v, radius, vec_field=False):
                                 # df_bwd_except_sp[-1:]), axis=0)
     # df_bwd = np.ma.concatenate((df_fwd_except_np[:1], df_bwd_adj_sp,
                                 # df_bwd_except_sp), axis=0)
-    df_fwd_except_np = fwd_diff1(arr, lat)
-    df_bwd_except_sp = fwd_diff1(arr[::-1], lat[::-1])[::-1]
+    df_fwd_except_np = FiniteDiff.fwd_diff1(arr, lat)
+    df_bwd_except_sp = FiniteDiff.fwd_diff1(arr[::-1], lat[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_except_np,
                                 df_bwd_except_sp[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_except_np[:1],
@@ -90,8 +90,8 @@ def vert_advec_upwind(arr, omega, p):
     p = to_pascal(p)
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
-    df_fwd_partial = fwd_diff1(arr, p)
-    df_bwd_partial = fwd_diff1(arr[::-1], p[::-1])[::-1]
+    df_fwd_partial = FiniteDiff.fwd_diff1(arr, p)
+    df_bwd_partial = FiniteDiff.fwd_diff1(arr[::-1], p[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_partial, df_bwd_partial[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
     # 2015-10-26 S. Hill: does omega having the opposite sign convention as

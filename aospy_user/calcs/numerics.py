@@ -8,20 +8,6 @@ import xray
 from .. import LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
 
 
-def fwd_diff1(arr, dim):
-    """1st order accurate forward differencing approximation of derivative.
-
-    :param arr: Field to take derivative of.
-    :param dim: Values of dimension over which derivative is taken.  If a
-              singleton, assumed to be the uniform spacing.  If an array,
-              assumed to be the values themselves, not the spacing, and must
-              be the same length as `arr`.
-    :out: Array containing the df/dx approximation, with length in the 0th
-          axis one less than that of the input array.
-    """
-    return FiniteDiff.fwd_diff_deriv(arr, dim)
-
-
 def fwd_diff2(arr, dim):
     """2nd order accurate forward differencing approximation of derivative.
 
@@ -40,11 +26,6 @@ def fwd_diff2(arr, dim):
         df_dx1 = (arr[1:-1] - arr[:-2]) / (dim[1:-1] - dim[:-2])
         df_dx2 = (arr[2:]   - arr[:-2]) / (dim[2:]   - dim[:-2])
         return 2.*df_dx1 - df_dx2
-
-
-# def cen_diff2(arr, dim):
-    # return FiniteDiff.cen_diff_deriv(arr, dim, order=2,
-                                     # do_edges_one_sided=True)
 
 
 def cen_diff4(arr, dim):
