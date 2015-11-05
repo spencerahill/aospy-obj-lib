@@ -22,27 +22,63 @@ am2 = Model(
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012),
-    runs=[
-        runs.am2_cont, runs.am2_aero, runs.am2_atm, runs.am2_amtm,
-        runs.am2_gas, runs.am2_gtm, runs.am2_gmtm, runs.am2_aatl,
-        runs.am2_aind, runs.am2_apac, runs.am2_noT, runs.am2_noT_p2K,
-        runs.am2_amip, runs.am2_reyoi_cont, runs.am2_reyoi_m0p25,
-        runs.am2_reyoi_m0p5, runs.am2_reyoi_m1, runs.am2_reyoi_m1p5,
-        runs.am2_reyoi_m2, runs.am2_reyoi_m3, runs.am2_reyoi_m4,
-        runs.am2_reyoi_p0p25, runs.am2_reyoi_p0p5, runs.am2_reyoi_p1,
-        runs.am2_reyoi_p1p5, runs.am2_reyoi_p2, runs.am2_reyoi_p3,
-        runs.am2_reyoi_p4, runs.am2_reyoi_p6, runs.am2_reyoi_p8,
-        runs.am2_reyoi_m6, runs.am2_reyoi_m8, runs.am2_reyoi_m10,
-        runs.am2_reyoi_p10, runs.am2_reyoi_wpwp_p2, runs.am2_reyoi_wpwp_m2,
-        runs.am2_cld_lock_cont, runs.am2_cld_lock_p2,
-        runs.am2_cld_lock_sst, runs.am2_cld_lock_cld, runs.am2_amip1,
-        runs.am2_amip1_p2, runs.am2_reynolds, runs.am2_reynolds_p2,
-        runs.am2_hurrell_cont, runs.am2_hurrell_p2,
-        runs.am2_cld_seed_all_p2, runs.am2_cld_seed_np_p2,
-        runs.am2_cld_seed_sp_p2, runs.am2_cld_seed_sa_p2,
-        runs.am2_test
-    ],
-    default_runs=[runs.am2_reyoi_cont, runs.am2_reyoi_p2]
+    runs={
+        runs.am2_cont,
+        runs.am2_aero,
+        runs.am2_atm,
+        runs.am2_amtm,
+        runs.am2_gas,
+        runs.am2_gtm,
+        runs.am2_gmtm,
+        runs.am2_aatl,
+        runs.am2_aind,
+        runs.am2_apac,
+        runs.am2_noT,
+        runs.am2_noT_p2K,
+        runs.am2_amip,
+        runs.am2_reyoi_cont,
+        runs.am2_reyoi_m0p25,
+        runs.am2_reyoi_m0p5,
+        runs.am2_reyoi_m1,
+        runs.am2_reyoi_m1p5,
+        runs.am2_reyoi_m2,
+        runs.am2_reyoi_m3,
+        runs.am2_reyoi_m4,
+        runs.am2_reyoi_p0p25,
+        runs.am2_reyoi_p0p5,
+        runs.am2_reyoi_p1,
+        runs.am2_reyoi_p1p5,
+        runs.am2_reyoi_p2,
+        runs.am2_reyoi_p3,
+        runs.am2_reyoi_p4,
+        runs.am2_reyoi_p6,
+        runs.am2_reyoi_p8,
+        runs.am2_reyoi_m6,
+        runs.am2_reyoi_m8,
+        runs.am2_reyoi_m10,
+        runs.am2_reyoi_p10,
+        runs.am2_reyoi_wpwp_p2,
+        runs.am2_reyoi_wpwp_m2,
+        runs.am2_cld_lock_cont,
+        runs.am2_cld_lock_p2,
+        runs.am2_cld_lock_sst,
+        runs.am2_cld_lock_cld,
+        runs.am2_amip1,
+        runs.am2_amip1_p2,
+        runs.am2_reynolds,
+        runs.am2_reynolds_p2,
+        runs.am2_hurrell_cont,
+        runs.am2_hurrell_p2,
+        runs.am2_cld_seed_all_p2,
+        runs.am2_cld_seed_np_p2,
+        runs.am2_cld_seed_sp_p2,
+        runs.am2_cld_seed_sa_p2,
+        runs.am2_test,
+    },
+    default_runs={
+        runs.am2_reyoi_cont,
+        runs.am2_reyoi_p2
+    }
 )
 am3 = Model(
     name='am3',
@@ -57,17 +93,41 @@ am3 = Model(
     data_in_start_date=1980,
     data_in_end_date=2010,
     default_date_range=(1981, 2010),
-    runs=[
-        runs.am3_cont, runs.am3_aero, runs.am3_atm, runs.am3_amtm,
-        runs.am3_gas, runs.am3_gtm, runs.am3_gmtm, runs.am3_aatl,
-        runs.am3_aind, runs.am3_apac, runs.am3_hc, runs.am3_hp1k,
-        runs.am3_hp2k, runs.am3_hp4k, runs.am3_hp6k, runs.am3_hp8k,
-        runs.am3_hp10k, runs.am3_hm1k, runs.am3_hm2k, runs.am3_hm4k,
-        runs.am3_hm6k, runs.am3_hm8k, runs.am3_hm10k, runs.am3_hm15k,
-        runs.am3_amip, runs.am3_hwpwp_p2k, runs.am3_hc_static_veg,
-        runs.am3_hc_static_veg_p4k, runs.am3_hc_static_veg_10kyr
-    ],
-    default_runs=[runs.am3_hc, runs.am3_hp2k]
+    runs={
+        runs.am3_cont,
+        runs.am3_aero,
+        runs.am3_atm,
+        runs.am3_amtm,
+        runs.am3_gas,
+        runs.am3_gtm,
+        runs.am3_gmtm,
+        runs.am3_aatl,
+        runs.am3_aind,
+        runs.am3_apac,
+        runs.am3_hc,
+        runs.am3_hp1k,
+        runs.am3_hp2k,
+        runs.am3_hp4k,
+        runs.am3_hp6k,
+        runs.am3_hp8k,
+        runs.am3_hp10k,
+        runs.am3_hm1k,
+        runs.am3_hm2k,
+        runs.am3_hm4k,
+        runs.am3_hm6k,
+        runs.am3_hm8k,
+        runs.am3_hm10k,
+        runs.am3_hm15k,
+        runs.am3_amip,
+        runs.am3_hwpwp_p2k,
+        runs.am3_hc_static_veg,
+        runs.am3_hc_static_veg_p4k,
+        runs.am3_hc_static_veg_10kyr,
+    },
+    default_runs={
+        runs.am3_hc,
+        runs.am3_hp2k,
+    }
 )
 hiram = Model(
     name='hiram',
@@ -81,12 +141,23 @@ hiram = Model(
     data_in_start_date=1979,
     data_in_end_date=1995,
     default_date_range=(1979, 1995),
-    runs=[
-        runs.hiram_amip, runs.hiram_cont, runs.hiram_aero, runs.hiram_atm,
-        runs.hiram_amtm, runs.hiram_gas, runs.hiram_gtm, runs.hiram_gmtm,
-        runs.hiram_aatl, runs.hiram_aind, runs.hiram_apac
-    ],
-    default_runs=[runs.hiram_cont, runs.hiram_gtm]
+    runs={
+        runs.hiram_amip,
+        runs.hiram_cont,
+        runs.hiram_aero,
+        runs.hiram_atm,
+        runs.hiram_amtm,
+        runs.hiram_gas,
+        runs.hiram_gtm,
+        runs.hiram_gmtm,
+        runs.hiram_aatl,
+        runs.hiram_aind,
+        runs.hiram_apac,
+    },
+    default_runs={
+        runs.hiram_cont,
+        runs.hiram_gtm,
+    }
 )
 sm2 = Model(
     name='sm2',
@@ -100,7 +171,12 @@ sm2 = Model(
     data_in_dur=20,
     data_in_start_date=1,
     default_date_range=(61, 80),
-    runs=[runs.sm2_cont, runs.sm2_aero, runs.sm2_gas, runs.sm2_both],
+    runs={
+        runs.sm2_cont,
+        runs.sm2_aero,
+        runs.sm2_gas,
+        runs.sm2_both,
+    },
 )
 hiram_c48 = Model(
     name='hiram_mz',
@@ -117,15 +193,30 @@ hiram_c48 = Model(
     data_in_start_date=1981,
     data_in_end_date=1995,
     default_date_range=(1981, 1995),
-    runs=[
-        runs.hiram_c48_0, runs.hiram_c48_0_p2K, runs.hiram_c48_1,
-        runs.hiram_c48_1_p2K, runs.hiram_c48_2, runs.hiram_c48_2_p2K,
-        runs.hiram_c48_3, runs.hiram_c48_3_p2K, runs.hiram_c48_4,
-        runs.hiram_c48_4_p2K, runs.hiram_c48_5, runs.hiram_c48_5_p2K,
-        runs.hiram_c48_6, runs.hiram_c48_6_p2K, runs.hiram_c48_7,
-        runs.hiram_c48_7_p2K, runs.hiram_c48_8, runs.hiram_c48_8_p2K
-    ],
-    default_runs=[runs.hiram_c48_0, runs.hiram_c48_0_p2K]
+    runs={
+        runs.hiram_c48_0,
+        runs.hiram_c48_0_p2K,
+        runs.hiram_c48_1,
+        runs.hiram_c48_1_p2K,
+        runs.hiram_c48_2,
+        runs.hiram_c48_2_p2K,
+        runs.hiram_c48_3,
+        runs.hiram_c48_3_p2K,
+        runs.hiram_c48_4,
+        runs.hiram_c48_4_p2K,
+        runs.hiram_c48_5,
+        runs.hiram_c48_5_p2K,
+        runs.hiram_c48_6,
+        runs.hiram_c48_6_p2K,
+        runs.hiram_c48_7,
+        runs.hiram_c48_7_p2K,
+        runs.hiram_c48_8,
+        runs.hiram_c48_8_p2K,
+    },
+    default_runs={
+        runs.hiram_c48_0,
+        runs.hiram_c48_0_p2K,
+    }
 )
 am3c90 = Model(
     name='am3c90',
@@ -139,7 +230,10 @@ am3c90 = Model(
     data_in_start_date=1981,
     data_in_end_date=1990,
     default_date_range=(1981, 1990),
-    runs=[runs.am3c90_cont, runs.am3c90_p2K]
+    runs={
+        runs.am3c90_cont,
+        runs.am3c90_p2K,
+    }
 )
 am2p5 = Model(
     name='am2p5',
@@ -154,7 +248,10 @@ am2p5 = Model(
     data_in_start_date=1981,
     data_in_end_date=2000,
     default_date_range=(1981, 2000),
-    runs=[runs.am2p5_cont, runs.am2p5_p2K]
+    runs={
+        runs.am2p5_cont,
+        runs.am2p5_p2K,
+    }
 )
 am4a1 = Model(
     name='am4a1',
@@ -171,7 +268,10 @@ am4a1 = Model(
     data_in_start_date=2,
     data_in_end_date=11,
     default_date_range=(2, 11),
-    runs=[runs.am4_a1c, runs.am4_a1p2k]
+    runs={
+        runs.am4_a1c,
+        runs.am4_a1p2k,
+    }
 )
 am4a2 = Model(
     name='am4a2',
@@ -186,7 +286,10 @@ am4a2 = Model(
     data_in_start_date=2,
     data_in_end_date=11,
     default_date_range=(2, 11),
-    runs=[runs.am4_a2c, runs.am4_a2p2k]
+    runs={
+        runs.am4_a2c,
+        runs.am4_a2p2k,
+    }
 )
 am4c1 = Model(
     name='am4c1',
@@ -202,5 +305,8 @@ am4c1 = Model(
     data_in_start_date=1,
     data_in_end_date=10,
     default_date_range=(1, 10),
-    runs=[runs.am4_c1c, runs.am4_c1p2k]
+    runs={
+        runs.am4_c1c,
+        runs.am4_c1p2k,
+    }
 )
