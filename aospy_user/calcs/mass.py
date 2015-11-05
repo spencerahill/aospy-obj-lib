@@ -7,7 +7,8 @@ from .. import PFULL_STR, TIME_STR
 from ..sphere_harm import SpharmInterface
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
 from .advection import horiz_advec
-from .tendencies import time_tendency_first_to_last
+from .tendencies import (time_tendency_first_to_last,
+                         time_tendency_each_timestep)
 
 
 def horiz_divg(u, v, radius):
@@ -92,12 +93,6 @@ def mass_column_divg_spharm(u, v, radius, dp):
     return horiz_divg_spharm(u_int, v_int, radius)
 
 
-# def mass_column_divg_with_adj(u, v, q, ps, radius, dp):
-#     """Divergence of vertically integrated, mass-adjusted horizontal wind."""
-#     return mass_column_divg(uv_mass_adjusted(u, q, ps, dp),
-#                             uv_mass_adjusted(v, q, ps, dp), radius, dp)
-
-
 def mass_column_budget_lhs(ps, u, v, radius, dp, freq='1M'):
     """Tendency plus flux terms in the column-integrated mass budget.
 
@@ -105,8 +100,9 @@ def mass_column_budget_lhs(ps, u, v, radius, dp, freq='1M'):
     the source term, however artifacts introduced by numerics and other things
     yield a residual.
     """
-    tendency = time_tendency_first_to_last(ps)
-    transport = mass_column_divg(u, v, radius, dp)
+    # tendency = time_tendency_first_to_last(ps, freq=freq)
+    tendency = time_tendency_each_timestep(ps)
+    transport = mass_column_divg_spharm(u, v, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
 
 
@@ -129,13 +125,12 @@ def mass_column_budget_residual(ps, u, v, evap, precip, radius, dp, freq='1M'):
     the source term, however artifacts introduced by numerics and other things
     yield a residual.
     """
-    tendency = time_tendency_first_to_last(ps, freq=freq)
-    tendency[:]=0.0
+    # tendency = time_tendency_first_to_last(ps, freq=freq)
+    tendency = time_tendency_each_timestep(ps)
     transport = mass_column_divg_spharm(u, v, radius, dp)
-    # transport = mass_column_divg(u, v, radius, dp)
     source = mass_column_source(evap, precip)
-    source[:]=0.0
-    return budget_residual(tendency, transport, source, freq=freq)
+    return tendency + transport - source
+    # return budget_residual(tendency, transport, source, freq=freq)
 
 
 def mass_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
@@ -164,6 +159,15 @@ def mass_adjusted(ps, u, v, evap, precip, radius, dp, freq='1M'):
 def mass_column_divg_with_adj(ps, u, v, evap, precip, radius, dp, freq='1M'):
     u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
     return mass_column_divg_spharm(u_adj, v_adj, radius, dp)
+
+
+def mass_column_budget_adj_residual(ps, u, v, evap, precip, radius, dp,
+                                    freq='1M'):
+    tendency = time_tendency_each_timestep(ps)
+    u_adj, v_adj = mass_adjusted(ps, u, v, evap, precip, radius, dp, freq=freq)
+    transport = mass_column_divg_spharm(u_adj, v_adj, radius, dp)
+    source = mass_column_source(evap, precip)
+    return tendency + transport - source
 
 
 def column_flux_divg(arr, u, v, radius, dp):
