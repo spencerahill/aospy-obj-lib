@@ -1,7 +1,7 @@
 """Advection-related quantities."""
 from aospy.constants import grav
 from aospy.utils import to_radians, to_pascal
-from finite_diff import FiniteDiff
+from infinite_diff import FiniteDiff
 import numpy as np
 
 from .. import LAT_STR, PFULL_STR

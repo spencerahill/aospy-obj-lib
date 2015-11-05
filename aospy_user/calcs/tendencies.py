@@ -1,6 +1,6 @@
 """Calculations involved in mass and energy budgets."""
 from aospy.utils import coord_to_new_dataarray
-from finite_diff import FiniteDiff
+from infinite_diff import FiniteDiff
 import numpy as np
 
 from .. import TIME_STR
