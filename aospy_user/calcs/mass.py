@@ -93,6 +93,20 @@ def mass_column_divg_spharm(u, v, radius, dp):
     return horiz_divg_spharm(u_int, v_int, radius)
 
 
+def budget_residual(tendency, transport, source=None, freq='1M'):
+    """Compute residual between tendency and transport terms.
+
+    Resamples transport and source terms to specified frequency, since often
+    tendencies are computed at monthly intervals while the transport is much
+    higher frequencies (e.g. 3- or 6-hourly).
+    """
+    resid = (tendency +
+             transport.resample(freq, TIME_STR, how='mean').dropna(TIME_STR))
+    if source is not None:
+        resid -= source.resample(freq, TIME_STR, how='mean').dropna(TIME_STR)
+    return resid
+
+
 def mass_column_budget_lhs(ps, u, v, radius, dp, freq='1M'):
     """Tendency plus flux terms in the column-integrated mass budget.
 
@@ -217,20 +231,6 @@ def dry_mass_column_divg(u, v, q, radius, dp):
     u_int = integrate((1. - q)*u, dp, PFULL_STR)
     v_int = integrate((1. - q)*v, dp, PFULL_STR)
     return horiz_divg(u_int, v_int, radius)
-
-
-def budget_residual(tendency, transport, source=None, freq='1M'):
-    """Compute residual between tendency and transport terms.
-
-    Resamples transport and source terms to specified frequency, since often
-    tendencies are computed at monthly intervals while the transport is much
-    higher frequencies (e.g. 3- or 6-hourly).
-    """
-    resid = (tendency +
-             transport.resample(freq, TIME_STR, how='mean').dropna(TIME_STR))
-    if source is not None:
-        resid -= source.resample(freq, TIME_STR, how='mean').dropna(TIME_STR)
-    return resid
 
 
 def dry_mass_column_budget_residual(ps, u, v, q, radius, dp, freq='1M'):

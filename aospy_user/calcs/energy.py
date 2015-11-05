@@ -49,33 +49,6 @@ def energy_column_budget_lhs(temp, z, q, q_ice, u, v, ps, dp, radius,
     return budget_residual(tendency, transport, freq=freq)
 
 
-def energy_column_divg_with_adj(temp, z, q, q_ice, ps, u, v, evap,
-                                precip, radius, dp):
-    return column_flux_divg_with_adj(energy(temp, z, q, q_ice, u, v), ps, u, v,
-                                     evap, precip, radius, dp)
-
-
-def energy_column_divg_with_adj2(temp, z, q, q_ice, ps, u, v, evap, precip,
-                                 radius, dp, freq='1M'):
-    """Column flux divergence, with the field defined per unit mass of air."""
-    en = energy(temp, z, q, q_ice, u, v)
-    col_energy_divg = column_flux_divg_with_adj(en, ps, u, v, evap, precip,
-                                                radius, dp)
-    col_mass_divg = mass_column_divg_with_adj(ps, u, v, evap, precip, radius,
-                                              dp, freq=freq)
-    return col_energy_divg - col_mass_divg * int_dp_g(en, dp) / ps
-
-
-def energy_column_divg_with_adj3(temp, z, q, q_ice, ps, u, v, evap, precip,
-                                 radius, dp, freq='1M'):
-    """Column flux divergence, with the field defined per unit mass of air."""
-    en = energy(temp, z, q, q_ice, u, v)
-    col_energy_divg = column_flux_divg(en, u, v, radius, dp)
-    col_mass_divg = mass_column_divg_with_adj(ps, u, v, evap, precip, radius,
-                                              dp, freq=freq)
-    return col_energy_divg - col_mass_divg * int_dp_g(en, dp) / ps
-
-
 def energy_column_budget_residual(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                   olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
                                   shflx, evap, dp, radius):
@@ -87,17 +60,18 @@ def energy_column_budget_residual(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
     return tendency + transport - source
 
 
-def energy_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
-               swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius):
+def uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                         dp, radius):
     """Adjustment to subtract off of u, v to impose column energy balance."""
     residual = energy_column_budget_residual(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
         swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    # Get the residual in terms of its spectral coefficients.
-    # Grab only one level of u, v since residual not defined vertically.
+    # Get the residual in terms of its spectral coefficients.  Grab only one
+    # level of u, v since the residual is not defined vertically.
     sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius,
-                              make_spharmt=True)
+                              make_spharmt=True, squeeze=True)
     resid_spectral = SpharmInterface.prep_for_spharm(residual)
     resid_spectral = sph_int.spharmt.grdtospec(resid_spectral)
 
@@ -112,13 +86,57 @@ def energy_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
     return u_arr / col_energy, v_arr / col_energy
 
 
-def energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
-                    swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius):
+def u_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                        dp, radius):
+    """Adjustment applied to zonal wind to close column energy budget."""
+    u_adj, _ = uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa,
+                                    swup_toa, olr, swup_sfc, swdn_sfc,
+                                    lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                                    radius)
+    return u_adj
+
+
+def v_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                        dp, radius):
+    """Adjustment applied to meridional wind to close column energy budget."""
+    _, v_adj = uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa,
+                                    swup_toa, olr, swup_sfc, swdn_sfc,
+                                    lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                                    radius)
+    return v_adj
+
+
+def uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                       swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                       radius):
     """Horizontal wind components with column energy balance-adjustment."""
-    u_adj, v_adj = energy_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
-                              swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
-                              evap, dp, radius)
+    u_adj, v_adj = uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa,
+                                        swup_toa, olr, swup_sfc, swdn_sfc,
+                                        lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                                        radius)
     return u - u_adj, v - v_adj
+
+
+def u_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                      swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                      radius):
+    """Zonal wind with column energy balance-adjustment applied."""
+    u_adj, _ = uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                  olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                  shflx, evap, dp, radius)
+    return u - u_adj
+
+
+def v_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                      swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
+                      radius):
+    """Meridional wind with column energy balance-adjustment applied."""
+    v_adj, _ = uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                  olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                  shflx, evap, dp, radius)
+    return v - v_adj
 
 
 def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -126,7 +144,7 @@ def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            precip, ps, dp, radius, freq='1M'):
     u_mass_adj, v_mass_adj = mass_adjusted(ps, u, v, evap, precip, radius,
                                            dp, freq=freq)
-    u_en_adj, v_en_adj = energy_adjusted(
+    u_en_adj, v_en_adj = uv_energy_adjusted(
         temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
