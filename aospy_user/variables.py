@@ -1527,7 +1527,7 @@ energy_column_divg = Var(
     name='energy_column_divg',
     domain='atmos',
     description='Column flux divergence of energy.  No mass adjustment.',
-    variables=(temp, hght, sphum, ucomp, vcomp, dp, r_e),
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, dp, r_e),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -1540,8 +1540,9 @@ energy_column_divg_with_adj = Var(
     name='energy_column_divg_with_adj',
     domain='atmos',
     description='Column flux divergence of energy, with mass adjustment.',
-    # variables=(temp, hght, sphum, ucomp, vcomp, ps, dp, r_e),
-    variables=(temp, hght, sphum, ps, ucomp, vcomp, evap, precip, r_e, dp),
+    # variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, dp, r_e),
+    variables=(temp, hght, sphum, ice_wat, ps, ucomp, vcomp, evap, precip,
+               r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -1554,8 +1555,9 @@ energy_column_divg_with_adj2 = Var(
     name='energy_column_divg_with_adj2',
     domain='atmos',
     description='Column flux divergence of energy, with mass adjustment.',
-    # variables=(temp, hght, sphum, ucomp, vcomp, ps, dp, r_e),
-    variables=(temp, hght, sphum, ps, ucomp, vcomp, evap, precip, r_e, dp),
+    # variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, dp, r_e),
+    variables=(temp, hght, sphum, ice_wat, ps, ucomp, vcomp, evap, precip,
+               r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -1568,8 +1570,9 @@ energy_column_divg_with_adj3 = Var(
     name='energy_column_divg_with_adj3',
     domain='atmos',
     description='Column flux divergence of energy, with mass adjustment.',
-    # variables=(temp, hght, sphum, ucomp, vcomp, ps, dp, r_e),
-    variables=(temp, hght, sphum, ps, ucomp, vcomp, evap, precip, r_e, dp),
+    # variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, dp, r_e),
+    variables=(temp, hght, sphum, ice_wat, ps, ucomp, vcomp, evap, precip,
+               r_e, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -1582,12 +1585,57 @@ energy_column_tendency = Var(
     name='energy_column_tendency',
     domain='atmos',
     description='Monthly time-tendency of column integrated energy.',
-    variables=(temp, hght, sphum, ucomp, vcomp, dp),
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, dp),
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=True,
     func=calcs.energy_column_tendency,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_budget_residual = Var(
+    name='energy_column_budget_residual',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
+               r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_budget_residual,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_divg_adj = Var(
+    name='energy_column_divg_adj',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_adj,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_budget_adj_residual = Var(
+    name='energy_column_budget_adj_residual',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_budget_adj_residual,
     units=units.W_m2,
     colormap='RdBu_r'
 )
@@ -1694,6 +1742,7 @@ mass_column_tendency = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.time_tendency_first_to_last,
+    # func=calcs.time_tendency_each_timestep,
     units=units.Pa_s1_mass,
     colormap='RdBu_r'
 )
@@ -1739,6 +1788,21 @@ mass_column_budget_residual = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.mass_column_budget_residual,
+    units=units.Pa_s1_mass,
+    colormap='RdBu_r'
+)
+mass_column_budget_adj_residual = Var(
+    name='mass_column_budget_adj_residual',
+    domain='atmos',
+    description=(
+        'Residual in column mass budget with imposed mass balance adjustment.'
+    ),
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mass_column_budget_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu_r'
 )
