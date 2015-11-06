@@ -1595,6 +1595,36 @@ energy_column_budget_adj_residual = Var(
     units=units.W_m2,
     colormap='RdBu_r'
 )
+energy_ps_horiz_advec = Var(
+    name='energy_ps_horiz_advec',
+    domain='atmos',
+    description='Advection of surface energy times surface pressure',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_sfc_ps_advec,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_horiz_advec_const_p_from_eta = Var(
+    name='energy_horiz_advec_const_p_from_eta',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec_const_p_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu_r'
+)
 mass_column = Var(
     name='mass_column',
     math_str=r'$p_s/g$',
@@ -1918,7 +1948,8 @@ mse_horiz_advec = Var(
     math_str=r'$\mathbf{v}\cdot\nabla h$',
     domain='atmos',
     description='Horizontal advection of moist static energy.',
-    variables=(temp, hght, sphum, ucomp, vcomp, r_e),
+    # variables=(temp, hght, sphum, ucomp, vcomp, r_e),
+    variables=(temp, hght, sphum, ucomp, vcomp, ps, r_e, bk, pk),
     def_time=True,
     def_vert=True,
     def_lat=True,

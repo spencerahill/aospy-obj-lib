@@ -1,10 +1,13 @@
 """Energy budget-related fields"""
+from aospy.constants import grav
 from aospy.utils import int_dp_g
 
+from .. import PFULL_STR
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
-                        vert_advec_upwind, total_advec_upwind)
+                        vert_advec_upwind, total_advec_upwind,
+                        horiz_advec_const_p_from_eta)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_column_budget_adjustment)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
@@ -109,17 +112,17 @@ def u_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     u_adj, _ = uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                   olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
                                   shflx, evap, dp, radius)
-    return u - u_adj
+    return u_adj
 
 
 def v_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                       swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
                       radius):
     """Meridional wind with column energy balance-adjustment applied."""
-    v_adj, _ = uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+    _, v_adj = uv_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                   olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
                                   shflx, evap, dp, radius)
-    return v - v_adj
+    return v_adj
 
 
 def uv_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -145,7 +148,7 @@ def u_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     u_adj, _ = uv_mass_energy_adjustment(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
-        )
+    )
     return u_adj
 
 
@@ -164,7 +167,7 @@ def uv_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                             swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
                             evap, precip, ps, dp, radius):
     """Horizontal wind components with column energy balance-adjustment."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
+    u_adj, v_adj = uv_mass_energy_adjustment(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
@@ -179,31 +182,28 @@ def u_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    return u - u_adj
+    return u_adj
 
 
 def v_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                            precip, ps, dp, radius):
     """Meridional wind with column energy balance-adjustment applied."""
-    v_adj, _ = uv_mass_energy_adjusted(
+    _, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    return v - v_adj
+    return v_adj
 
 
 def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                            precip, ps, dp, radius, freq='1M'):
-    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
-                                              dp, freq=freq)
-    u_en_adj, v_en_adj = uv_energy_adjusted(
-        temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
-        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    return energy_column_divg(temp, z, q, q_ice, u_en_adj,
-                              v_en_adj, dp, radius)
+    return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
 
 
 def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
@@ -214,12 +214,45 @@ def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     tendency = time_tendency_each_timestep(int_dp_g(en, dp))
     transport = energy_column_divg_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq='1M'
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
     )
     source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                                   lwup_sfc, lwdn_sfc, shflx, evap)
 
     return tendency + transport - source
+
+
+def energy_horiz_advec_const_p_from_eta(temp, z, q, q_ice, u, v, swdn_toa,
+                                        swup_toa, olr, swup_sfc, swdn_sfc,
+                                        lwup_sfc, lwdn_sfc, shflx, evap,
+                                        precip, ps, dp, radius, bk, pk,
+                                        freq='1M'):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+                        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+                        precip, ps, dp, radius):
+    """Advection of energy times surface pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    sfc_sel = {PFULL_STR: en[PFULL_STR].max()}
+    def sel(arr):
+        return arr.sel(**sfc_sel).drop(PFULL_STR)
+
+    en = sel(en)
+    u_adj = sel(u_adj)
+    v_adj = sel(v_adj)
+    return horiz_advec(ps, u_adj*en, v_adj*en, radius) / grav.value
 
 
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):

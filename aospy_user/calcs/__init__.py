@@ -143,6 +143,8 @@ from .energy import (
     v_mass_energy_adjusted,
     energy_column_divg_adj,
     energy_column_budget_adj_residual,
+    energy_sfc_ps_advec,
+    energy_horiz_advec_const_p_from_eta,
     mse_horiz_flux_divg,
     mse_horiz_advec,
     mse_times_horiz_divg,
