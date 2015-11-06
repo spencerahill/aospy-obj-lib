@@ -1,11 +1,10 @@
 """Advection-related quantities."""
-from aospy.constants import grav
 from aospy.utils import to_radians, to_pascal
 from infinite_diff import FiniteDiff
 import numpy as np
 
-from .. import LAT_STR, PFULL_STR
-from .numerics import (fwd_diff1, latlon_deriv_prefactor, upwind_scheme,
+from .. import LAT_STR
+from .numerics import (latlon_deriv_prefactor, upwind_scheme,
                        wraparound_lon, d_dx_from_latlon, d_dy_from_lat,
                        d_dp_from_p, d_dx_at_const_p_from_eta,
                        d_dy_at_const_p_from_eta, d_dp_from_eta)
@@ -60,14 +59,6 @@ def merid_advec_upwind(arr, v, radius, vec_field=False):
         prefactor = prefactor.T
     # Create arrays holding positive and negative values, each with forward
     # differencing at south pole and backward differencing at north pole.
-    # df_fwd_except_np = fwd_diff2(f, lat)
-    # df_bwd_except_sp = fwd_diff2(f[::-1], lat[::-1])[::-1]
-    # df_fwd_adj_np = fwd_diff1(f[-2:], lat[-2:])
-    # df_bwd_adj_sp = fwd_diff1(f[1::-1], lat[1::-1])[::-1]
-    # df_fwd = np.ma.concatenate((df_fwd_except_np, df_fwd_adj_np,
-                                # df_bwd_except_sp[-1:]), axis=0)
-    # df_bwd = np.ma.concatenate((df_fwd_except_np[:1], df_bwd_adj_sp,
-                                # df_bwd_except_sp), axis=0)
     df_fwd_except_np = FiniteDiff.fwd_diff1(arr, lat)
     df_bwd_except_sp = FiniteDiff.fwd_diff1(arr[::-1], lat[::-1])[::-1]
     df_fwd = np.ma.concatenate((df_fwd_except_np,
@@ -135,11 +126,3 @@ def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk,
     return (horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
                                          vec_field=vec_field) +
             vert_advec(arr, omega, p))
-
-
-def horiz_advec_sfc_pressure(ps, u, v, radius):
-    """Horizontal advection of surface pressure."""
-    # Pressure data indexing is surface to TOA; sigma data is opposite.
-    u_sfc = u.isel(**{PFULL_STR: 0})
-    v_sfc = v.isel(**{PFULL_STR: 0})
-    return horiz_advec(ps, u_sfc, v_sfc, radius) / grav.value
