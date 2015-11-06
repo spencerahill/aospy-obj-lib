@@ -68,7 +68,7 @@ def uv_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
         swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    col_energy = int_dp_g(energy(temp, z, q, q_ice, u, v), dp)
+    col_energy = energy_column(temp, z, q, q_ice, u, v, dp)
     return uv_column_budget_adjustment(u, v, residual, col_energy, radius)
 
 
@@ -131,14 +131,11 @@ def uv_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     """Horiz wind adjustments to impose column mass and energy balance."""
     u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
                                               dp, freq=freq)
-    residual = energy_column_budget_residual(
+    u_en_adj, v_en_adj = uv_energy_adjustment(
         temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    col_energy = int_dp_g(energy(temp, z, q, q_ice, u_mass_adj, v_mass_adj),
-                          dp)
-    return uv_column_budget_adjustment(u_mass_adj, v_mass_adj, residual,
-                                       col_energy, radius)
+    return u_en_adj, v_en_adj
 
 
 def u_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -199,11 +196,14 @@ def v_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
 def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                            precip, ps, dp, radius, freq='1M'):
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
+                                              dp)
+    u_en_adj, v_en_adj = uv_energy_adjusted(
+        temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
+        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
+    return energy_column_divg(temp, z, q, q_ice, u_en_adj,
+                              v_en_adj, dp, radius)
 
 
 def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
