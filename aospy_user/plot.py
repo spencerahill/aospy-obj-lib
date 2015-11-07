@@ -1,14 +1,12 @@
 #! /usr/bin/env python
 """Script that interfaces w/ aospy.plotting to create multi-panel plots."""
-import matplotlib
-
 import aospy
-import aospy_user
-from aospy_user import projs as p
+from aospy_user import projs
 from aospy_user import models as m
 from aospy_user import runs as r
 from aospy_user import variables as v
-from aospy_user import regions as reg
+from aospy_user import regions
+import matplotlib
 
 
 def plot(plot_params):
@@ -34,8 +32,8 @@ def plot(plot_params):
         x_dim='lon',
         y_dim='lat',
 
-        min_cntr=-1.9e1,
-        max_cntr=1.9e1,
+        min_cntr=-1.9e2,
+        max_cntr=1.9e2,
         num_cntr=19,
         # min_cntr=[[-3.75, 0]],# False]],
         # max_cntr=[[3.75, 20]],# False]],
@@ -44,8 +42,10 @@ def plot(plot_params):
         contour_labels=False,
         # contour_labels=[[False, True]],# False]],
         colormap='default',
+        # colormap='RdBu',
         # colormap=[['default', False]],# False]],
         do_colorbar='all',      # 'all' 'column' 'row' False True
+        # do_colorbar=False,
         # do_colorbar=[['all', False]],# False]],
         cbar_ax_lim=(0.11, 0.08, 0.8, 0.02),
         cbar_ticks=False,
@@ -61,31 +61,39 @@ def plot(plot_params):
         dtype_in_time='inst',
         # dtype_in_time=['ts'] + ['inst']*2,
         # dtype_in_vert=False,
-        dtype_in_vert='sigma',
         # dtype_in_vert='pressure',
+        dtype_in_vert='sigma',
+        # dtype_in_vert=[False] + ['sigma']*1,
         # dtype_in_vert=[False]*2 + [['pressure', False]]*4,
         dtype_out_time='av',
         # dtype_out_time='reg.ts',
-        dtype_out_vert=False,
-        # dtype_out_vert='vert_int',
-        # dtype_out_vert=[False]*2 + [['vert_int', False]]*4,
+        # dtype_out_time=['av', 'time-mean.av', 'eddy.av'],
+        # dtype_out_vert=False,
+        dtype_out_vert='vert_int',
+        # dtype_out_vert=[False]*3 + ['vert_int'],
         # level=700,
         level=False,
         # date_range='default',
         # date_range=('1983-01-01', '2012-12-31'),
-        # date_range=('1983-01-01', '1983-12-31'),
-        date_range=('1983-01-01', '1984-12-31'),
+        date_range=('1982-01-01', '1982-12-31'),
+        # date_range=('1983-01-01', '1984-12-31'),
 
-        # fig_title=False,
+        fig_title=False,
+        # fig_title=r'AM2.1 1983-1984 JAS column dry mass budget terms',
+        # fig_title=r'AM2.1 1983-1984 JAS column moisture budget terms',
         # fig_title=r'AM2.1 1983-1984 JAS column mass budget terms',
-        fig_title=r'AM2.1 1983-1984 JAS column mass budget residual',
         # fig_title=r'Control JAS MSE budget terms',
-        # ax_title=False,
-        ax_title=['Without mass adjustment', 'With mass adjustment'],
+        ax_title=False,
+        # ax_title=['Without mass adjustment', 'With mass adjustment'],
         # ax_title=['AM2.1', 'c48-HiRAM'] + ['']*4,
-        # ax_title=[r'Tendency term',
-                  # r'Transport term',
-                  # r'Residual (Tendency + transport)'],
+        # ax_title=[
+            # r'Source term',
+            # r'Tendency term',
+            # r'Transport term, no adjustment',
+            # r'Transport term, mass-adjusted',
+            # r'Tendency + transport',
+            # r'Tendency + mass-adjusted transport',
+        # ],
         ax_left_label=False,
         # ax_left_label=[r'$F_\mathrm{net}$', '',
                        # r'$\{\omega\frac{\partial h}{\partial p}\}$', '',
@@ -129,7 +137,7 @@ def plot(plot_params):
 
         # lat_lim=(-5, 35),
         # lat_lim=(12.5, 50),
-        lat_lim=(-50, 50),
+        lat_lim=(-60, 60),
         lat_ticks=False,
         lat_ticklabels=False,
         lat_label=False,
@@ -238,12 +246,12 @@ class MainParams(object):
         pass
 
     def prep_data(self):
-        proj = aospy_user.to_proj(self.proj)
-        model = aospy_user.to_model(self.model, proj)
-        run = aospy_user.to_run(self.run, model, proj)
-        var = aospy_user.to_var(self.var)
-        region = aospy_user.to_region(self.region, proj=proj)
-        proj, model, var, region = [aospy_user.to_iterable(obj)
+        proj = aospy.to_proj(self.proj, projs)
+        model = aospy.to_model(self.model, proj, projs)
+        run = aospy.to_run(self.run, model, proj, projs)
+        var = aospy.to_var(self.var, v)
+        region = aospy.to_region(self.region, regions, proj=proj)
+        proj, model, var, region = [aospy.to_iterable(obj)
                                     for obj in (proj, model, var, region)]
         self.proj = proj
         self.model = model
@@ -260,8 +268,8 @@ def main(main_params):
 
 if __name__ == '__main__':
     params = MainParams()
-    # params.proj = p.obs
-    params.proj = p.aero_3agcm
+    # params.proj = projs.obs
+    params.proj = projs.aero_3agcm
     params.model = m.am2
     # params.model = [m.am2, m.hiram_c48]*3
     # params.model = [[m.am2, m.am3, m.hiram, m.hiram_c48]]
@@ -273,7 +281,8 @@ if __name__ == '__main__':
     # params.run = [[dam2, r.am2_reyoi_p2, dam2]]
     # params.run = [[dam2, dam3, dhir, dc48]]
     # params.run = [r.am2_reyoi_cont, r.hiram_c48_0]*3
-    params.run = r.am2_reyoi_cont
+    # params.run = r.am2_reyoi_cont
+    params.run = [r.am2_hurrell_cont, r.am2_reyoi_cont]
     # params.run = [[dam2, r.am2_reyoi_cont],
                   # [dam3, r.am3_hc],
                   # [dhir, r.hiram_cont],
@@ -284,16 +293,14 @@ if __name__ == '__main__':
                   # [dc48, r.hiram_c48_0, dc48]]
 
     params.ens_mem = False
-    # params.var = v.u_mass_adjustment
-    params.var = [  # v.mass_budget_tendency_term,
-                    # v.mass_budget_transport_term,
-        v.mass_budget_residual,
-        v.mass_budget_with_adj_residual]
-    # params.var = [v.q_horiz_advec_const_p_from_eta,
-                  # v.q_horiz_advec]
-    # params.var = [v.divg_of_vert_int_horiz_flow,
-                  # v.divg_of_vert_int_mass_adj_horiz_flow]
-                  # v.ps_monthly_tendency]
+    params.var = v.energy_horiz_advec_from_eta
+    # params.var = [v.energy_column_source,
+    #               v.energy_column_divg_adj,
+    #               v.energy_ps_horiz_advec,
+    #               v.energy_horiz_advec_const_p_from_eta,]
+    # params.var = [v.mass_column_source,
+    #               v.mass_column_divg_adj,
+    #               v.mass_column_budget_adj_residual]
     # params.var = ([v.column_energy]*2 +
                   # [v.mse_vert_advec_upwind]*2 +
                   # [v.mse_horiz_advec_upwind]*2)
@@ -309,6 +316,6 @@ if __name__ == '__main__':
     # params.var = [[[v.precip, v.cre_net]]]
 
     params.region = False
-    # params.region = reg.sahel
+    # params.region = regions.sahel
 
     fig = main(params)
