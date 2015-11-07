@@ -183,52 +183,33 @@ if __name__ == '__main__':
     mp = MainParams()
     mp.proj = 'aero_3agcm'
     mp.model = 'am2'
-    mp.run = ['reyoi_cont']
+    mp.run = ['hurrell_cont']
     mp.ens_mem = [False]
-    mp.var = [
-        # 'energy_column_tendency',
-        # 'energy_column_divg',
-        # 'energy_column_divg_with_adj',
-        # 'energy_column_divg_with_adj2',
-        'energy_column_source',
-        # 'mass_column_tendency',
-        # 'mass_column_divg',
-        # 'mass_column_divg_with_adj',
-        # 'mass_column_source',
-        # 'mass_column_budget_lhs',
-        # 'mass_column_budget_with_adj_lhs',
-        # 'mass_column_budget_residual',
-        # 'moisture_column_source',
-        # 'moisture_column_tendency',
-        # 'moisture_column_divg'
-        # 'moisture_column_divg_with_adj'
-        # 'moisture_column_budget_lhs',
-        # 'moisture_column_budget_with_adj_lhs',
-        # 'moisture_column_budget_with_adj2_lhs',
-        # 'moisture_column_budget_residual',
-        # 'dry_mass_column_tendency',
-        # 'dry_mass_column_divg',
-        # 'dry_mass_column_divg_with_adj',
-        # 'dry_mass_column_budget_residual'
-        # 'dry_mass_column_budget_with_adj_residual'
-    ]
-    # mp.var = ['p_minus_e']
+    mp.var = ['energy_column_source']
     # mp.date_range = [('1983-01-01', '2012-12-31')]
-    mp.date_range = [('1983-01-01', '1984-12-31')]
+    mp.date_range = [('1982-01-01', '1982-12-31')]
+    # mp.date_range = [('1983-01-01', '1983-12-31')]
     # mp.date_range = ['default']
     mp.region = 'all'
-    mp.intvl_in = ['monthly']
-    # mp.intvl_in = ['3hr']
+    # mp.intvl_in = ['monthly']
+    mp.intvl_in = ['3hr']
     mp.intvl_out = ['jas']
-    mp.dtype_in_time = ['ts']
-    # mp.dtype_in_time = ['inst']
-    mp.dtype_in_vert = [False]
-    # mp.dtype_in_vert = ['sigma']
+    # mp.dtype_in_time = ['ts']
+    mp.dtype_in_time = ['inst']
+    # mp.dtype_in_vert = [False]
+    mp.dtype_in_vert = ['sigma']
     # mp.dtype_in_vert = ['pressure']
     # mp.dtype_out_time = [('av', 'eddy.av', 'eddy.reg.av', 'reg.av')]
-    mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
-    mp.dtype_out_vert = [False]
-    # mp.dtype_out_vert = ['vert_int']
+    # mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
+    mp.dtype_out_time = [(
+        'av', 'std', 'reg.av', 'reg.ts', 'reg.std', 'eddy.av', 'eddy.std',
+        'eddy.reg.av', 'eddy.reg.ts', 'eddy.reg.std', 'time-mean.av',
+        'time-mean.std', 'time-mean.reg.av', 'time-mean.reg.std',
+        'time-mean.reg.ts'
+    )]
+    # mp.dtype_out_vert = [False]
+    mp.dtype_out_vert = ['vert_int']
+    # mp.dtype_out_vert = [False, 'vert_int']
     mp.level = [False]
     mp.chunk_len = [False]
     mp.verbose = [True]
