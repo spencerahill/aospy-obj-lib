@@ -164,11 +164,13 @@ def uv_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                             swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
                             evap, precip, ps, dp, radius):
     """Horizontal wind components with column energy balance-adjustment."""
-    u_adj, v_adj = uv_mass_energy_adjustment(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
+                                              dp)
+    u_en_adj, v_en_adj = uv_energy_adjusted(
+        temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
+        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
     )
-    return u - u_adj, v - v_adj
+    return u_en_adj, v_en_adj
 
 
 def u_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -222,15 +224,14 @@ def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     return tendency + transport - source
 
 
-def energy_horiz_advec_const_p_from_eta(temp, z, q, q_ice, u, v, swdn_toa,
-                                        swup_toa, olr, swup_sfc, swdn_sfc,
-                                        lwup_sfc, lwdn_sfc, shflx, evap,
-                                        precip, ps, dp, radius, bk, pk,
-                                        freq='1M'):
+def energy_horiz_advec_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                shflx, evap, precip, ps, dp, radius, bk, pk,
+                                freq='1M'):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
     return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
@@ -246,6 +247,7 @@ def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
     sfc_sel = {PFULL_STR: en[PFULL_STR].max()}
+
     def sel(arr):
         return arr.sel(**sfc_sel).drop(PFULL_STR)
 

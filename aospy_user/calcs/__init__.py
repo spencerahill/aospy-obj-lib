@@ -20,8 +20,6 @@ from .numerics import (
     d_dy_from_lat,
     d_dx_at_const_p_from_eta,
     d_dy_at_const_p_from_eta,
-    d_dx_of_vert_int,
-    d_dy_of_vert_int,
     d_dp_from_p,
     d_dp_from_eta
 )
@@ -75,7 +73,7 @@ from .advection import (
     horiz_advec_const_p_from_eta,
     vert_advec_from_eta,
     total_advec_from_eta,
-    horiz_advec_sfc_pressure,
+    horiz_advec_spharm,
 )
 from .mass import (
     horiz_divg,
@@ -144,7 +142,7 @@ from .energy import (
     energy_column_divg_adj,
     energy_column_budget_adj_residual,
     energy_sfc_ps_advec,
-    energy_horiz_advec_const_p_from_eta,
+    energy_horiz_advec_from_eta,
     mse_horiz_flux_divg,
     mse_horiz_advec,
     mse_times_horiz_divg,

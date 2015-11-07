@@ -1057,30 +1057,6 @@ dse_horiz_advec_divg_sum = Var(
     func=calcs.dse_horiz_advec_divg_sum,
     units=units.J_kg1_s1
 )
-d_dx_of_vert_int_u = Var(
-    name='d_dx_of_vert_int_u',
-    domain='atmos',
-    description='',
-    variables=(ucomp, r_e, dp),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.d_dx_of_vert_int,
-    units=units.kg_m2_s1_mass
-)
-d_dy_of_vert_int_v = Var(
-    name='d_dy_of_vert_int_v',
-    domain='atmos',
-    description='',
-    variables=(vcomp, r_e, dp),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.d_dy_of_vert_int,
-    units=units.kg_m2_s1_mass
-)
 du_dx = Var(
     name='du_dx',
     domain='atmos',
@@ -1408,19 +1384,6 @@ horiz_divg_mass_adj = Var(
     units=units.s1,
     colormap='RdBu'
 )
-horiz_advec_sfc_pressure = Var(
-    name='horiz_advec_sfc_pressure',
-    domain='atmos',
-    description='',
-    variables=(ps, ucomp, vcomp, r_e, p),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.horiz_advec_sfc_pressure,
-    units=units.s1,
-    colormap='RdBu'
-)
 horiz_divg_vert_int_max = Var(
     name='horiz_divg_vert_int_max',
     domain='atmos',
@@ -1608,12 +1571,12 @@ energy_ps_horiz_advec = Var(
     def_lon=True,
     func=calcs.energy_sfc_ps_advec,
     units=units.W_m2,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
-energy_horiz_advec_const_p_from_eta = Var(
-    name='energy_horiz_advec_const_p_from_eta',
+energy_horiz_advec_from_eta = Var(
+    name='energy_horiz_advec_from_eta',
     domain='atmos',
-    description='Residual in column-integrated energy budget.',
+    description='Horizontal advection of energy from model coordinates',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
@@ -1621,9 +1584,9 @@ energy_horiz_advec_const_p_from_eta = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    func=calcs.energy_horiz_advec_const_p_from_eta,
+    func=calcs.energy_horiz_advec_from_eta,
     units=units.J_kg1_s1,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
 mass_column = Var(
     name='mass_column',

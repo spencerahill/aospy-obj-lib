@@ -1,6 +1,7 @@
 """Finite differencing and other numerical methods."""
-from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, int_dp_g,
-                         pfull_from_ps, to_pfull_from_phalf, to_radians)
+from animal_spharm import SpharmInterface
+from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
+                         to_pfull_from_phalf, to_radians)
 from infinite_diff import FiniteDiff
 import numpy as np
 import xray
@@ -103,14 +104,6 @@ def d_dy_from_lat(arr, radius, vec_field=False):
     return prefactor*darr_dy
 
 
-def d_dx_of_vert_int(arr, radius, dp):
-    return d_dx_from_latlon(int_dp_g(arr, dp), radius)
-
-
-def d_dy_of_vert_int(arr, radius, dp):
-    return d_dy_from_lat(int_dp_g(arr, dp), radius, vec_field=True)
-
-
 def d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk):
     """d/dx at constant pressure of `arr`.
 
@@ -158,3 +151,32 @@ def d_dp_from_eta(arr, ps, bk, pk):
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
     return (FiniteDiff.cen_diff(arr, PFULL_STR, do_edges_one_sided=True) /
             FiniteDiff.cen_diff(pfull, PFULL_STR, do_edges_one_sided=True))
+
+
+def horiz_gradient_spharm(arr, radius):
+    """Horizontal gradient computed spectrally using spherical harmonics."""
+    n_lat, n_lon = arr[LAT_STR].size, arr[LON_STR].size
+    sph = SpharmInterface(n_lat=n_lat, n_lon=n_lon, rsphere=radius,
+                          make_spharmt=True)
+    d_dx, d_dy = (sph.spharmt.getgrad(sph.spharmt.grdtospec(
+        sph.prep_for_spharm(arr)
+    )))
+    return sph.to_xray(d_dx, arr_orig=arr), sph.to_xray(d_dy, arr_orig=arr)
+
+
+def horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):
+    """d/dy at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    pfull_coord = arr[PFULL_STR]
+    d_dx_const_eta, d_dy_const_eta = horiz_gradient_spharm(arr, radius)
+    darr_deta = d_deta_from_pfull(arr)
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    d_dx_ps, d_dy_ps = horiz_gradient_spharm(ps, radius)
+    return (d_dx_const_eta + (darr_deta * bk_at_pfull * d_dx_ps /
+                              (da_deta + db_deta*ps)),
+            d_dy_const_eta + (darr_deta * bk_at_pfull * d_dy_ps /
+                              (da_deta + db_deta*ps)))

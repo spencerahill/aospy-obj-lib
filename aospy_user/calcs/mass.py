@@ -22,8 +22,7 @@ def horiz_divg(u, v, radius):
 
 
 def horiz_divg_spharm(u, v, radius):
-    sph_int = SpharmInterface(u, v, rsphere=radius)
-    sph_int.make_vectorwind()
+    sph_int = SpharmInterface(u, v, rsphere=radius, make_vectorwind=True)
     divg = sph_int.vectorwind.divergence()
     return sph_int.to_xray(divg)
 
@@ -209,8 +208,7 @@ def column_flux_divg(arr, u, v, radius, dp):
     return horiz_divg_spharm(int_dp_g(arr*u, dp), int_dp_g(arr*v, dp), radius)
 
 
-def column_flux_divg_adj(arr, ps, u, v, evap, precip, radius, dp,
-                              freq='1M'):
+def column_flux_divg_adj(arr, ps, u, v, evap, precip, radius, dp, freq='1M'):
     """Column flux divergence, with the field defined per unit mass of air."""
     u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
                                     freq=freq)
