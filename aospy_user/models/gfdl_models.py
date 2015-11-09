@@ -6,17 +6,8 @@ am2 = Model(
     grid_file_paths=(
         ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos/atmos.static.nc'),
-        # ['/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
-         # 'atmos/ts/monthly/1yr/atmos.{:4d}01-{:4d}12.'
-         # 'ucomp.nc'.format(n, n) for n in range(1982, 2013)],
-        # ('/archive/Yi.Ming/siena_201203/m45_am2p14_1990/gfdl.ncrc2-intel-prod/'
-         # 'pp/atmos/ts/monthly/16yr/atmos.198301-199812.temp.nc'),
-        # ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
-         # 'pp/atmos_level/atmos_level.static.nc'),
         ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
-         'pp/atmos_level/ts/monthly/1yr/atmos_level.198201-198212.temp.nc'),
-        # ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
-         # 'pp/atmos_level/ts/monthly/1yr/atmos_level.198201-198212.hght.nc')
+         'pp/atmos_level/ts/monthly/30yr/atmos_level.198301-201212.temp.nc'),
     ),
     data_in_dur=1,
     data_in_start_date=1982,

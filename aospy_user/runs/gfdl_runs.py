@@ -139,7 +139,7 @@ am2_reyoi_cont = Run(
         '/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
     ),
     data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -284,8 +284,8 @@ am2_reyoi_p2 = Run(
     name='reyoi+2K',
     description='',
     data_in_direc='/archive/Spencer.Hill/am2/am2clim_reyoi+2K/gfdl.ncrc2-default-prod/pp/',
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -409,9 +409,10 @@ am2_cld_lock_p2 = Run(
 am2_hurrell_cont = Run(
     name='hurrell_cont',
     description='',
-    data_in_direc='/archive/Spencer.Hill/am2/am2clim_hurrell/' + \
-             'gfdl.ncrc2-default-prod/pp/',
-    data_in_dur=1,
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_hurrell/gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -421,7 +422,7 @@ am2_hurrell_p2 = Run(
     description='',
     data_in_direc='/archive/Spencer.Hill/am2/am2clim_hurrell+2K/' + \
              'gfdl.ncrc2-default-prod/pp/',
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
