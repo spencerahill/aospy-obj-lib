@@ -75,15 +75,15 @@ def mass_column_source(evap, precip):
 
 def mass_column_divg(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
-    u_int = integrate(u, dp, PFULL_STR)
-    v_int = integrate(v, dp, PFULL_STR)
+    u_int = integrate(u, dp, is_pressure=True)
+    v_int = integrate(v, dp, is_pressure=True)
     return horiz_divg(u_int, v_int, radius)
 
 
 def mass_column_divg_spharm(u, v, radius, dp):
     """Horizontal divergence of vertically integrated flow."""
-    u_int = integrate(u, dp, PFULL_STR)
-    v_int = integrate(v, dp, PFULL_STR)
+    u_int = integrate(u, dp, is_pressure=True)
+    v_int = integrate(v, dp, is_pressure=True)
     return horiz_divg_spharm(u_int, v_int, radius)
 
 
@@ -291,8 +291,8 @@ def dry_mass_column_divg(u, v, q, radius, dp):
 
     E.g. Trenberth 1991, Eq. 9
     """
-    u_int = integrate((1. - q)*u, dp, PFULL_STR)
-    v_int = integrate((1. - q)*v, dp, PFULL_STR)
+    u_int = integrate((1. - q)*u, dp, is_pressure=True)
+    v_int = integrate((1. - q)*v, dp, is_pressure=True)
     return horiz_divg(u_int, v_int, radius)
 
 
@@ -314,8 +314,10 @@ def dry_mass_column_divg_with_adj(u, v, q, ps, radius, dp):
     Based on Trenberth 1991 J. Climate, but in the limit that the mass
     transport term is much larger magnitude than the tendency term.
     """
-    u_int = integrate((1 - q)*uv_mass_adjusted(u, q, ps, dp), dp, PFULL_STR)
-    v_int = integrate((1 - q)*uv_mass_adjusted(v, q, ps, dp), dp, PFULL_STR)
+    u_int = integrate((1 - q)*uv_mass_adjusted(u, q, ps, dp), dp,
+                      is_pressure=True)
+    v_int = integrate((1 - q)*uv_mass_adjusted(v, q, ps, dp), dp,
+                      is_pressure=True)
     return horiz_divg(u_int, v_int, radius)
 
 

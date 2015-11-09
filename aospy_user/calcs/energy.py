@@ -1,8 +1,7 @@
 """Energy budget-related fields"""
 from aospy.constants import grav
-from aospy.utils import int_dp_g
+from aospy.utils import int_dp_g, vert_coord_name
 
-from .. import PFULL_STR
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
@@ -276,10 +275,11 @@ def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    sfc_sel = {PFULL_STR: en[PFULL_STR].max()}
+    p_str = vert_coord_name(temp)
 
     def sel(arr):
-        return arr.sel(**sfc_sel).drop(PFULL_STR)
+        sfc_sel = {p_str: en[p_str].max()}
+        return arr.sel(**sfc_sel).drop(p_str)
 
     en = sel(en)
     u_adj = sel(u_adj)
