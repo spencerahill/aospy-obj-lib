@@ -1,5 +1,5 @@
 from aospy.units import Units
-from aospy.constants import c_p, seconds_in_day
+from aospy.constants import c_p, grav, seconds_in_day
 
 
 unitless = Units(units='')
@@ -22,12 +22,20 @@ W = Units(
 s = Units(
     units=r's',
     plot_units=r'day',
-    plot_units_conv=1. / seconds_in_day.value
+    plot_units_conv=1. / seconds_in_day.value,
 )
 s1 = Units(
     units=r's$^{-1}$',
     plot_units=r'day$^{-1}$',
     plot_units_conv=seconds_in_day.value,
+)
+s1_mass = Units(
+    units=r's$^{-1}$',
+    plot_units=r'day$^{-1}$',
+    plot_units_conv=seconds_in_day.value,
+    vert_int_plot_units=r'hPa month$^{-1}$',
+    vert_int_plot_units_conv=(grav.value * seconds_in_day.value *
+                              (365. / 12.) / 100.)
 )
 s1_spec_mass = Units(
     units=r's$^{-1}$',

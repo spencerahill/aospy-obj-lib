@@ -1375,13 +1375,39 @@ horiz_divg_mass_adj = Var(
     name='horiz_divg_mass_adj',
     domain='atmos',
     description='',
-    variables=(ucomp, vcomp, sphum, ps, r_e, dp, p),
+    variables=(ucomp, vcomp, evap, precip, ps, r_e, dp),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.horiz_divg_mass_adj,
-    units=units.s1,
+    units=units.s1_mass,
+    colormap='RdBu'
+)
+horiz_divg_mass_adj_spharm = Var(
+    name='horiz_divg_mass_adj_spharm',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, evap, precip, ps, r_e, dp),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_divg_mass_adj_spharm,
+    units=units.s1_mass,
+    colormap='RdBu'
+)
+horiz_divg_mass_adj_from_eta = Var(
+    name='horiz_divg_mass_adj_from_eta',
+    domain='atmos',
+    description='',
+    variables=(ucomp, vcomp, evap, precip, ps, r_e, dp, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.horiz_divg_mass_adj_from_eta,
+    units=units.s1_mass,
     colormap='RdBu'
 )
 horiz_divg_vert_int_max = Var(
@@ -1585,6 +1611,48 @@ energy_horiz_advec_from_eta = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_horiz_advec_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_horiz_divg_from_eta = Var(
+    name='energy_horiz_divg_from_eta',
+    domain='atmos',
+    description='Energy times horizontal divergence from model coordinates',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_divg_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_column_divg_divergent_component = Var(
+    name='energy_column_divg_divergent_component',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_divergent_component,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+energy_vert_advec_from_eta = Var(
+    name='energy_vert_advec_from_eta',
+    domain='atmos',
+    description='Horizontal advection of energy from model coordinates',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec_from_eta,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
@@ -2129,6 +2197,19 @@ prec_conv_frac = Var(
     def_lon=True,
     func=calcs.prec_conv_frac,
     units=units.unitless
+)
+ps_horiz_advec = Var(
+    name='ps_horiz_advec',
+    domain='atmos',
+    description='Horizontal advection of surface pressure',
+    variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.ps_horiz_advec,
+    units=units.Pa_s1_mass,
+    colormap='RdBu'
 )
 q_zonal_advec = Var(
     name='q_zonal_advec',

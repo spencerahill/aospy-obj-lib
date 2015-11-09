@@ -7,9 +7,9 @@ from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind,
-                        horiz_advec_const_p_from_eta)
+                        horiz_advec_const_p_from_eta, d_dp_from_eta)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
-                   uv_column_budget_adjustment)
+                   uv_column_budget_adjustment, horiz_divg_from_eta)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -235,6 +235,36 @@ def energy_horiz_advec_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
     return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_vert_advec_from_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
+    """Horizontal advection of energy at constant pressure."""
+    return omega*d_dp_from_eta(energy(temp, z, q, q_ice, u, v), ps, bk, pk)
+
+
+def energy_horiz_divg_from_eta(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
+                               radius, bk, pk, freq='1M'):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
+                                    freq=freq)
+    return (energy(temp, z, q, q_ice, u_adj, v_adj) *
+            horiz_divg_from_eta(u_adj, v_adj, ps, radius, bk, pk))
+
+
+def energy_column_divg_divergent_component(temp, z, q, q_ice, u, v, swdn_toa,
+                                           swup_toa, olr, swup_sfc, swdn_sfc,
+                                           lwup_sfc, lwdn_sfc, shflx, evap,
+                                           precip, ps, dp, radius, bk, pk,
+                                           freq='1M'):
+    """Divergent component of column energy flux divergence."""
+    return energy_column_divg_adj(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+    ) - int_dp_g(energy_horiz_advec_from_eta(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
+        freq=freq
+    ), dp)
 
 
 def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,

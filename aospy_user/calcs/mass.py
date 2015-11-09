@@ -4,12 +4,15 @@ try:
 except ImportError:
     pass
 from aospy.constants import grav
-from aospy.utils import dp_from_ps, int_dp_g, integrate
+from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
+                         to_pfull_from_phalf, dp_from_ps, int_dp_g,
+                         integrate)
 import numpy as np
 
 from .. import PFULL_STR, TIME_STR
-from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
-from .advection import horiz_advec
+from .numerics import (d_dx_from_latlon, d_dy_from_lat, d_dp_from_p,
+                       d_dx_at_const_p_from_eta, d_dy_at_const_p_from_eta)
+from .advection import horiz_advec, horiz_advec_spharm
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 
@@ -25,6 +28,11 @@ def horiz_divg_spharm(u, v, radius):
     sph_int = SpharmInterface(u, v, rsphere=radius, make_vectorwind=True)
     divg = sph_int.vectorwind.divergence()
     return sph_int.to_xray(divg)
+
+
+def horiz_divg_from_eta(u, v, ps, radius, bk, pk):
+    return (d_dx_at_const_p_from_eta(u, ps, radius, bk, pk) +
+            d_dy_at_const_p_from_eta(v, ps, radius, bk, pk, vec_field=True))
 
 
 def vert_divg(omega, p):
@@ -216,15 +224,51 @@ def column_flux_divg_adj(arr, ps, u, v, evap, precip, radius, dp, freq='1M'):
                              radius)
 
 
-def horiz_divg_mass_adj(u, v, q, ps, radius, dp):
-    return horiz_divg(uv_mass_adjusted(u, q, ps, dp),
-                      uv_mass_adjusted(v, q, ps, dp), radius)
+def horiz_divg_mass_adj(u, v, evap, precip, ps, radius, dp):
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return horiz_divg(u_adj, v_adj, radius)
 
 
-def horiz_advec_mass_adj(arr, u, v, q, ps, radius, dp, p, vec_field=False):
-    u_cor = uv_mass_adjusted(u, q, ps, dp, p)
-    v_cor = uv_mass_adjusted(v, q, ps, dp, p)
-    return horiz_advec(arr, u_cor, v_cor, radius, vec_field=vec_field)
+def horiz_divg_mass_adj_spharm(u, v, evap, precip, ps, radius, dp):
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return horiz_divg_spharm(u_adj, v_adj, radius)
+
+
+def horiz_divg_mass_adj_from_eta(u, v, evap, precip, ps, radius, dp, bk, pk):
+    """Mass-balance adjusted horizontal divergence from model coordinates."""
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    divg_eta = horiz_divg_spharm(u_adj, v_adj, radius)
+    du_deta, dv_deta = d_deta_from_pfull(u_adj), d_deta_from_pfull(v_adj)
+    pfull_coord = u[PFULL_STR]
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    return (divg_eta - (bk_at_pfull / (da_deta + db_deta*ps)) *
+            horiz_advec_spharm(ps, du_deta, dv_deta, radius))
+
+
+def horiz_advec_mass_adj(arr, u, v, evap, precip, ps, radius, dp):
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return horiz_advec(arr, u_adj, v_adj, radius)
+
+
+def horiz_advec_mass_adj_spharm(arr, u, v, evap, precip, ps, radius, dp):
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return horiz_advec_spharm(arr, u_adj, v_adj, radius)
+
+
+def ps_horiz_advec(ps, u, v, evap, precip, radius, dp):
+    """Horizontal advection of surface pressure."""
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    sfc_sel = {PFULL_STR: u_adj[PFULL_STR].max()}
+
+    def sel(arr):
+        """Grab the value at the level nearest the surface."""
+        return arr.sel(**sfc_sel).drop(PFULL_STR)
+
+    u_adj = sel(u_adj)
+    v_adj = sel(v_adj)
+    return horiz_advec_spharm(ps, u_adj, v_adj, radius)
 
 
 def column_dry_air_mass(ps, wvp):

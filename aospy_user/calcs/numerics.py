@@ -165,7 +165,7 @@ def horiz_gradient_spharm(arr, radius):
 
 
 def horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):
-    """d/dy at constant pressure of `arr`.
+    """Horizontal gradient at constant pressure of `arr`.
 
     `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
     """
@@ -180,3 +180,23 @@ def horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):
                               (da_deta + db_deta*ps)),
             d_dy_const_eta + (darr_deta * bk_at_pfull * d_dy_ps /
                               (da_deta + db_deta*ps)))
+
+
+def d_dx_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):
+    """d/dx at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    d_dx, _ = horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk,
+                                             vec_field=vec_field)
+    return d_dx
+
+
+def d_dy_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):
+    """d/dy at constant pressure of `arr`.
+
+    `arr` must be defined on full levels in hybrid sigma-pressure coordinates.
+    """
+    _, d_dy = horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk,
+                                             vec_field=vec_field)
+    return d_dy

@@ -8,8 +8,7 @@ from .numerics import (latlon_deriv_prefactor, upwind_scheme,
                        wraparound_lon, d_dx_from_latlon, d_dy_from_lat,
                        d_dp_from_p, d_dx_at_const_p_from_eta,
                        d_dy_at_const_p_from_eta, d_dp_from_eta,
-                       # horiz_gradient_spharm)
-                       horiz_gradient_from_eta_spharm)
+                       horiz_gradient_spharm, horiz_gradient_from_eta_spharm)
 
 
 def zonal_advec(arr, u, radius):
@@ -46,7 +45,6 @@ def zonal_advec_upwind(arr, u, radius):
     arr_ext = wraparound_lon(arr)
     df_fwd = FiniteDiff.fwd_diff1(arr_ext)
     df_bwd = FiniteDiff.bwd_diff1(arr_ext)
-    # Transpose again to regain original axis order.
     return prefactor*upwind_scheme(df_fwd, df_bwd, u)
 
 
@@ -130,19 +128,37 @@ def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk,
             vert_advec(arr, omega, p))
 
 
-def horiz_advec_spharm(arr, u, v, ps, radius, bk, pk):
-    # d_dx, d_dy = horiz_gradient_spharm(arr, radius)
+def horiz_advec_spharm(arr, u, v, radius):
+    """Horizontal advection using spherical harmonics."""
+    d_dx, d_dy = horiz_gradient_spharm(arr, radius)
+    return u * d_dx + v * d_dy
+
+
+def zonal_advec_spharm(arr, u, radius):
+    """Zonal advection using spherical harmonics."""
+    d_dx, _ = horiz_gradient_spharm(arr, radius)
+    return u * d_dx
+
+
+def merid_advec_spharm(arr, v, radius):
+    """Meridional advection using spherical harmonics."""
+    _, d_dy = horiz_gradient_spharm(arr, radius)
+    return v * d_dy
+
+
+def horiz_advec_from_eta_spharm(arr, u, v, ps, radius, bk, pk):
+    """Horizontal advection using spherical harmonics from model coords."""
     d_dx, d_dy = horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk)
     return u * d_dx + v * d_dy
 
 
-def zonal_advec_spharm(arr, u, ps, radius, bk, pk):
-    # d_dx, _ = horiz_gradient_spharm(arr, radius)
+def zonal_advec_from_eta_spharm(arr, u, ps, radius, bk, pk):
+    """Zonal advection using spherical harmonics from model coords."""
     d_dx, _ = horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk)
     return u * d_dx
 
 
-def merid_advec_spharm(arr, v, ps, radius, bk, pk):
-    # _, d_dy = horiz_gradient_spharm(arr, radius)
+def merid_advec_from_eta_spharm(arr, v, ps, radius, bk, pk):
+    """Meridional advection using spherical harmonics from model coords."""
     _, d_dy = horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk)
     return v * d_dy
