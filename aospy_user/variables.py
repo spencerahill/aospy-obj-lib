@@ -1614,6 +1614,21 @@ energy_horiz_advec_from_eta = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+energy_horiz_advec = Var(
+    name='energy_horiz_advec',
+    domain='atmos',
+    description='Horizontal advection of energy from model coordinates',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 energy_horiz_divg_from_eta = Var(
     name='energy_horiz_divg_from_eta',
     domain='atmos',
@@ -1628,8 +1643,8 @@ energy_horiz_divg_from_eta = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
-energy_column_divg_divergent_component = Var(
-    name='energy_column_divg_divergent_component',
+energy_column_vert_advec_as_resid_from_eta = Var(
+    name='energy_column_vert_advec_as_resid_from_eta',
     domain='atmos',
     description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
@@ -1639,20 +1654,48 @@ energy_column_divg_divergent_component = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.energy_column_divg_divergent_component,
+    func=calcs.energy_column_vert_advec_as_resid_from_eta,
+    units=units.W_m2,
+    colormap='RdBu'
+)
+energy_column_vert_advec_as_resid = Var(
+    name='energy_column_vert_advec_as_resid',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_vert_advec_as_resid,
     units=units.W_m2,
     colormap='RdBu'
 )
 energy_vert_advec_from_eta = Var(
     name='energy_vert_advec_from_eta',
     domain='atmos',
-    description='Horizontal advection of energy from model coordinates',
+    description='Vertical advection of energy from model coordinates',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, ps, bk, pk),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.energy_vert_advec_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_vert_advec = Var(
+    name='energy_vert_advec',
+    domain='atmos',
+    description='Vertical advection of energy',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )

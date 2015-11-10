@@ -1,7 +1,7 @@
 """Finite differencing and other numerical methods."""
 from animal_spharm import SpharmInterface
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
-                         to_pfull_from_phalf, to_radians)
+                         to_pfull_from_phalf, to_radians, to_pascal)
 from infinite_diff import FiniteDiff
 import numpy as np
 import xray
@@ -138,9 +138,12 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
                              (da_deta + db_deta*ps))
 
 
-def d_dp_from_p(arr, p):
+def d_dp_from_p(arr):
     """Derivative in pressure of array defined on fixed pressure levels."""
-    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, do_edges_one_sided=True)
+    p = to_pascal(arr[PLEVEL_STR])
+    return (FiniteDiff.cen_diff(arr, PLEVEL_STR, do_edges_one_sided=True) /
+            FiniteDiff.cen_diff(p, PLEVEL_STR, do_edges_one_sided=True,
+                                is_coord=True))
 
 
 def d_dp_from_eta(arr, ps, bk, pk):
