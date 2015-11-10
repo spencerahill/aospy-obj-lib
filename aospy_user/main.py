@@ -6,7 +6,7 @@ import itertools
 import aospy
 import colorama
 
-from aospy_user import projs, variables
+from . import projs, variables
 
 
 class MainParams(object):
@@ -177,41 +177,3 @@ def main(main_params):
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
     return calcs
-
-if __name__ == '__main__':
-    mp = MainParams()
-    mp.proj = 'aero_3agcm'
-    mp.model = 'am2'
-    mp.run = ['reyoi_cont', 'reyoi+2K', 'hurrell_cont', 'hurrell+2K']
-    mp.ens_mem = [False]
-    mp.var = ['energy_column_divg_adj', 'energy_column_source']
-    mp.date_range = [('1983-01-01', '2012-12-31')]
-    # mp.date_range = [('1983-01-01', '1983-12-31')]
-    # mp.date_range = ['default']
-    mp.region = 'all'
-    mp.intvl_in = ['monthly']
-    # mp.intvl_in = ['3hr']
-    mp.intvl_out = ['jas']
-    mp.dtype_in_time = ['ts']
-    # mp.dtype_in_time = ['inst']
-    # mp.dtype_in_vert = [False]
-    mp.dtype_in_vert = ['sigma']
-    # mp.dtype_in_vert = ['pressure']
-    # mp.dtype_out_time = [('av', 'eddy.av', 'eddy.reg.av', 'reg.av')]
-    mp.dtype_out_time = [('av', 'std', 'reg.av', 'reg.ts', 'reg.std')]
-    # mp.dtype_out_time = [(
-        # 'av', 'std', 'reg.av', 'reg.ts', 'reg.std', 'eddy.av', 'eddy.std',
-        # 'eddy.reg.av', 'eddy.reg.ts', 'eddy.reg.std', 'time-mean.av',
-        # 'time-mean.std', 'time-mean.reg.av', 'time-mean.reg.std',
-        # 'time-mean.reg.ts'
-    # )]
-    # mp.dtype_out_vert = [False]
-    mp.dtype_out_vert = ['vert_int']
-    # mp.dtype_out_vert = [False, 'vert_int']
-    mp.level = [False]
-    mp.chunk_len = [False]
-    mp.verbose = [True]
-    mp.compute = True
-    mp.print_table = False
-
-    calcs = main(mp)
