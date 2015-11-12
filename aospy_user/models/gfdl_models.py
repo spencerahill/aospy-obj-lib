@@ -50,6 +50,8 @@ am2 = Model(
         runs.am2_reyoi_p10,
         runs.am2_reyoi_wpwp_p2,
         runs.am2_reyoi_wpwp_m2,
+        runs.am2_reyoi_uw,
+        runs.am2_reyoi_uw_p2,
         runs.am2_cld_lock_cont,
         runs.am2_cld_lock_p2,
         runs.am2_cld_lock_sst,
@@ -64,6 +66,7 @@ am2 = Model(
         runs.am2_cld_seed_np_p2,
         runs.am2_cld_seed_sp_p2,
         runs.am2_cld_seed_sa_p2,
+        runs.am2_reyoi_w_ice,
         runs.am2_test,
     },
     default_runs={
@@ -76,9 +79,11 @@ am3 = Model(
     grid_file_paths=(
         ('/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-'
          'openmp/pp/atmos/atmos.static.nc'),
-        ['/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-'
-         'openmp/pp/atmos/ts/monthly/1yr/atmos.{:4d}01-{:4d}12'
-         '.ucomp.nc'.format(n, n) for n in range(1980, 2011)]
+        ('/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-'
+         'openmp/pp/atmos/ts/monthly/1yr/atmos.198101-198112.ucomp.nc'),
+        ('/archive/Spencer.Hill/am3/am3clim_hurrell/gfdl.ncrc2-intel-prod-'
+         'openmp/pp/atmos_level/ts/monthly/1yr/'
+         'atmos_level.198101-198112.ucomp.nc')
     ),
     data_in_dur=1,
     data_in_start_date=1980,
@@ -236,9 +241,9 @@ am2p5 = Model(
          % (y1, y2) for (y1, y2) in zip((1981, 1991), (1990, 2000))]
     ),
     data_in_dur=10,
-    data_in_start_date=1981,
-    data_in_end_date=2000,
-    default_date_range=(1981, 2000),
+    data_in_start_date='1981-01-01',
+    data_in_end_date='2000-12-31',
+    default_date_range=('1981-01-01', '2000-12-31'),
     runs={
         runs.am2p5_cont,
         runs.am2p5_p2K,
