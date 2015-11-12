@@ -139,7 +139,7 @@ am2_reyoi_cont = Run(
         '/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/pp/'
     ),
     data_in_dur=1,
-    data_in_start_date=1983,
+    data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -366,6 +366,36 @@ am2_reyoi_wpwp_m2 = Run(
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
+am2_reyoi_uw = Run(
+    name='reyoi_uw_conv',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_p2 = Run(
+    name='reyoi_uw_conv+2K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and +2K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+2K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
 am2_cld_lock_cont = Run(
     name='cld_lock_cont',
     description='',
@@ -506,6 +536,18 @@ am2_cld_seed_sa_p2 = Run(
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
+)
+am2_reyoi_w_ice = Run(
+    name='reyoi_w_ice_file',
+    description='Standard climatological OI SSTs run but including ice file',
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_with_ice_file/'
+        'gfdl.ncrc2-default-prod/pp/',
+        ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1982, 1985)
 )
 am2_test = Run(
     name='test',
@@ -1079,16 +1121,20 @@ am3c90_cont = Run(
 am3c90_p2K = Run(
     name='p2K',
     description='',
-    data_in_direc='/archive/h1g/FMS/siena_201203/c90L48_am3p10_v6_clim_p2k/' + \
-             'gfdl.ncrc2-intel-prod-openmp/pp'
+    data_in_direc=(
+        '/archive/h1g/FMS/siena_201203/c90L48_am3p10_v6_clim_p2k/'
+        'gfdl.ncrc2-intel-prod-openmp/pp'
+    )
 )
 
 # AM2.5
 am2p5_cont = Run(
     name='cont',
     description='',
-    data_in_direc='/archive/miz/hiramdp/siena_201204/c180l32_am2_C0/' + \
-             'gfdl.ncrc2-intel-prod/pp'
+    data_in_direc=(
+        '/archive/miz/hiramdp/siena_201204/c180l32_am2_C0/'
+        'gfdl.ncrc2-intel-prod/pp'
+    )
 )
 am2p5_p2K = Run(
     name='p2K',
