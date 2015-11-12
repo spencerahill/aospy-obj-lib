@@ -238,6 +238,17 @@ hght = Var(
     def_lon=True,
     in_nc_grid=False
 )
+ice_mask = Var(
+    name='ice_mask',
+    units=units.unitless,
+    domain='atmos',
+    description='Ice mask.',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
 ice_wat = Var(
     name='ice_wat',
     units=units.specific_mass,
@@ -775,6 +786,16 @@ wvp = Var(
     colormap='Greys'
 )
 # Grid variables.
+land_mask = Var(
+    name='land_mask',
+    units=units.unitless,
+    description='Land mask',
+    def_time=False,
+    def_vert=True,
+    def_lat=True,
+    def_lon=False,
+    in_nc_grid=True
+)
 lat = Var(
     name='lat',
     units=units.latlon,
