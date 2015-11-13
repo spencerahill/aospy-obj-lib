@@ -396,6 +396,145 @@ am2_reyoi_uw_p2 = Run(
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
+am2_reyoi_uw_p5 = Run(
+    name='reyoi_uw_conv+5K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and +5K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+5K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_p10 = Run(
+    name='reyoi_uw_conv+10K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and +10K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+10K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_m2 = Run(
+    name='reyoi_uw_conv-2K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and -2K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-2K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_m5 = Run(
+    name='reyoi_uw_conv-5K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and -5K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-5K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_m10 = Run(
+    name='reyoi_uw_conv-10K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS and -10K SST',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-10K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_lo_0p5 = Run(
+    name='reyoi_uw_landocean0.5',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS, and with the '
+        'land-ocean entrainment rate ratio set to 0.5',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.5/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_lo_0p5_p2k = Run(
+    name='reyoi_uw_landocean0.5+2K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS, and with the '
+        'land-ocean entrainment rate ratio set to 0.5 and +2K SSTs',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.5+2K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_lo_0p25 = Run(
+    name='reyoi_uw_landocean0.25',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS, and with the '
+        'land-ocean entrainment rate ratio set to 0.25',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.25/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
+am2_reyoi_uw_lo_0p25_p2k = Run(
+    name='reyoi_uw_landocean0.25+2K',
+    description=(
+        'Same NOAA OI SST dataset climatology used in other `am2_reyoi` runs, '
+        'but using UW shallow convection scheme rather than RAS, and with the '
+        'land-ocean entrainment rate ratio set to 0.25 and +2K SSTs',
+    ),
+    data_in_direc=(
+        '/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.25+2K/'
+        'gfdl.ncrc2-default-prod/pp/'
+    ),
+    data_in_dur=1,
+    data_in_start_date=1982,
+    data_in_end_date=2012,
+    default_date_range=(1983, 2012)
+)
 am2_cld_lock_cont = Run(
     name='cld_lock_cont',
     description='',
