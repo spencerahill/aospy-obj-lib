@@ -1,15 +1,20 @@
 """Energy budget-related fields"""
 from aospy.constants import grav
-from aospy.utils import int_dp_g, vert_coord_name
+from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
+                         to_pfull_from_phalf, int_dp_g, vert_coord_name,
+                         monthly_mean_ts, monthly_mean_at_each_ind)
 
+from .. import PFULL_STR
+from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind,
-                        horiz_advec_const_p_from_eta, d_dp_from_eta,
-                        d_dp_from_p)
+                        horiz_advec_const_p_from_eta, horiz_advec_spharm,
+                        horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
-                   uv_column_budget_adjustment, horiz_divg_from_eta)
+                   uv_column_budget_adjustment, horiz_divg_spharm,
+                   horiz_divg_from_eta)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -30,9 +35,14 @@ def energy_column(temp, z, q, q_ice, u, v, dp):
     return int_dp_g(energy(temp, z, q, q_ice, u, v), dp)
 
 
-def energy_column_tendency(temp, z, q, q_ice, u, v, dp, freq='1M'):
+def energy_column_tendency(temp, z, q, q_ice, u, v, dp):
     return time_tendency_first_to_last(energy_column(temp, z, q, q_ice,
-                                                     u, v, dp), freq=freq)
+                                                     u, v, dp))
+
+
+def energy_column_tendency_each_timestep(temp, z, q, q_ice, u, v, dp):
+    return time_tendency_each_timestep(energy_column(temp, z, q, q_ice, u, v,
+                                                     dp))
 
 
 energy_column_source = column_energy
@@ -43,10 +53,10 @@ def energy_column_divg(temp, z, q, q_ice, u, v, dp, radius):
 
 
 def energy_column_budget_lhs(temp, z, q, q_ice, u, v, ps, dp, radius,
-                             freq='1M'):
-    tendency = energy_column_tendency(temp, z, q, q_ice, u, v, dp, freq=freq)
+                             ):
+    tendency = energy_column_tendency(temp, z, q, q_ice, u, v, dp)
     transport = energy_column_divg(temp, z, q, q_ice, u, v, dp, radius)
-    return budget_residual(tendency, transport, freq=freq)
+    return budget_residual(tendency, transport)
 
 
 def energy_column_budget_residual(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
@@ -127,10 +137,10 @@ def v_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
 
 def uv_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                               swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
-                              evap, precip, ps, dp, radius, freq='1M'):
+                              evap, precip, ps, dp, radius):
     """Horiz wind adjustments to impose column mass and energy balance."""
     u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
-                                              dp, freq=freq)
+                                              dp)
     u_en_adj, v_en_adj = uv_energy_adjustment(
         temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
@@ -140,22 +150,22 @@ def uv_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
 
 def u_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                              swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
-                             evap, precip, ps, dp, radius, freq='1M'):
+                             evap, precip, ps, dp, radius):
     """Zonal wind adjustment to impose column mass and energy balance."""
     u_adj, _ = uv_mass_energy_adjustment(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
     )
     return u_adj
 
 
 def v_mass_energy_adjustment(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                              swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
-                             evap, precip, ps, dp, radius, freq='1M'):
+                             evap, precip, ps, dp, radius):
     """Meridional wind adjustment to impose column mass and energy balance."""
     _, v_adj = uv_mass_energy_adjustment(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
         )
     return v_adj
 
@@ -197,7 +207,8 @@ def v_mass_energy_adjusted(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
 
 def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
-                           precip, ps, dp, radius, freq='1M'):
+                           precip, ps, dp, radius):
+    """Column energy divergence with mass and energy adjustments."""
     u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
                                               dp)
     u_en_adj, v_en_adj = uv_energy_adjusted(
@@ -208,15 +219,54 @@ def energy_column_divg_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                               v_en_adj, dp, radius)
 
 
+def energy_column_divg_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
+                                     swup_toa, olr, swup_sfc, swdn_sfc,
+                                     lwup_sfc, lwdn_sfc, shflx, evap, precip,
+                                     ps, dp, radius):
+    """Column energy divergence with energy adjustments by time mean flow."""
+    u_mass_adj, v_mass_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius,
+                                              dp)
+    u_en_adj, v_en_adj = uv_energy_adjusted(
+        temp, z, q, q_ice, u_mass_adj, v_mass_adj, swdn_toa, swup_toa, olr,
+        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
+    )
+    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice, u_en_adj,
+                                                  v_en_adj, dp, radius)]
+    return energy_column_divg(*monthly_terms)
+
+
+def energy_column_divg_adj_eddy(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                shflx, evap, precip, ps, dp, radius):
+    """Column energy divergence with energy adjustments by transient eddies."""
+    full = energy_column_divg_adj(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    time_mean = energy_column_divg_adj_time_mean(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    return full - monthly_mean_at_each_ind(time_mean, full)
+
+
+def energy_column_divg_mass_adj(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
+                                radius):
+    """Column energy divergence with adjustment for mass but not energy."""
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
+
+
 def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
                                       swup_toa, olr, swup_sfc, swdn_sfc,
                                       lwup_sfc, lwdn_sfc, shflx, evap, precip,
-                                      ps, dp, radius, freq='1M'):
+                                      ps, dp, radius):
+    """Column energy budget residual when mass and energy adjustments used."""
     en = energy(temp, z, q, q_ice, u, v)
     tendency = time_tendency_each_timestep(int_dp_g(en, dp))
     transport = energy_column_divg_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
     )
     source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                                   lwup_sfc, lwdn_sfc, shflx, evap)
@@ -227,19 +277,36 @@ def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
 def energy_horiz_advec_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                 olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
                                 shflx, evap, precip, ps, dp, radius, bk, pk,
-                                freq='1M'):
+                                ):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    # return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
     return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_horiz_advec_from_eta_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
+                                          swup_toa, olr, swup_sfc, swdn_sfc,
+                                          lwup_sfc, lwdn_sfc, shflx, evap,
+                                          precip, ps, dp, radius, bk, pk,
+                                          ):
+    """Horizontal energy advection at constant pressure by time-mean flow."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    monthly_terms = [monthly_mean_ts(d) for d in (en, u_adj, v_adj, ps)]
+    monthly_terms += [radius, bk, pk]
+    return horiz_advec_const_p_from_eta(*monthly_terms)
 
 
 def energy_horiz_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                        olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                       shflx, evap, precip, ps, dp, radius, freq='1M'):
+                       shflx, evap, precip, ps, dp, radius):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
@@ -259,44 +326,83 @@ def energy_vert_advec_from_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
     return omega*d_dp_from_eta(energy(temp, z, q, q_ice, u, v), ps, bk, pk)
 
 
-def energy_horiz_divg_from_eta(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
-                               radius, bk, pk, freq='1M'):
-    """Horizontal advection of energy at constant pressure."""
-    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp,
-                                    freq=freq)
-    return (energy(temp, z, q, q_ice, u_adj, v_adj) *
-            horiz_divg_from_eta(u_adj, v_adj, ps, radius, bk, pk))
+def horiz_divg_energy_adj_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                   olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                   shflx, evap, precip, ps, dp, radius, bk, pk,
+                                   ):
+    """Mass-balance adjusted horizontal divergence from model coordinates."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    divg_eta = horiz_divg_spharm(u_adj, v_adj, radius)
+    du_deta, dv_deta = d_deta_from_pfull(u_adj), d_deta_from_pfull(v_adj)
+    pfull_coord = u[PFULL_STR]
+    bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
+    da_deta = d_deta_from_phalf(pk, pfull_coord)
+    db_deta = d_deta_from_phalf(bk, pfull_coord)
+    return (divg_eta - (bk_at_pfull / (da_deta + db_deta*ps)) *
+            horiz_advec_spharm(ps, du_deta, dv_deta, radius))
 
 
-def energy_column_vert_advec_as_resid_from_eta(temp, z, q, q_ice, u, v,
-                                               swdn_toa, swup_toa, olr,
-                                               swup_sfc, swdn_sfc, lwup_sfc,
-                                               lwdn_sfc, shflx, evap, precip,
-                                               ps, dp, radius, bk, pk,
-                                               freq='1M'):
-    """Divergent component of column energy flux divergence."""
-    return energy_column_divg_adj(
+def energy_horiz_divg_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                               shflx, evap, precip, ps, dp, radius, bk, pk,
+                               ):
+    """Energy times adjusted horizontal divergence at constant pressure."""
+    return (energy(temp, z, q, q_ice, u, v) *
+            horiz_divg_energy_adj_from_eta(
+                temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
+                swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp,
+                radius, bk, pk,
+            ))
+
+
+def energy_column_vert_advec_as_resid_from_eta_time_mean(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
-    ) - int_dp_g(energy_horiz_advec_from_eta(
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
+):
+    """Vertical advection energy by time-mean flow."""
+    return energy_column_divg_adj_time_mean(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
-        freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    ) - int_dp_g(energy_horiz_advec_from_eta_time_mean(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
     ), dp)
 
 
 def energy_column_vert_advec_as_resid(temp, z, q, q_ice, u, v, swdn_toa,
                                       swup_toa, olr, swup_sfc, swdn_sfc,
                                       lwup_sfc, lwdn_sfc, shflx, evap, precip,
-                                      ps, dp, radius, freq='1M'):
+                                      ps, dp, radius):
     """Divergent component of column energy flux divergence."""
     return energy_column_divg_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
     ) - int_dp_g(energy_horiz_advec(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, freq=freq
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
     ), dp)
+
+
+def energy_vert_advec_adj_from_eta(temp, z, q, q_ice, u, v, omega, swdn_toa,
+                                   swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc,
+                                   lwdn_sfc, shflx, evap, precip, ps, dp,
+                                   radius, bk, pk):
+    """Vertical advection of energy with column balance adjustment."""
+    column_advec_as_resid = energy_column_vert_advec_as_resid_from_eta(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
+
+    )
+    en = energy(temp, z, q, q_ice, u, v)
+    # monthly_terms = [monthly_mean_ts(d) for d in (en, ps)]
+    # monthly_terms += [bk, pk]
+    advec = omega*d_dp_from_eta(en, ps, bk, pk)
+    column_advec = int_dp_g(advec, dp)
+    residual = column_advec_as_resid - column_advec
+    return advec - (residual * grav.value / ps)
 
 
 def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -311,13 +417,32 @@ def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
     p_str = vert_coord_name(temp)
 
     def sel(arr):
-        sfc_sel = {p_str: en[p_str].max()}
+        sfc_sel = {p_str: temp[p_str].max()}
         return arr.sel(**sfc_sel).drop(p_str)
 
     en = sel(en)
     u_adj = sel(u_adj)
     v_adj = sel(v_adj)
-    return horiz_advec(ps, u_adj*en, v_adj*en, radius) / grav.value
+    return horiz_advec_spharm(ps, u_adj*en, v_adj*en, radius) / grav.value
+
+
+def energy_sfc_ps_advec_as_resid(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                                 olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                                 shflx, evap, precip, ps, dp, radius, bk, pk):
+    """Advection of energy times surface pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    col_divg = energy_column_divg_adj(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    # 2015-11-16 S. Hill: This should have eta correction applied.
+    divg_col_int = int_dp_g(horiz_divg_from_eta(en*u_adj, en*v_adj, ps,
+                                                radius, bk, pk), dp)
+    return col_divg - divg_col_int
 
 
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):

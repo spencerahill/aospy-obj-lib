@@ -1560,6 +1560,19 @@ energy_column_tendency = Var(
     units=units.W_m2,
     colormap='RdBu_r'
 )
+energy_column_tendency_each_timestep = Var(
+    name='energy_column_tendency_each_timestep',
+    domain='atmos',
+    description='Monthly time-tendency of column integrated energy.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, dp),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_tendency_each_timestep,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
 energy_column_budget_residual = Var(
     name='energy_column_budget_residual',
     domain='atmos',
@@ -1578,7 +1591,7 @@ energy_column_budget_residual = Var(
 energy_column_divg_adj = Var(
     name='energy_column_divg_adj',
     domain='atmos',
-    description='Residual in column-integrated energy budget.',
+    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -1587,6 +1600,50 @@ energy_column_divg_adj = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_column_divg_adj,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_divg_adj_time_mean = Var(
+    name='energy_column_divg_adj_time_mean',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_adj_time_mean,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_divg_adj_eddy = Var(
+    name='energy_column_divg_adj_eddy',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_adj_eddy,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_divg_mass_adj = Var(
+    name='energy_column_divg_mass_adj',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, evap, precip, ps,
+               dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_divg_mass_adj,
     units=units.W_m2,
     colormap='RdBu_r'
 )
@@ -1620,6 +1677,21 @@ energy_ps_horiz_advec = Var(
     units=units.W_m2,
     colormap='RdBu'
 )
+energy_ps_horiz_advec_as_resid = Var(
+    name='energy_ps_horiz_advec_as_resid',
+    domain='atmos',
+    description='Advection of surface energy times surface pressure',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_sfc_ps_advec_as_resid,
+    units=units.W_m2,
+    colormap='RdBu'
+)
 energy_horiz_advec_from_eta = Var(
     name='energy_horiz_advec_from_eta',
     domain='atmos',
@@ -1632,6 +1704,21 @@ energy_horiz_advec_from_eta = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_horiz_advec_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_horiz_advec_from_eta_time_mean = Var(
+    name='energy_horiz_advec_from_eta_time_mean',
+    domain='atmos',
+    description='Horizontal advection of energy from model coordinates',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec_from_eta_time_mean,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
@@ -1654,7 +1741,8 @@ energy_horiz_divg_from_eta = Var(
     name='energy_horiz_divg_from_eta',
     domain='atmos',
     description='Energy times horizontal divergence from model coordinates',
-    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, evap,
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
     def_time=True,
     def_vert=True,
@@ -1664,8 +1752,8 @@ energy_horiz_divg_from_eta = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
-energy_column_vert_advec_as_resid_from_eta = Var(
-    name='energy_column_vert_advec_as_resid_from_eta',
+energy_column_vert_advec_as_resid_from_eta_time_mean = Var(
+    name='energy_column_vert_advec_as_resid_from_eta_time_mean',
     domain='atmos',
     description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
@@ -1675,7 +1763,7 @@ energy_column_vert_advec_as_resid_from_eta = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.energy_column_vert_advec_as_resid_from_eta,
+    func=calcs.energy_column_vert_advec_as_resid_from_eta_time_mean,
     units=units.W_m2,
     colormap='RdBu'
 )
@@ -1704,6 +1792,21 @@ energy_vert_advec_from_eta = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_vert_advec_from_eta,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_vert_advec_adj_from_eta = Var(
+    name='energy_vert_advec_adj_from_eta',
+    domain='atmos',
+    description='Vertical advection of energy from model coordinates',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, swdn_toa,
+               swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
+               evap, precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec_adj_from_eta,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
