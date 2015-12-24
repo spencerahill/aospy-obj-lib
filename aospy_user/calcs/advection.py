@@ -3,7 +3,7 @@ from aospy.utils import to_radians, to_pascal
 from infinite_diff import FiniteDiff
 import numpy as np
 
-from .. import LAT_STR
+from .. import LAT_STR, LON_STR
 from .numerics import (latlon_deriv_prefactor, upwind_scheme,
                        wraparound_lon, d_dx_from_latlon, d_dy_from_lat,
                        d_dp_from_p, d_dx_at_const_p_from_eta,
@@ -43,8 +43,8 @@ def zonal_advec_upwind(arr, u, radius):
     prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
                                        radius, d_dy_of_scalar_field=False)
     arr_ext = wraparound_lon(arr)
-    df_fwd = FiniteDiff.fwd_diff1(arr_ext)
-    df_bwd = FiniteDiff.bwd_diff1(arr_ext)
+    df_fwd = FiniteDiff.fwd_diff_deriv(arr_ext, LON_STR)
+    df_bwd = FiniteDiff.bwd_diff_deriv(arr_ext, LON_STR)
     return prefactor*upwind_scheme(df_fwd, df_bwd, u)
 
 
@@ -65,9 +65,6 @@ def merid_advec_upwind(arr, v, radius, vec_field=False):
                                 df_bwd_except_sp[-1:]), axis=0)
     df_bwd = np.ma.concatenate((df_fwd_except_np[:1],
                                 df_bwd_except_sp), axis=0)
-    # Roll axis and transpose again to regain original axis order.
-    df_fwd = np.rollaxis(df_fwd, 0, 2).T
-    df_bwd = np.rollaxis(df_bwd, 0, 2).T
     return prefactor*upwind_scheme(df_fwd, df_bwd, v)
 
 
