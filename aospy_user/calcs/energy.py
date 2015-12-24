@@ -1,5 +1,5 @@
 """Energy budget-related fields"""
-from aospy.constants import grav
+from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
                          monthly_mean_ts, monthly_mean_at_each_ind)
@@ -621,3 +621,14 @@ def tdt_lw_cld(tdt_lw, tdt_lw_clr):
 def tdt_sw_cld(tdt_sw, tdt_sw_clr):
     """Cloudy-sky temperature tendency from shortwave radiation."""
     return tdt_sw - tdt_sw_clr
+
+
+def tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif):
+    """Net moist diabatic heating rate, i.e. neglecting condensation."""
+    return tdt_lw + tdt_sw + tdt_vdif
+
+
+def mse_tendency(tdt_lw, tdt_sw, tdt_vdif, qdt_vdif):
+    """Net moist energetic forcing, i.e. neglecting condensation."""
+    return (c_p*tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif) +
+            L_v*qdt_vdif)

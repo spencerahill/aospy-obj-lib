@@ -400,6 +400,17 @@ pv = Var(
     def_lon=True,
     in_nc_grid=False
 )
+qdt_vdif = Var(
+    name='qdt_vdif',
+    units=units.s1_spec_mass,
+    domain='atmos',
+    description='Moisture tendency from vertical diffusion.',
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
 rh = Var(
     name='rh',
     alt_names=('hur',),
@@ -941,6 +952,32 @@ column_energy = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.column_energy,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+column_lw = Var(
+    name='column_lw',
+    domain='atmos',
+    description='Net LW flux into atmosphere from surface and TOA.',
+    variables=(olr, lwup_sfc, lwdn_sfc),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_lw,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+column_sw = Var(
+    name='column_sw',
+    domain='atmos',
+    description='Net SW flux into atmosphere from surface and TOA.',
+    variables=(swdn_toa, swup_toa, swup_sfc, swdn_sfc),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.column_sw,
     units=units.W_m2,
     colormap='RdBu_r'
 )
@@ -2186,6 +2223,18 @@ mse = Var(
     valid_range=(3.05e5, 5e6),
     colormap='RdBu_r'
 )
+mse_tendency = Var(
+    name='mse_tendency',
+    domain='atmos',
+    description='',
+    variables=(tdt_lw, tdt_sw, tdt_vdif, qdt_vdif),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_tendency,
+    units=units.J_kg1_s1
+)
 mse_horiz_advec = Var(
     name='mse_horiz_advec',
     math_str=r'$\mathbf{v}\cdot\nabla h$',
@@ -2879,6 +2928,18 @@ tdt_sw_cld = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.tdt_sw_cld,
+    units=units.K_s1
+)
+tdt_moist_diabatic = Var(
+    name='tdt_moist_diabatic',
+    domain='atmos',
+    description='',
+    variables=(tdt_lw, tdt_sw, tdt_vdif),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.tdt_moist_diabatic,
     units=units.K_s1
 )
 toa_rad = Var(

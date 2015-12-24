@@ -54,6 +54,8 @@ from .toa_sfc_fluxes import (
     sfc_sw_cld,
     sfc_energy,
     column_energy,
+    column_lw,
+    column_sw,
     bowen_ratio,
     evap_frac,
 )
@@ -184,6 +186,8 @@ from .energy import (
     tdt_diab,
     tdt_lw_cld,
     tdt_sw_cld,
+    tdt_moist_diabatic,
+    mse_tendency
     )
 from .stats import (
     pointwise_corr,

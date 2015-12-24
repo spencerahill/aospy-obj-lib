@@ -87,6 +87,16 @@ def column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
             sfc_energy(swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap))
 
 
+def column_sw(swdn_toa, swup_toa, swup_sfc, swdn_sfc):
+    """All sky net SW flux into atmosphere."""
+    return toa_sw(swdn_toa, swup_toa) + sfc_sw(swup_sfc, swdn_sfc)
+
+
+def column_lw(olr, lwup_sfc, lwdn_sfc):
+    """All sky net LW flux into atmosphere."""
+    return -1*olr + sfc_lw(lwup_sfc, lwdn_sfc)
+
+
 def bowen_ratio(shflx, evap):
     """Bowen ratio: surface SH/LH."""
     return shflx/(L_v * evap)
