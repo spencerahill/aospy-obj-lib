@@ -1489,8 +1489,8 @@ dry_mass_column_budget_residual = Var(
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
-dry_mass_column_divg_with_adj = Var(
-    name='dry_mass_column_divg_with_adj',
+dry_mass_column_divg_adj = Var(
+    name='dry_mass_column_divg_adj',
     domain='atmos',
     description=('Divergence of vertical integral of (one minus specific '
                  'humidity) times horizontal flow.'),
@@ -1499,14 +1499,14 @@ dry_mass_column_divg_with_adj = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_column_divg_with_adj,
+    func=calcs.dry_mass_column_divg_adj,
     units=units.Pa_s1_mass,
     math_str=(r'$\nabla\cdot\int_{p_\mathrm{t}}^{p_\mathrm{s}}'
               '(1-q)\mathbf{v}\,\mathrm{d}p$'),
     colormap='RdBu'
 )
-dry_mass_column_budget_with_adj_residual = Var(
-    name='dry_mass_column_budget_with_adj_residual',
+dry_mass_column_budget_adj_residual = Var(
+    name='dry_mass_column_budget_adj_residual',
     domain='atmos',
     description=('Residual of mass budget with explicit correction applied '
                  'to transport term'),
@@ -1515,7 +1515,7 @@ dry_mass_column_budget_with_adj_residual = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    func=calcs.dry_mass_column_budget_with_adj_residual,
+    func=calcs.dry_mass_column_budget_adj_residual,
     units=units.Pa_s1_mass,
     colormap='RdBu'
 )
@@ -1659,6 +1659,51 @@ energy_column_budget_adj_residual = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_column_budget_adj_residual,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_budget_energy_adj_residual = Var(
+    name='energy_column_budget_energy_adj_residual',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_budget_energy_adj_residual,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_budget_mass_adj_residual = Var(
+    name='energy_column_budget_mass_adj_residual',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_budget_mass_adj_residual,
+    units=units.W_m2,
+    colormap='RdBu_r'
+)
+energy_column_budget_dry_mass_adj_residual = Var(
+    name='energy_column_budget_dry_mass_adj_residual',
+    domain='atmos',
+    description='Residual in column-integrated energy budget.',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               ps, dp, r_e),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_column_budget_dry_mass_adj_residual,
     units=units.W_m2,
     colormap='RdBu_r'
 )

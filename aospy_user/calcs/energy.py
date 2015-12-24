@@ -13,8 +13,8 @@ from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         horiz_advec_const_p_from_eta, horiz_advec_spharm,
                         horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
-                   uv_column_budget_adjustment, horiz_divg_spharm,
-                   horiz_divg_from_eta)
+                   uv_dry_mass_adjusted, uv_column_budget_adjustment,
+                   horiz_divg_spharm, horiz_divg_from_eta)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg)
@@ -250,10 +250,28 @@ def energy_column_divg_adj_eddy(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
     return full - monthly_mean_at_each_ind(time_mean, full)
 
 
+def energy_column_divg_dry_mass_adj(temp, z, q, q_ice, u, v, ps, dp, radius):
+    """Column energy divergence with adjustment for dry mass."""
+    u_adj, v_adj = uv_dry_mass_adjusted(ps, u, v, q, radius, dp)
+    return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
+
+
 def energy_column_divg_mass_adj(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
                                 radius):
     """Column energy divergence with adjustment for mass but not energy."""
     u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
+
+
+def energy_column_divg_energy_adj(temp, z, q, q_ice, u, v, swdn_toa,
+                                  swup_toa, olr, swup_sfc, swdn_sfc,
+                                  lwup_sfc, lwdn_sfc, shflx, evap,
+                                  ps, dp, radius):
+    """Column energy divergence with adjustment for energy but not mass."""
+    u_adj, v_adj = uv_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
+        swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp, radius
+    )
     return energy_column_divg(temp, z, q, q_ice, u_adj, v_adj, dp, radius)
 
 
@@ -271,6 +289,53 @@ def energy_column_budget_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                                   lwup_sfc, lwdn_sfc, shflx, evap)
 
+    return tendency + transport - source
+
+
+def energy_column_budget_dry_mass_adj_residual(temp, z, q, q_ice, u, v,
+                                               swdn_toa, swup_toa, olr,
+                                               swup_sfc, swdn_sfc, lwup_sfc,
+                                               lwdn_sfc, shflx, evap, ps, dp,
+                                               radius):
+    """Column energy budget residual when column dry mass is corrected."""
+    en = energy(temp, z, q, q_ice, u, v)
+    tendency = time_tendency_each_timestep(int_dp_g(en, dp))
+    transport = energy_column_divg_dry_mass_adj(
+        temp, z, q, q_ice, u, v, ps, dp, radius
+    )
+    source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                                  lwup_sfc, lwdn_sfc, shflx, evap)
+    return tendency + transport - source
+
+
+def energy_column_budget_mass_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
+                                           swup_toa, olr, swup_sfc, swdn_sfc,
+                                           lwup_sfc, lwdn_sfc, shflx, evap,
+                                           precip, ps, dp, radius):
+    """Column energy budget residual when column mass is corrected."""
+    en = energy(temp, z, q, q_ice, u, v)
+    tendency = time_tendency_each_timestep(int_dp_g(en, dp))
+    transport = energy_column_divg_mass_adj(
+        temp, z, q, q_ice, u, v, evap, precip, ps, dp, radius
+    )
+    source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                                  lwup_sfc, lwdn_sfc, shflx, evap)
+    return tendency + transport - source
+
+
+def energy_column_budget_energy_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
+                                             swup_toa, olr, swup_sfc, swdn_sfc,
+                                             lwup_sfc, lwdn_sfc, shflx, evap,
+                                             ps, dp, radius):
+    """Column energy budget residual when column energy is corrected."""
+    en = energy(temp, z, q, q_ice, u, v)
+    tendency = time_tendency_each_timestep(int_dp_g(en, dp))
+    transport = energy_column_divg_energy_adj(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
+        swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,ps, dp, radius
+    )
+    source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+                                  lwup_sfc, lwdn_sfc, shflx, evap)
     return tendency + transport - source
 
 

@@ -308,22 +308,27 @@ def dry_mass_column_budget_residual(ps, u, v, q, radius, dp, freq='1M'):
     return budget_residual(tendency, transport, freq=freq)
 
 
-def dry_mass_column_divg_with_adj(u, v, q, ps, radius, dp):
-    """Transport term of atmospheric column mass budget with adjustment.
-
-    Based on Trenberth 1991 J. Climate, but in the limit that the mass
-    transport term is much larger magnitude than the tendency term.
-    """
-    u_int = integrate((1 - q)*uv_mass_adjusted(u, q, ps, dp), dp,
-                      is_pressure=True)
-    v_int = integrate((1 - q)*uv_mass_adjusted(v, q, ps, dp), dp,
-                      is_pressure=True)
-    return horiz_divg(u_int, v_int, radius)
+def uv_dry_mass_adjustment(ps, u, v, q, radius, dp, freq='1M'):
+    """Adjustment to horiz. winds to enforce column dry mass budget closure."""
+    residual = dry_mass_column_budget_residual(ps, u, v, q, radius,
+                                               dp, freq=freq)
+    return uv_column_budget_adjustment(u, v, residual, ps, radius)
 
 
-def dry_mass_column_budget_with_adj_residual(ps, u, v, q, radius, dp,
-                                             freq='1M'):
+def uv_dry_mass_adjusted(ps, u, v, q, radius, dp, freq='1M'):
+    """Horizontal winds adjusted to impose column dry mass budget closure."""
+    u_adj, v_adj = uv_dry_mass_adjustment(ps, u, v, q, radius, dp, freq=freq)
+    return u - u_adj, v - v_adj
+
+
+def dry_mass_column_divg_adj(ps, u, v, q, radius, dp, freq='1M'):
+    """Column divergence of dry mass with budget correction applied."""
+    u_adj, v_adj = uv_dry_mass_adjusted(ps, u, v, q, radius, dp, freq=freq)
+    return column_flux_divg(1 - q, u_adj, v_adj, radius, dp)
+
+
+def dry_mass_column_budget_adj_residual(ps, u, v, q, radius, dp, freq='1M'):
     """Residual in column mass budget when flow is adjusted for balance."""
     tendency = dry_mass_column_tendency(ps, q, dp, freq=freq)
-    transport = dry_mass_column_divg_with_adj(u, v, q, ps, radius, dp)
+    transport = dry_mass_column_divg_adj(ps, u, v, q, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
