@@ -2,6 +2,7 @@
 """Main script for automating computations using aospy."""
 from __future__ import print_function
 import itertools
+import warnings
 
 import aospy
 import colorama
@@ -164,16 +165,18 @@ class CalcSuite(object):
                                  region=region, plot_units=True)])
 
 
-def main(main_params):
+def main(main_params, exec_calcs=True, print_table=True, prompt_verify=True):
     """Main script for interfacing with aospy."""
     # Instantiate objects and load default/all models, runs, and regions.
     cs = CalcSuite(MainParamsParser(main_params, projs))
     cs.print_params()
-    try:
-        cs.prompt_user_verify()
-    except IOError as e:
-        print(e)
-        return
+    if prompt_verify:
+        try:
+            cs.prompt_user_verify()
+        except IOError as e:
+            warnings.warn(e)
+            return
     param_combos = cs.create_params_all_calcs()
-    calcs = cs.create_calcs(param_combos, exec_calcs=True, print_table=True)
+    calcs = cs.create_calcs(param_combos, exec_calcs=exec_calcs,
+                            print_table=print_table)
     return calcs
