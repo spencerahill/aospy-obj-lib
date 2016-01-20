@@ -1,5 +1,5 @@
 from aospy.units import Units
-from aospy.constants import c_p, grav, seconds_in_day
+from aospy.constants import c_p, grav, seconds_in_day,L_v
 
 
 unitless = Units(units='')
@@ -39,8 +39,10 @@ s1_mass = Units(
 )
 s1_spec_mass = Units(
     units=r's$^{-1}$',
-    plot_units=r'g kg$^{-1}$ day$^{-1}$',
-    plot_units_conv=seconds_in_day.value*1e3,
+    # plot_units=r'g kg$^{-1}$ day$^{-1}$',
+    # plot_units_conv=seconds_in_day.value*1e3,
+    plot_units=r'10$^{-3}$ W kg$^{-1}$',
+    plot_units_conv=L_v.value*1e3,
     vert_int_plot_units=r'mm day$^{-1}$',
     vert_int_plot_units_conv=seconds_in_day.value
 )
@@ -51,6 +53,10 @@ s1_vort = Units(
 )
 K_s1 = Units(
     units=r'K s$^{-1}$',
+    plot_units=r'10$^{-3}$ W kg$^{-1}$',
+    plot_units_conv=c_p.value*1e3,
+    # plot_units=r'K day$^{-1}$',
+    # plot_units_conv=seconds_in_day.value,
     vert_int_plot_units=r'W m$^{-2}$',
     vert_int_plot_units_conv=c_p.value
 )
@@ -93,9 +99,12 @@ J_kg1 = Units(
     vert_int_plot_units_conv=1e-6
 )
 J_kg1_s1 = Units(
-    units=r'J kg$^{-1}$ s$^{-1}$',
-    plot_units='K day$^{-1}',
-    plot_units_conv=seconds_in_day.value / c_p.value,
+    # units=r'J kg$^{-1}$ s$^{-1}$',
+    # plot_units='K day$^{-1}',
+    # plot_units_conv=seconds_in_day.value / c_p.value,
+    units=r'W kg$^{-1}$',
+    plot_units=r'10$^{-3}$ W kg$^{-1}$',
+    plot_units_conv=1e3,
     vert_int_units='W m$^{-2}$',
     vert_int_plot_units='W m$^{-2}$',
     vert_int_plot_units_conv=1
