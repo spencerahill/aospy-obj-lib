@@ -5,7 +5,7 @@ import numpy as np
 
 from . import horiz_divg, vert_divg
 from .thermo import dse, mse
-from .numerics import d_dp_from_p
+from .numerics import d_dp_from_p, d_dp_from_eta
 
 
 def field_vert_int_max(arr, dp):
@@ -73,10 +73,13 @@ def gms_each_level(temp, hght, sphum, level, lev_dn=925.):
 
 
 def dry_static_stab(temp, hght, level, lev_dn=925.):
+    """Dry static stability, in terms of dry static energy."""
     d = dse(temp, hght)
     return (d - d[np.where(level == lev_dn)])/c_p
 
 
-def moist_static_stab(temp, hght, sphum, p):
-    mse_ = mse(temp, hght, sphum)
-    return d_dp_from_p(mse_, p)
+# def moist_static_stab(temp, hght, sphum, p):
+def moist_static_stab(temp, hght, sphum, ps, bk, pk):
+    """Moist static stability, in terms of moist static energy."""
+    return d_dp_from_eta(mse(temp, hght, sphum), ps, bk, pk)
+    # return d_dp_from_p(mse(temp, hght, sphum), p)
