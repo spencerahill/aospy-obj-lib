@@ -630,5 +630,5 @@ def tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif):
 
 def mse_tendency(tdt_lw, tdt_sw, tdt_vdif, qdt_vdif):
     """Net moist energetic forcing, i.e. neglecting condensation."""
-    return (c_p*tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif) +
-            L_v*qdt_vdif)
+    return (c_p.value*tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif) +
+            L_v.value*qdt_vdif)
