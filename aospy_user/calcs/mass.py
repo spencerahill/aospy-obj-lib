@@ -332,3 +332,29 @@ def dry_mass_column_budget_adj_residual(ps, u, v, q, radius, dp, freq='1M'):
     tendency = dry_mass_column_tendency(ps, q, dp, freq=freq)
     transport = dry_mass_column_divg_adj(ps, u, v, q, radius, dp)
     return budget_residual(tendency, transport, freq=freq)
+
+
+def omega_from_divg_eta(u, v, ps, radius, bk, pk):
+    """Omega computed from the horizontal flow on model-native coordinates."""
+    pfull_coord = u[PFULL_STR]
+    ps_advec = horiz_advec_spharm(ps, u, v, radius)
+    term1 = to_pfull_from_phalf(bk, pfull_coord) * ps_advec
+
+    db = d_deta_from_phalf(bk, pfull_coord)
+    term2 = u.copy()
+    term2.values = np.cumsum(ps_advec*db, axis=1)
+
+    divg = horiz_divg_spharm(u, v, radius)
+    dp = dp_from_ps(bk, pk, ps, pfull_coord)
+    divg_dp = divg*dp
+    # term3 = u.copy()
+    # 2016-01-22 S. Hill: The use of explicit axis numbers here is not good.
+    # It should be replaced by variables that correspond to the axis number
+    # of the desired dimension.
+    divg_int = np.cumsum(divg_dp, axis=1)
+    # 2016-01-22 S. Hill: This is a workaround to deal with the divg_int
+    # calculation above resulting in a shape of (lat, time, pfull, lon).
+    # divg_int = np.swapaxes(divg_int, 1, 2)
+    # divg_int = np.swapaxes(divg_int, 0, 2)
+    # term3.values = divg_int
+    return term1 - term2 - divg_int

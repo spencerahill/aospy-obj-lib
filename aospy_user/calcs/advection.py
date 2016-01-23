@@ -1,9 +1,10 @@
 """Advection-related quantities."""
-from aospy.utils import to_radians, to_pascal
+from aospy.utils import (to_radians, to_pascal, to_pfull_from_phalf,
+                         d_deta_from_phalf)
 from infinite_diff import FiniteDiff
 import numpy as np
 
-from .. import LAT_STR, LON_STR
+from .. import LAT_STR, LON_STR, PFULL_STR
 from .numerics import (latlon_deriv_prefactor, upwind_scheme,
                        wraparound_lon, d_dx_from_latlon, d_dy_from_lat,
                        d_dp_from_p, d_dx_at_const_p_from_eta,

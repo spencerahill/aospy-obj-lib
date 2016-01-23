@@ -2421,6 +2421,17 @@ mass_flux = Var(
     func=calcs.msf_max,
     units=units.kg_s1
 )
+omega_from_divg_eta = Var(
+    name='omega_from_divg_eta',
+    domain='atmos',
+    variables=(ucomp, vcomp, ps, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.omega_from_divg_eta,
+    units=units.Pa_s1
+)
 p_minus_e = Var(
     name='p-e',
     domain='atmos',
@@ -2494,6 +2505,7 @@ q_merid_advec = Var(
     def_time=True,
     def_vert=True,
     def_lat=True,
+
     def_lon=True,
     func=calcs.merid_advec,
     units=units.s1_spec_mass,
