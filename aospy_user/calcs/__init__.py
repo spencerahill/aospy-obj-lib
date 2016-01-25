@@ -115,7 +115,6 @@ from .mass import (
     uv_mass_adjusted,
     horiz_divg_mass_adj,
     horiz_advec_mass_adj,
-    omega_from_divg_eta,
 )
 from .transport import (
     field_horiz_flux_divg,
@@ -126,6 +125,7 @@ from .transport import (
     field_vert_int_bal,
     field_times_horiz_divg_mass_adj,
     field_horiz_flux_divg_mass_adj,
+    omega_from_divg_eta,
 )
 from .energy import (
     kinetic_energy,
@@ -164,9 +164,11 @@ from .energy import (
     energy_horiz_divg_from_eta,
     energy_column_vert_advec_as_resid_from_eta_time_mean,
     energy_column_vert_advec_as_resid,
-    energy_vert_advec_from_eta,
-    energy_vert_advec_adj_from_eta,
     energy_vert_advec,
+    energy_vert_advec_from_eta,
+    energy_vert_advec_eta_omega_adj,
+    energy_vert_advec_eta_omega_adj_time_mean,
+    energy_vert_advec_adj_from_eta,
     mse_horiz_flux_divg,
     mse_horiz_advec,
     mse_times_horiz_divg,
