@@ -1,10 +1,13 @@
 """Functions for computing tracer transports."""
-from aospy.utils import int_dp_g
+from aospy.utils import (int_dp_g, to_pfull_from_phalf, d_deta_from_phalf,
+                         dp_from_ps)
 import numpy as np
 
+from .. import PFULL_STR
 from .numerics import d_dx_from_latlon, d_dy_from_lat, d_dp_from_p
-from .advection import horiz_advec, vert_advec
-from .mass import horiz_divg, horiz_divg_mass_adj, horiz_advec_mass_adj
+from .advection import horiz_advec, vert_advec, horiz_advec_spharm
+from .mass import (horiz_divg, horiz_divg_mass_adj, horiz_advec_mass_adj,
+                   horiz_divg_spharm)
 
 
 def field_horiz_flux_divg(arr, u, v, radius):
@@ -55,3 +58,21 @@ def field_horiz_flux_divg_mass_adj(arr, u, v, q, ps, radius, dp, p,
 def field_horiz_advec_divg_sum(arr, u, v, radius, dp):
     return (field_times_horiz_divg(arr, u, v, radius) +
             horiz_advec(arr, u, v, radius))
+
+
+def omega_from_divg_eta(u, v, ps, radius, bk, pk):
+    """Omega computed from the horizontal flow on model-native coordinates."""
+    pfull_coord = u[PFULL_STR]
+    ps_advec = horiz_advec_spharm(ps, u, v, radius)
+    term1 = to_pfull_from_phalf(bk, pfull_coord) * ps_advec
+
+    db = d_deta_from_phalf(bk, pfull_coord)
+    term2 = u.copy()
+    term2.values = np.cumsum(ps_advec*db, axis=1)
+
+    divg = horiz_divg_spharm(u, v, radius)
+    dp = dp_from_ps(bk, pk, ps, pfull_coord)
+    divg_dp = divg*dp
+    p_axis_num = divg_dp.get_axis_num(PFULL_STR)
+    divg_int = np.cumsum(divg_dp, axis=p_axis_num)
+    return term1 - term2 - divg_int
