@@ -10,8 +10,7 @@ from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind,
-                        horiz_advec_const_p_from_eta, horiz_advec_spharm,
-                        horiz_advec_from_eta_spharm)
+                        horiz_advec_const_p_from_eta, horiz_advec_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_dry_mass_adjusted, uv_column_budget_adjustment,
                    horiz_divg_spharm, horiz_divg_from_eta)
