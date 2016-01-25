@@ -16,7 +16,7 @@ from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    horiz_divg_spharm, horiz_divg_from_eta)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
-                        field_times_horiz_divg)
+                        field_times_horiz_divg, omega_from_divg_eta)
 from .thermo import dse, mse, fmse
 from .toa_sfc_fluxes import column_energy
 
@@ -388,6 +388,36 @@ def energy_vert_advec(temp, z, q, q_ice, u, v, omega):
 def energy_vert_advec_from_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
     """Vertical advection of energy."""
     return omega*d_dp_from_eta(energy(temp, z, q, q_ice, u, v), ps, bk, pk)
+
+
+def energy_vert_advec_eta_omega_adj(temp, z, q, q_ice, u, v, swdn_toa,
+                                    swup_toa, olr, swup_sfc, swdn_sfc,
+                                    lwup_sfc, lwdn_sfc, shflx, evap, precip,
+                                    ps, dp, radius, bk, pk):
+    """Vertical advection of energy using column energy-adjusted omega."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    omega_adj = omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)
+    return omega_adj*d_dp_from_eta(energy(temp, z, q, q_ice, u, v), ps, bk, pk)
+
+
+def energy_vert_advec_eta_omega_adj_time_mean(temp, z, q, q_ice, u, v,
+                                              swdn_toa, swup_toa, olr,
+                                              swup_sfc, swdn_sfc, lwup_sfc,
+                                              lwdn_sfc, shflx, evap, precip,
+                                              ps, dp, radius, bk, pk):
+    """Time-mean vertical energy advection w/ column energy-adjusted omega."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    u_mon, v_mon, ps_mon = [monthly_mean_ts(d) for d in (u_adj, v_adj, ps)]
+    omega_adj = omega_from_divg_eta(u_mon, v_mon, ps_mon, radius, bk, pk)
+    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice)]
+    monthly_terms += [u_mon, v_mon]
+    return omega_adj*d_dp_from_eta(energy(*monthly_terms), ps, bk, pk)
 
 
 def horiz_divg_energy_adj_from_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,

@@ -1905,6 +1905,36 @@ energy_vert_advec = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+energy_vert_advec_eta_omega_adj = Var(
+    name='energy_vert_advec_eta_omega_adj',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec_eta_omega_adj,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_vert_advec_eta_omega_adj_time_mean = Var(
+    name='energy_vert_advec_eta_omega_adj_time_mean',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec_eta_omega_adj_time_mean,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 mass_column = Var(
     name='mass_column',
     math_str=r'$p_s/g$',
