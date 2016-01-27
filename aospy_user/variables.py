@@ -1905,6 +1905,32 @@ energy_vert_advec = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+energy_vert_advec_from_eta_upwind = Var(
+    name='energy_vert_advec_from_eta_upwind',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_vert_advec_from_eta_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_horiz_advec_from_eta_upwind = Var(
+    name='energy_horiz_advec_from_eta_upwind',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec_from_eta_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 energy_vert_advec_eta_omega_adj = Var(
     name='energy_vert_advec_eta_omega_adj',
     domain='atmos',

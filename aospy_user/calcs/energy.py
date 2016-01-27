@@ -2,7 +2,8 @@
 from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind)
+                         monthly_mean_ts, monthly_mean_at_each_ind,
+                         pfull_from_ps)
 
 from .. import PFULL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
@@ -380,6 +381,13 @@ def energy_horiz_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
     return horiz_advec(en, u_adj, v_adj, radius)
 
 
+def energy_horiz_advec_from_eta_upwind(temp, z, q, q_ice, u, v, radius,
+                                       ps, bk, pk, order=1):
+    """Vertical advection of energy using upwind scheme."""
+    return horiz_advec_upwind(energy(temp, z, q, q_ice, u, v), u, v, radius,
+                              order=order)
+
+
 def energy_vert_advec(temp, z, q, q_ice, u, v, omega):
     """Vertical advection of energy."""
     return omega*d_dp_from_p(energy(temp, z, q, q_ice, u, v))
@@ -388,6 +396,15 @@ def energy_vert_advec(temp, z, q, q_ice, u, v, omega):
 def energy_vert_advec_from_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
     """Vertical advection of energy."""
     return omega*d_dp_from_eta(energy(temp, z, q, q_ice, u, v), ps, bk, pk)
+
+
+def energy_vert_advec_from_eta_upwind(temp, z, q, q_ice, u, v, omega,
+                                      ps, bk, pk, order=1):
+    """Vertical advection of energy using upwind scheme."""
+    pfull_coord = u[PFULL_STR]
+    pfull = pfull_from_ps(bk, pk, ps, pfull_coord)
+    return vert_advec_upwind(energy(temp, z, q, q_ice, u, v), omega,
+                             dim=PFULL_STR, coord=pfull, order=order)
 
 
 def energy_vert_advec_eta_omega_adj(temp, z, q, q_ice, u, v, swdn_toa,
@@ -573,19 +590,16 @@ def mse_total_advec(temp, hght, sphum, u, v, omega, p, radius):
     return field_total_advec(mse_, u, v, omega, p, radius)
 
 
-def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius, vec_field=False):
-    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius,
-                              vec_field=vec_field)
+def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius):
+    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius)
 
 
 def mse_vert_advec_upwind(temp, hght, sphum, omega, p):
     return vert_advec_upwind(mse(temp, hght, sphum), omega, p)
 
 
-def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius,
-                           vec_field=False):
-    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, p, radius,
-                              vec_field=vec_field)
+def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius):
+    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, p, radius)
 
 
 def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega,
