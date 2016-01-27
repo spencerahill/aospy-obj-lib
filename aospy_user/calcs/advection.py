@@ -1,15 +1,14 @@
 """Advection-related quantities."""
-from aospy.utils import (to_radians, to_pascal, to_pfull_from_phalf,
-                         d_deta_from_phalf)
+from aospy.utils import to_radians
 from infinite_diff import FiniteDiff
 import numpy as np
 
 from .. import LAT_STR, LON_STR, PFULL_STR
-from .numerics import (latlon_deriv_prefactor, upwind_scheme,
-                       wraparound_lon, d_dx_from_latlon, d_dy_from_lat,
-                       d_dp_from_p, d_dx_at_const_p_from_eta,
-                       d_dy_at_const_p_from_eta, d_dp_from_eta,
-                       horiz_gradient_spharm, horiz_gradient_from_eta_spharm)
+from .numerics import (latlon_deriv_prefactor, wraparound,
+                       d_dx_from_latlon, d_dy_from_lat, d_dp_from_p,
+                       d_dx_at_const_p_from_eta, d_dy_at_const_p_from_eta,
+                       d_dp_from_eta, horiz_gradient_spharm,
+                       horiz_gradient_from_eta_spharm)
 
 
 def zonal_advec(arr, u, radius):
@@ -17,15 +16,15 @@ def zonal_advec(arr, u, radius):
     return u*d_dx_from_latlon(arr, radius)
 
 
-def merid_advec(arr, v, radius, vec_field=False):
+def merid_advec(arr, v, radius):
     """Meridional advection of the given field."""
-    return v*d_dy_from_lat(arr, radius, vec_field=vec_field)
+    return v*d_dy_from_lat(arr, radius, vec_field=False)
 
 
-def horiz_advec(arr, u, v, radius, vec_field=False):
+def horiz_advec(arr, u, v, radius):
     """Horizontal advection of the given field."""
     return (zonal_advec(arr, u, radius) +
-            merid_advec(arr, v, radius, vec_field=vec_field))
+            merid_advec(arr, v, radius, vec_field=False))
 
 
 def vert_advec(arr, omega, p):
@@ -33,65 +32,46 @@ def vert_advec(arr, omega, p):
     return omega*d_dp_from_p(arr, p)
 
 
-def total_advec(arr, u, v, omega, p, radius, vec_field=False):
+def total_advec(arr, u, v, omega, p, radius):
     """Total advection of the given field."""
-    return (horiz_advec(arr, u, v, radius, vec_field=vec_field) +
-            vert_advec(arr, omega, p))
+    return horiz_advec(arr, u, v, radius) + vert_advec(arr, omega, p)
 
 
-def zonal_advec_upwind(arr, u, radius):
+def zonal_advec_upwind(arr, u, radius, order=1):
     """Advection in the zonal direction using upwind differencing."""
     prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
                                        radius, d_dy_of_scalar_field=False)
-    arr_ext = wraparound_lon(arr)
-    df_fwd = FiniteDiff.fwd_diff_deriv(arr_ext, LON_STR)
-    df_bwd = FiniteDiff.bwd_diff_deriv(arr_ext, LON_STR)
-    return prefactor*upwind_scheme(df_fwd, df_bwd, u)
+    arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
+    lon_rad_ext = to_radians(arr_ext[LON_STR])
+    return prefactor*FiniteDiff.upwind_advec(arr_ext, u, LON_STR,
+                                             coord=lon_rad_ext, order=order,
+                                             wraparound=True)
 
 
-def merid_advec_upwind(arr, v, radius, vec_field=False):
+def merid_advec_upwind(arr, v, radius, order=1):
     """Advection in the meridional direction using upwind differencing."""
-    lat = to_radians(arr[LAT_STR])
+    lat_rad = to_radians(arr.coords[LAT_STR])
     prefactor = 1. / radius
-    # Del operator differs in spherical coords for scalar v. vector fields.
-    if vec_field:
-        arr *= np.cos(lat)
-        prefactor /= np.cos(lat)
-        prefactor = prefactor.T
-    # Create arrays holding positive and negative values, each with forward
-    # differencing at south pole and backward differencing at north pole.
-    df_fwd_except_np = FiniteDiff.fwd_diff1(arr, lat)
-    df_bwd_except_sp = FiniteDiff.fwd_diff1(arr[::-1], lat[::-1])[::-1]
-    df_fwd = np.ma.concatenate((df_fwd_except_np,
-                                df_bwd_except_sp[-1:]), axis=0)
-    df_bwd = np.ma.concatenate((df_fwd_except_np[:1],
-                                df_bwd_except_sp), axis=0)
-    return prefactor*upwind_scheme(df_fwd, df_bwd, v)
+    return prefactor*FiniteDiff.upwind_advec(arr, v, LAT_STR, coord=lat_rad,
+                                             order=order, wraparound=False)
 
 
-def horiz_advec_upwind(arr, u, v, radius, vec_field=False):
-    return (zonal_advec_upwind(arr, u, radius) +
-            merid_advec_upwind(arr, v, radius, vec_field=vec_field))
+def horiz_advec_upwind(arr, u, v, radius, order=1):
+    return (zonal_advec_upwind(arr, u, radius, order=order) +
+            merid_advec_upwind(arr, v, radius, order=order))
 
 
-def vert_advec_upwind(arr, omega, p):
+def vert_advec_upwind(arr, omega, dim=PFULL_STR, coord=None, order=1):
     """Advection in pressure using upwind differencing."""
-    p = to_pascal(p)
-    # Create arrays holding positive and negative values, each with forward
-    # differencing at south pole and backward differencing at north pole.
-    df_fwd_partial = FiniteDiff.fwd_diff1(arr, p)
-    df_bwd_partial = FiniteDiff.fwd_diff1(arr[::-1], p[::-1])[::-1]
-    df_fwd = np.ma.concatenate((df_fwd_partial, df_bwd_partial[-1:]), axis=0)
-    df_bwd = np.ma.concatenate((df_fwd_partial[:1], df_bwd_partial), axis=0)
-    # 2015-10-26 S. Hill: does omega having the opposite sign convention as
-    # normal mean that the forward v. backward differencing should be switched?
-    return upwind_scheme(df_fwd, df_bwd, omega)
+    if coord is None:
+        coord = arr[dim]
+    return FiniteDiff.upwind_advec(arr, omega, dim, coord=coord, order=order)
 
 
 def total_advec_upwind(arr, u, v, omega, p, radius,
-                       vec_field=False):
-    return (horiz_advec_upwind(arr, u, v, radius, vec_field) +
-            vert_advec_upwind(arr, omega, p))
+                       p_str=PFULL_STR, order=1):
+    return (horiz_advec_upwind(arr, u, v, radius, order=order) +
+            vert_advec_upwind(arr, omega, p=p, p_str=p_str, order=order))
 
 
 def zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk):
@@ -99,18 +79,15 @@ def zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk):
     return u*d_dx_at_const_p_from_eta(arr, ps, radius, bk, pk)
 
 
-def merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk, vec_field=False):
+def merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk):
     """Meridional advection at constant pressure of the given scalar field."""
-    return v*d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk,
-                                      vec_field=vec_field)
+    return v*d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk)
 
 
-def horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
-                                 vec_field=False):
+def horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk):
     """Horizontal advection at constant pressure of the given scalar field."""
     return (zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk) +
-            merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk,
-                                         vec_field=vec_field))
+            merid_advec_const_p_from_eta(arr, v, ps, radius, bk, pk))
 
 
 def vert_advec_from_eta(arr, omega, ps, bk, pk):
@@ -118,11 +95,9 @@ def vert_advec_from_eta(arr, omega, ps, bk, pk):
     return omega*d_dp_from_eta(arr, ps, bk, pk)
 
 
-def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk,
-                         vec_field=False):
+def total_advec_from_eta(arr, u, v, omega, p, ps, radius, bk, pk):
     """Total advection of the given scalar field."""
-    return (horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk,
-                                         vec_field=vec_field) +
+    return (horiz_advec_const_p_from_eta(arr, u, v, ps, radius, bk, pk) +
             vert_advec(arr, omega, p))
 
 

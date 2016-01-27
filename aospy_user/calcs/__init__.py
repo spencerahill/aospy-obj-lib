@@ -13,9 +13,8 @@ from .tendencies import (
 )
 from .numerics import (
     fwd_diff2,
-    upwind_scheme,
     latlon_deriv_prefactor,
-    wraparound_lon,
+    wraparound,
     d_dx_from_latlon,
     d_dy_from_lat,
     d_dx_at_const_p_from_eta,
@@ -159,6 +158,7 @@ from .energy import (
     energy_sfc_ps_advec,
     energy_sfc_ps_advec_as_resid,
     energy_horiz_advec_from_eta,
+    energy_horiz_advec_from_eta_upwind,
     energy_horiz_advec_from_eta_time_mean,
     energy_horiz_advec,
     energy_horiz_divg_from_eta,
@@ -166,6 +166,7 @@ from .energy import (
     energy_column_vert_advec_as_resid,
     energy_vert_advec,
     energy_vert_advec_from_eta,
+    energy_vert_advec_from_eta_upwind,
     energy_vert_advec_eta_omega_adj,
     energy_vert_advec_eta_omega_adj_time_mean,
     energy_vert_advec_adj_from_eta,
