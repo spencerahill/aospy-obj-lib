@@ -40,52 +40,40 @@ def cen_diff4(arr, dim):
         return (8.*df_dx1 - df_dx2) / 12.
 
 
-def upwind_scheme(df_fwd, df_bwd, a):
-    """Upwind differencing scheme for advection.
-
-    :param df_fwd: Forward difference of the field.
-    :param df_bwd: Backard difference of the field.
-    :param a: Flow that is advecting the field `f`.
-    """
-    a_pos = np.ma.where(a >= 0., a, 0)
-    a_neg = np.ma.where(a < 0., a, 0)
-    return a_pos*df_bwd + a_neg*df_fwd
-
-
 # Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, radians=True,
                            d_dy_of_scalar_field=False):
     """Factor that multiplies del operations in spherical coordinates."""
+    lat_rad = to_radians(lat)
     if d_dy_of_scalar_field:
         return 1. / radius
     else:
-        lat_rad = lat if radians else np.deg2rad(lat)
         return 1. / (radius*np.cos(lat_rad))
 
 
-def wraparound_lon(arr, n=1, radians=True):
-    """Append wrap-around points in longitude to the DataArray or Dataset.
+def wraparound(arr, dim, left=True, right=True, circumf=360.):
+    """Append wrap-around point(s) to the DataArray or Dataset coord.
 
-    The longitude arraymust span from 0 to 360.  While this will usually be the
-    case, it's not guaranteed.  Some pre-processing step should be implemented
-    in the future that forces this to be the case.
+    TODO: Support arbitrary number of wraparound points on either side.
     """
-    circumf = 2*np.pi if radians else 360.
-    edge_left = arr.isel(**{LON_STR: 0})
-    edge_left[LON_STR] += circumf
-    edge_right = arr.isel(**{LON_STR: -1})
-    edge_right[LON_STR] -= circumf
-    return xray.concat([edge_right, arr, edge_left], dim=LON_STR)
+    if left:
+        edge_left = arr.isel(**{dim: 0})
+        edge_left[dim] += circumf
+        arr = xray.concat([arr, edge_left], dim=dim)
+    if right:
+        edge_right = arr.isel(**{dim: -1})
+        edge_right[dim] -= circumf
+        xray.concat([edge_right, arr], dim=dim)
+    return arr
 
 
 def d_dx_from_latlon(arr, radius):
     """Compute \partial arr/\partial x using centered differencing."""
-    lon_rad = to_radians(arr[LON_STR])
     prefactor = latlon_deriv_prefactor(arr[LAT_STR], radius, radians=False)
-    arr_ext = wraparound_lon(arr, n=1, radians=False)
-    lon_rad = to_radians(arr_ext[LON_STR])
-    darr_dx = (FiniteDiff.cen_diff(arr_ext, LON_STR, is_coord=False) /
-               FiniteDiff.cen_diff(lon_rad, LON_STR, is_coord=False))
+    arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
+    lon_rad_ext = to_radians(arr_ext[LON_STR])
+    darr_dx = (FiniteDiff.cen_diff(arr_ext, LON_STR) /
+               FiniteDiff.cen_diff(lon_rad_ext, LON_STR))
     return prefactor*darr_dx
 
 
@@ -98,8 +86,7 @@ def d_dy_from_lat(arr, radius, vec_field=False):
         arr = arr * np.cos(lat_rad)
     darr_dy = (
         FiniteDiff.cen_diff(arr, LAT_STR, do_edges_one_sided=True) /
-        FiniteDiff.cen_diff(lat_rad, LAT_STR, do_edges_one_sided=True,
-                            is_coord=False)
+        FiniteDiff.cen_diff(lat_rad, LAT_STR, do_edges_one_sided=True)
     )
     return prefactor*darr_dy
 
@@ -132,28 +119,27 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
     bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
     da_deta = d_deta_from_phalf(pk, pfull_coord)
     db_deta = d_deta_from_phalf(bk, pfull_coord)
-    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=False)
+    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=vec_field)
 
     return d_dy_const_eta + (darr_deta*bk_at_pfull * d_dy_ps /
                              (da_deta + db_deta*ps))
 
 
-def d_dp_from_p(arr):
+def d_dp_from_p(arr, order=2):
     """Derivative in pressure of array defined on fixed pressure levels."""
     p = to_pascal(arr[PLEVEL_STR])
-    return (FiniteDiff.cen_diff(arr, PLEVEL_STR, do_edges_one_sided=True) /
-            FiniteDiff.cen_diff(p, PLEVEL_STR, do_edges_one_sided=True,
-                                is_coord=True))
+    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, coord=p, order=order,
+                                     do_edges_one_sided=True)
 
 
-def d_dp_from_eta(arr, ps, bk, pk):
+def d_dp_from_eta(arr, ps, bk, pk, order=2):
     """Derivative in pressure of array defined on hybrid sigma-p coords.
 
     The array is assumed to be on full (as opposed to half) levels.
     """
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
-    return (FiniteDiff.cen_diff(arr, PFULL_STR, do_edges_one_sided=True) /
-            FiniteDiff.cen_diff(pfull, PFULL_STR, do_edges_one_sided=True))
+    return FiniteDiff.cen_diff_deriv(arr, PFULL_STR, coord=pfull, order=order,
+                                     do_edges_one_sided=True)
 
 
 def horiz_gradient_spharm(arr, radius):
