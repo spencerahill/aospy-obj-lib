@@ -12,7 +12,6 @@ from .tendencies import (
     time_tendency_each_timestep,
 )
 from .numerics import (
-    fwd_diff2,
     latlon_deriv_prefactor,
     wraparound,
     d_dx_from_latlon,

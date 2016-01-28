@@ -9,38 +9,6 @@ import xarray as xr
 from .. import LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
 
 
-def fwd_diff2(arr, dim):
-    """2nd order accurate forward differencing approximation of derivative.
-
-    :param arr: Field to take derivative of.
-    :param dim: Values of dimension over which derivative is taken.  If a
-              singleton, assumed to be the uniform spacing.  If an array,
-              assumed to be the values themselves, not the spacing, and must
-              be the same length as `arr`.
-    :out: Array containing the df/dx approximation, with length in the 0th
-          axis two less than that of the input array.
-    """
-    if isinstance(dim, (float, int)):
-        dx = dim
-        return (-arr[2:] + 4*arr[1:-1] - 3*arr[:-2]) / (2.*dx)
-    else:
-        df_dx1 = (arr[1:-1] - arr[:-2]) / (dim[1:-1] - dim[:-2])
-        df_dx2 = (arr[2:]   - arr[:-2]) / (dim[2:]   - dim[:-2])
-        return 2.*df_dx1 - df_dx2
-
-
-def cen_diff4(arr, dim):
-    """4th order accurate centered differencing."""
-    if isinstance(dim, (float, int)):
-        dx = dim
-        return (8*(arr[3:-1] - arr[1:-3]) - (arr[4:] - arr[:-4])) / (12.*dx)
-    else:
-        df_dx1 = (arr[3:-1] - arr[1:-3]) / (dim[3:-1] - dim[1:-3])
-        df_dx2 = (arr[4:] - arr[:-4]) / (dim[4:] - dim[:-4])
-        return (8.*df_dx1 - df_dx2) / 12.
-
-
-# Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, radians=True,
                            d_dy_of_scalar_field=False):
     """Factor that multiplies del operations in spherical coordinates."""
@@ -51,17 +19,14 @@ def latlon_deriv_prefactor(lat, radius, radians=True,
         return 1. / (radius*np.cos(lat_rad))
 
 
-def wraparound(arr, dim, left=True, right=True, circumf=360.):
-    """Append wrap-around point(s) to the DataArray or Dataset coord.
-
-    TODO: Support arbitrary number of wraparound points on either side.
-    """
+def wraparound(arr, dim, left=1, right=1, circumf=360., spacing=1):
+    """Append wrap-around point(s) to the DataArray or Dataset coord."""
     if left:
-        edge_left = arr.isel(**{dim: 0})
+        edge_left = arr.isel(**{dim: slice(0, left, spacing)})
         edge_left[dim] += circumf
         arr = xr.concat([arr, edge_left], dim=dim)
     if right:
-        edge_right = arr.isel(**{dim: -1})
+        edge_right = arr.isel(**{dim: slice(-right, None, spacing)})
         edge_right[dim] -= circumf
         xr.concat([edge_right, arr], dim=dim)
     return arr

@@ -1,7 +1,6 @@
 """Advection-related quantities."""
 from aospy.utils import to_radians
 from infinite_diff import FiniteDiff
-import numpy as np
 
 from .. import LAT_STR, LON_STR, PFULL_STR
 from .numerics import (latlon_deriv_prefactor, wraparound,
@@ -41,7 +40,7 @@ def zonal_advec_upwind(arr, u, radius, order=1):
     """Advection in the zonal direction using upwind differencing."""
     prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
                                        radius, d_dy_of_scalar_field=False)
-    arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
+    arr_ext = wraparound(arr, LON_STR, left=order, right=order, circumf=360.)
     lon_rad_ext = to_radians(arr_ext[LON_STR])
     return prefactor*FiniteDiff.upwind_advec(arr_ext, u, LON_STR,
                                              coord=lon_rad_ext, order=order,
