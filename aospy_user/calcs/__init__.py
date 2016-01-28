@@ -2,7 +2,7 @@
 
 Historically, these assumed input variables in the form of numpy arrays or
 masked numpy arrays.  As of October 2015, I have switched to assuming
-xray.DataArrays, to coincide with the same switch within aospy.  However, not
+xarray.DataArrays, to coincide with the same switch within aospy.  However, not
 all of the functions in this module have been converted to support this new
 datatype.
 """

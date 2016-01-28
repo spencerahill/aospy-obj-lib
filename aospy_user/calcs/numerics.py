@@ -4,7 +4,7 @@ from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
                          to_pfull_from_phalf, to_radians, to_pascal)
 from infinite_diff import FiniteDiff
 import numpy as np
-import xray
+import xarray as xr
 
 from .. import LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
 
@@ -59,11 +59,11 @@ def wraparound(arr, dim, left=True, right=True, circumf=360.):
     if left:
         edge_left = arr.isel(**{dim: 0})
         edge_left[dim] += circumf
-        arr = xray.concat([arr, edge_left], dim=dim)
+        arr = xr.concat([arr, edge_left], dim=dim)
     if right:
         edge_right = arr.isel(**{dim: -1})
         edge_right[dim] -= circumf
-        xray.concat([edge_right, arr], dim=dim)
+        xr.concat([edge_right, arr], dim=dim)
     return arr
 
 
@@ -150,7 +150,7 @@ def horiz_gradient_spharm(arr, radius):
     d_dx, d_dy = (sph.spharmt.getgrad(sph.spharmt.grdtospec(
         sph.prep_for_spharm(arr)
     )))
-    return sph.to_xray(d_dx, arr_orig=arr), sph.to_xray(d_dy, arr_orig=arr)
+    return sph.to_xarray(d_dx, arr_orig=arr), sph.to_xarray(d_dy, arr_orig=arr)
 
 
 def horiz_gradient_from_eta_spharm(arr, ps, radius, bk, pk, vec_field=False):

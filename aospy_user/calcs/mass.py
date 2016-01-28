@@ -9,7 +9,7 @@ from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          integrate)
 import numpy as np
 
-from .. import PFULL_STR, TIME_STR
+from .. import PFULL_STR, PHALF_STR, PLEVEL_STR, TIME_STR
 from .numerics import (d_dx_from_latlon, d_dy_from_lat, d_dp_from_p,
                        d_dx_at_const_p_from_eta, d_dy_at_const_p_from_eta)
 from .advection import horiz_advec, horiz_advec_spharm
@@ -27,7 +27,7 @@ def horiz_divg(u, v, radius):
 def horiz_divg_spharm(u, v, radius):
     sph_int = SpharmInterface(u, v, rsphere=radius, make_vectorwind=True)
     divg = sph_int.vectorwind.divergence()
-    return sph_int.to_xray(divg)
+    return sph_int.to_xarray(divg)
 
 
 def horiz_divg_from_eta(u, v, ps, radius, bk, pk):
@@ -143,15 +143,22 @@ def mass_column_budget_residual(ps, u, v, evap, precip, radius, dp, freq='1M'):
 
 def uv_column_budget_adjustment(u, v, residual, col_integral, radius):
     """Generic column budget conservation adjustment to apply to horiz wind."""
-    sph_int = SpharmInterface(u[:,0], v[:,0], rsphere=radius,
-                              make_spharmt=True, squeeze=True)
+    for p_str in [PFULL_STR, PHALF_STR, PLEVEL_STR]:
+        if hasattr(u, p_str):
+            dim = p_str
+            break
+    else:
+        raise AttributeError("Couldn't find vertical dimension "
+                             "of {}".format(u))
+    sph_int = SpharmInterface(u.isel(**{dim: 0}), v.isel(**{dim: 0}),
+                              rsphere=radius, make_spharmt=True, squeeze=True)
     # Assume residual stems entirely from divergent flow.
     resid_spectral = SpharmInterface.prep_for_spharm(residual)
     resid_spectral = sph_int.spharmt.grdtospec(resid_spectral)
     vort_spectral = np.zeros_like(resid_spectral)
 
     u_adj, v_adj = sph_int.spharmt.getuv(vort_spectral, resid_spectral)
-    u_arr, v_arr = sph_int.to_xray(u_adj), sph_int.to_xray(v_adj)
+    u_arr, v_arr = sph_int.to_xarray(u_adj), sph_int.to_xarray(v_adj)
     return u_arr / col_integral, v_arr / col_integral
 
 
