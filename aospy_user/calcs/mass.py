@@ -61,8 +61,6 @@ def mass_column_integral(bk, pk, ps):
 
     Explicitly computed by integrating over pressure, rather than implicitly
     using surface pressure.  Useful for checking if model data conserves mass.
-
-    :param dp: Pressure thickness of the model levels.
     """
     dp = dp_from_ps(bk, pk, ps)
     return dp.sum(dim=PFULL_STR)
