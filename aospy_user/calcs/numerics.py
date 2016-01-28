@@ -119,27 +119,27 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
     bk_at_pfull = to_pfull_from_phalf(bk, pfull_coord)
     da_deta = d_deta_from_phalf(pk, pfull_coord)
     db_deta = d_deta_from_phalf(bk, pfull_coord)
-    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=False)
+    d_dy_ps = d_dy_from_lat(ps, radius, vec_field=vec_field)
 
     return d_dy_const_eta + (darr_deta*bk_at_pfull * d_dy_ps /
                              (da_deta + db_deta*ps))
 
 
-def d_dp_from_p(arr):
+def d_dp_from_p(arr, order=2):
     """Derivative in pressure of array defined on fixed pressure levels."""
     p = to_pascal(arr[PLEVEL_STR])
-    return (FiniteDiff.cen_diff(arr, PLEVEL_STR, do_edges_one_sided=True) /
-            FiniteDiff.cen_diff(p, PLEVEL_STR, do_edges_one_sided=True))
+    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, coord=p, order=order,
+                                     do_edges_one_sided=True)
 
 
-def d_dp_from_eta(arr, ps, bk, pk):
+def d_dp_from_eta(arr, ps, bk, pk, order=2):
     """Derivative in pressure of array defined on hybrid sigma-p coords.
 
     The array is assumed to be on full (as opposed to half) levels.
     """
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
-    return (FiniteDiff.cen_diff(arr, PFULL_STR, do_edges_one_sided=True) /
-            FiniteDiff.cen_diff(pfull, PFULL_STR, do_edges_one_sided=True))
+    return FiniteDiff.cen_diff_deriv(arr, PFULL_STR, coord=pfull, order=order,
+                                     do_edges_one_sided=True)
 
 
 def horiz_gradient_spharm(arr, radius):
