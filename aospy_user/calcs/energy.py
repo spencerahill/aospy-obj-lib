@@ -11,7 +11,8 @@ from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         vert_advec_upwind, total_advec_upwind,
-                        horiz_advec_const_p_from_eta, horiz_advec_spharm)
+                        horiz_advec_const_p_from_eta, horiz_advec_spharm,
+                        horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_dry_mass_adjusted, uv_column_budget_adjustment,
                    horiz_divg_spharm, horiz_divg_from_eta)
@@ -338,23 +339,47 @@ def energy_column_budget_energy_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     return tendency + transport - source
 
 
-def energy_horiz_advec_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
-                           swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
-                           precip, ps, dp, radius, bk, pk):
+def energy_horiz_advec_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                           olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                           shflx, evap, precip, ps, dp, radius):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    # return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
+    return horiz_advec(en, u_adj, v_adj, radius)
+
+
+def energy_horiz_advec_eta_adj_spharm(temp, z, q, q_ice, u, v, swdn_toa,
+                                      swup_toa, olr, swup_sfc, swdn_sfc,
+                                      lwup_sfc, lwdn_sfc, shflx, evap, precip,
+                                      ps, dp, radius, bk, pk):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_horiz_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                               shflx, evap, precip, ps, dp, radius, bk, pk):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
     return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
 
 
-def energy_horiz_advec_eta_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
-                                     swup_toa, olr, swup_sfc, swdn_sfc,
-                                     lwup_sfc, lwdn_sfc, shflx, evap, precip,
-                                     ps, dp, radius, bk, pk):
+def energy_horiz_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
+                                         swup_toa, olr, swup_sfc, swdn_sfc,
+                                         lwup_sfc, lwdn_sfc, shflx, evap,
+                                         precip, ps, dp, radius, bk, pk):
     """Horizontal energy advection at constant pressure by time-mean flow."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
@@ -366,21 +391,9 @@ def energy_horiz_advec_eta_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
     return horiz_advec_const_p_from_eta(*monthly_terms)
 
 
-def energy_horiz_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
-                       olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                       shflx, evap, precip, ps, dp, radius):
-    """Horizontal advection of energy at constant pressure."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    return horiz_advec(en, u_adj, v_adj, radius)
-
-
-def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, radius, ps, bk, pk,
-                                  order=1):
-    """Vertical advection of energy using upwind scheme."""
+def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, ps, bk, pk,
+                              order=1):
+    """Horizontal advection of energy using upwind scheme."""
     return horiz_advec_upwind(energy(temp, z, q, q_ice, u, v), u, v, radius,
                               order=order)
 
