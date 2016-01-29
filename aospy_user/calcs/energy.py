@@ -331,7 +331,7 @@ def energy_column_budget_energy_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     tendency = time_tendency_each_timestep(int_dp_g(en, dp))
     transport = energy_column_divg_energy_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
-        swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,ps, dp, radius
+        swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, ps, dp, radius
     )
     source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                                   lwup_sfc, lwdn_sfc, shflx, evap)
@@ -340,7 +340,7 @@ def energy_column_budget_energy_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
 
 def energy_horiz_advec_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                            swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
-                           precip, ps, dp, radius, bk, pk ):
+                           precip, ps, dp, radius, bk, pk):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
@@ -433,10 +433,9 @@ def energy_vert_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    u_mon, v_mon, ps_mon = [monthly_mean_ts(d) for d in (u_adj, v_adj, ps)]
-    omega_adj = omega_from_divg_eta(u_mon, v_mon, ps_mon, radius, bk, pk)
-    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice)]
-    monthly_terms += [u_mon, v_mon]
+    omega_adj = omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)
+    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice,
+                                                  u_adj, v_adj)]
     ps_mon = monthly_mean_ts(ps)
     return omega_adj*d_dp_from_eta(energy(*monthly_terms), ps_mon, bk, pk)
 
@@ -463,13 +462,13 @@ def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    u_mon, v_mon, ps_mon = [monthly_mean_ts(d) for d in (u_adj, v_adj, ps)]
-    omega_adj = omega_from_divg_eta(u_mon, v_mon, ps_mon, radius, bk, pk)
-    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice)]
-    monthly_terms += [u_mon, v_mon]
+    omega_adj = omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)
+    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice,
+                                                  u_adj, v_adj)]
+    omega_mon = monthly_mean_ts(omega_adj)
     pfull_coord = u[PFULL_STR]
-    pfull = pfull_from_ps(bk, pk, ps_mon, pfull_coord)
-    return vert_advec_upwind(energy(*monthly_terms), omega_adj,
+    pfull = pfull_from_ps(bk, pk, monthly_mean_ts(ps), pfull_coord)
+    return vert_advec_upwind(energy(*monthly_terms), omega_mon,
                              dim=PFULL_STR, coord=pfull, order=order)
 
 
