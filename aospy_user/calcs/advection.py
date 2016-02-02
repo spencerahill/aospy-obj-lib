@@ -44,7 +44,7 @@ def zonal_advec_upwind(arr, u, radius, order=1):
     lon_rad_ext = to_radians(arr_ext[LON_STR])
     return prefactor*FiniteDiff.upwind_advec(arr_ext, u, LON_STR,
                                              coord=lon_rad_ext, order=order,
-                                             wraparound=True)
+                                             fill_edge=False)
 
 
 def merid_advec_upwind(arr, v, radius, order=1):
@@ -52,10 +52,11 @@ def merid_advec_upwind(arr, v, radius, order=1):
     lat_rad = to_radians(arr.coords[LAT_STR])
     prefactor = 1. / radius
     return prefactor*FiniteDiff.upwind_advec(arr, v, LAT_STR, coord=lat_rad,
-                                             order=order, wraparound=False)
+                                             order=order, fill_edge=True)
 
 
 def horiz_advec_upwind(arr, u, v, radius, order=1):
+    """Horizontal (meridional plus zonal) upwind advection."""
     return (zonal_advec_upwind(arr, u, radius, order=order) +
             merid_advec_upwind(arr, v, radius, order=order))
 
@@ -64,11 +65,13 @@ def vert_advec_upwind(arr, omega, dim=PFULL_STR, coord=None, order=1):
     """Advection in pressure using upwind differencing."""
     if coord is None:
         coord = arr[dim]
-    return FiniteDiff.upwind_advec(arr, omega, dim, coord=coord, order=order)
+    return FiniteDiff.upwind_advec(arr, omega, dim, coord=coord, order=order,
+                                   fill_edge=True)
 
 
 def total_advec_upwind(arr, u, v, omega, p, radius,
                        p_str=PFULL_STR, order=1):
+    """Total (horizontal plus vertical) upwind advection."""
     return (horiz_advec_upwind(arr, u, v, radius, order=order) +
             vert_advec_upwind(arr, omega, p=p, p_str=p_str, order=order))
 
