@@ -36,7 +36,7 @@ def total_advec(arr, u, v, omega, p, radius):
     return horiz_advec(arr, u, v, radius) + vert_advec(arr, omega, p)
 
 
-def zonal_advec_upwind(arr, u, radius, order=1):
+def zonal_advec_upwind(arr, u, radius, order=2):
     """Advection in the zonal direction using upwind differencing."""
     prefactor = latlon_deriv_prefactor(to_radians(arr.coords[LAT_STR]),
                                        radius, d_dy_of_scalar_field=False)
@@ -44,15 +44,17 @@ def zonal_advec_upwind(arr, u, radius, order=1):
     lon_rad_ext = to_radians(arr_ext[LON_STR])
     return prefactor*FiniteDiff.upwind_advec(arr_ext, u, LON_STR,
                                              coord=lon_rad_ext, order=order,
-                                             fill_edge=False)
+                                             fill_edge=False,
+                                             reverse_dim=False)
 
 
-def merid_advec_upwind(arr, v, radius, order=1):
+def merid_advec_upwind(arr, v, radius, order=2):
     """Advection in the meridional direction using upwind differencing."""
     lat_rad = to_radians(arr.coords[LAT_STR])
     prefactor = 1. / radius
     return prefactor*FiniteDiff.upwind_advec(arr, v, LAT_STR, coord=lat_rad,
-                                             order=order, fill_edge=True)
+                                             order=order, fill_edge=True,
+                                             reverse_dim=False)
 
 
 def horiz_advec_upwind(arr, u, v, radius, order=1):
@@ -61,12 +63,10 @@ def horiz_advec_upwind(arr, u, v, radius, order=1):
             merid_advec_upwind(arr, v, radius, order=order))
 
 
-def vert_advec_upwind(arr, omega, dim=PFULL_STR, coord=None, order=1):
+def vert_advec_upwind(arr, omega, dim=PFULL_STR, coord=None, order=2):
     """Advection in pressure using upwind differencing."""
-    if coord is None:
-        coord = arr[dim]
     return FiniteDiff.upwind_advec(arr, omega, dim, coord=coord, order=order,
-                                   fill_edge=True)
+                                   fill_edge=True, reverse_dim=False)
 
 
 def total_advec_upwind(arr, u, v, omega, p, radius,

@@ -391,8 +391,7 @@ def energy_horiz_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
     return horiz_advec_const_p_from_eta(*monthly_terms)
 
 
-def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, ps, bk, pk,
-                              order=1):
+def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, order=1):
     """Horizontal advection of energy using upwind scheme."""
     return horiz_advec_upwind(energy(temp, z, q, q_ice, u, v), u, v, radius,
                               order=order)
@@ -409,7 +408,7 @@ def energy_vert_advec_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
 
 
 def energy_vert_advec_eta_upwind(temp, z, q, q_ice, u, v, omega, ps, bk, pk,
-                                 order=1):
+                                 order=2):
     """Vertical advection of energy using upwind scheme."""
     pfull_coord = u[PFULL_STR]
     pfull = pfull_from_ps(bk, pk, ps, pfull_coord)

@@ -50,8 +50,8 @@ def d_dy_from_lat(arr, radius, vec_field=False):
     if vec_field:
         arr = arr * np.cos(lat_rad)
     darr_dy = (
-        FiniteDiff.cen_diff(arr, LAT_STR, do_edges_one_sided=True) /
-        FiniteDiff.cen_diff(lat_rad, LAT_STR, do_edges_one_sided=True)
+        FiniteDiff.cen_diff(arr, LAT_STR, fill_edges=True) /
+        FiniteDiff.cen_diff(lat_rad, LAT_STR, fill_edges=True)
     )
     return prefactor*darr_dy
 
@@ -94,7 +94,7 @@ def d_dp_from_p(arr, order=2):
     """Derivative in pressure of array defined on fixed pressure levels."""
     p = to_pascal(arr[PLEVEL_STR])
     return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, coord=p, order=order,
-                                     do_edges_one_sided=True)
+                                     fill_edges=True)
 
 
 def d_dp_from_eta(arr, ps, bk, pk, order=2):
@@ -104,7 +104,7 @@ def d_dp_from_eta(arr, ps, bk, pk, order=2):
     """
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
     return FiniteDiff.cen_diff_deriv(arr, PFULL_STR, coord=pfull, order=order,
-                                     do_edges_one_sided=True)
+                                     fill_edges=True)
 
 
 def horiz_gradient_spharm(arr, radius):

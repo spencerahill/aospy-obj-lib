@@ -34,6 +34,6 @@ def time_tendency_each_timestep(arr):
         time = arr[TIME_STR].copy()
         # Force time units to be seconds.
         time = (time - np.datetime64(0, 's')) / np.timedelta64(1, 's')
-        return (FiniteDiff.cen_diff(arr, TIME_STR, do_edges_one_sided=True) /
-                FiniteDiff.cen_diff(time, TIME_STR, do_edges_one_sided=True))
+        return (FiniteDiff.cen_diff(arr, TIME_STR, fill_edges=True) /
+                FiniteDiff.cen_diff(time, TIME_STR, fill_edges=True))
     return arr.groupby('time.year').apply(cen_diff_time)
