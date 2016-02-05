@@ -63,12 +63,6 @@ def horiz_advec_upwind(arr, u, v, radius, order=1):
             merid_advec_upwind(arr, v, radius, order=order))
 
 
-def vert_advec_upwind(arr, omega, dim=PFULL_STR, coord=None, order=2):
-    """Advection in pressure using upwind differencing."""
-    return FiniteDiff.upwind_advec(arr, omega, dim, coord=coord, order=order,
-                                   fill_edge=True, reverse_dim=False)
-
-
 def total_advec_upwind(arr, u, v, omega, p, radius,
                        p_str=PFULL_STR, order=1):
     """Total (horizontal plus vertical) upwind advection."""

@@ -65,7 +65,6 @@ from .advection import (
     total_advec,
     zonal_advec_upwind,
     merid_advec_upwind,
-    vert_advec_upwind,
     horiz_advec_upwind,
     total_advec_upwind,
     zonal_advec_const_p_from_eta,

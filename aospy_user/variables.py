@@ -2756,20 +2756,6 @@ q_horiz_advec_upwind = Var(
     units=units.s1_spec_mass,
     colormap='BrBG_r'
 )
-q_vert_advec_upwind = Var(
-    name='q_vert_advec_upwind',
-    domain='atmos',
-    description=('Vertical advection of specific humidity using upwind '
-                 'finite differencing scheme for derivatives.'),
-    variables=(sphum, omega, p),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.vert_advec_upwind,
-    units=units.s1_spec_mass,
-    colormap='BrBG_r'
-)
 q_total_advec_upwind = Var(
     name='q_total_advec_upwind',
     domain='atmos',
