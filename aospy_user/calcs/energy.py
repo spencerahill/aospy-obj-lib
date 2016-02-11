@@ -4,7 +4,7 @@ from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
                          monthly_mean_ts, monthly_mean_at_each_ind,
                          pfull_from_ps)
-from infinite_diff import FiniteDiff
+from infinite_diff import Upwind
 
 from .. import LON_STR, LAT_STR, PFULL_STR, PLEVEL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
@@ -429,9 +429,8 @@ def energy_vert_advec_eta_upwind(temp, z, q, q_ice, u, v, omega, ps, bk, pk,
     """Vertical advection of energy using upwind scheme."""
     pfull_coord = u[PFULL_STR]
     pfull = pfull_from_ps(bk, pk, ps, pfull_coord)
-    return FiniteDiff.upwind_advec(energy(temp, z, q, q_ice, u, v), omega,
-                                   PFULL_STR, coord=pfull, order=order,
-                                   fill_edge=True, reverse_dim=False)
+    return Upwind(omega, energy(temp, z, q, q_ice, u, v), PFULL_STR,
+                  coord=pfull, order=order, fill_edge=True).advec()
 
 
 def energy_vert_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, omega,
@@ -441,9 +440,8 @@ def energy_vert_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, omega,
     monthly_terms = monthly_mean_ts([temp, z, q, q_ice, u, v])
     ps_mon, omega_mon = monthly_mean_ts([ps, omega])
     pfull = pfull_from_ps(bk, pk, ps_mon, pfull_coord)
-    return FiniteDiff.upwind_advec(energy(*monthly_terms), omega_mon,
-                                   PFULL_STR, coord=pfull, order=order,
-                                   fill_edge=True, reverse_dim=False)
+    return Upwind(omega_mon, energy(*monthly_terms), PFULL_STR, coord=pfull,
+                  order=order, fill_edge=True).advec()
 
 
 def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
@@ -462,9 +460,8 @@ def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
                                                     bk, pk))
     pfull_coord = u[PFULL_STR]
     pfull = pfull_from_ps(bk, pk, monthly_mean_ts(ps), pfull_coord)
-    return FiniteDiff.upwind_advec(energy(*monthly_terms), omega_mon,
-                                   PFULL_STR, coord=pfull, order=order,
-                                   fill_edge=True, reverse_dim=False)
+    return Upwind(omega_mon, energy(*monthly_terms), PFULL_STR, coord=pfull,
+                  order=order, fill_edge=True).advec()
 
 
 def energy_vert_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -659,9 +656,8 @@ def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius):
 
 
 def mse_vert_advec_upwind(temp, hght, sphum, omega, p, order=2):
-    return FiniteDiff.upwind_advec(mse(temp, hght, sphum), omega,
-                                   PLEVEL_STR, coord=p, order=order,
-                                   fill_edge=True, reverse_dim=False)
+    return Upwind(omega, mse(temp, hght, sphum), PLEVEL_STR, coord=p,
+                  order=order, fill_edge=True).advec()
 
 
 def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius):

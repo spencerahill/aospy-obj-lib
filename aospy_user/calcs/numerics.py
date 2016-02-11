@@ -2,7 +2,7 @@
 from animal_spharm import SpharmInterface
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
                          to_pfull_from_phalf, to_radians, to_pascal)
-from infinite_diff import FiniteDiff
+from infinite_diff import CenDeriv
 import numpy as np
 import xarray as xr
 
@@ -37,8 +37,8 @@ def d_dx_from_latlon(arr, radius):
     prefactor = latlon_deriv_prefactor(arr[LAT_STR], radius, radians=False)
     arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
     lon_rad_ext = to_radians(arr_ext[LON_STR])
-    darr_dx = (FiniteDiff.cen_diff(arr_ext, LON_STR) /
-               FiniteDiff.cen_diff(lon_rad_ext, LON_STR))
+    darr_dx = CenDeriv(arr_ext, LON_STR,
+                       coord=lon_rad_ext).deriv(fill_edge=False)
     return prefactor*darr_dx
 
 
@@ -49,10 +49,7 @@ def d_dy_from_lat(arr, radius, vec_field=False):
                                        d_dy_of_scalar_field=False)
     if vec_field:
         arr = arr * np.cos(lat_rad)
-    darr_dy = (
-        FiniteDiff.cen_diff(arr, LAT_STR, fill_edges=True) /
-        FiniteDiff.cen_diff(lat_rad, LAT_STR, fill_edges=True)
-    )
+    darr_dy = CenDeriv(arr, LAT_STR, coord=lat_rad).deriv(fill_edge=True)
     return prefactor*darr_dy
 
 
@@ -93,8 +90,8 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
 def d_dp_from_p(arr, order=2):
     """Derivative in pressure of array defined on fixed pressure levels."""
     p = to_pascal(arr[PLEVEL_STR])
-    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, coord=p, order=order,
-                                     fill_edges=True)
+    return CenDeriv(arr, PLEVEL_STR, coord=p).deriv(order=order,
+                                                    fill_edge=True)
 
 
 def d_dp_from_eta(arr, ps, bk, pk, order=2):
@@ -103,8 +100,8 @@ def d_dp_from_eta(arr, ps, bk, pk, order=2):
     The array is assumed to be on full (as opposed to half) levels.
     """
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
-    return FiniteDiff.cen_diff_deriv(arr, PFULL_STR, coord=pfull, order=order,
-                                     fill_edges=True)
+    return CenDeriv(arr, PFULL_STR, coord=pfull).deriv(order=order,
+                                                       fill_edges=True)
 
 
 def horiz_gradient_spharm(arr, radius):

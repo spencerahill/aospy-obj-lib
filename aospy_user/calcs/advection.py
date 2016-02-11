@@ -1,6 +1,6 @@
 """Advection-related quantities."""
 from aospy.utils import to_radians
-from infinite_diff import FiniteDiff
+from infinite_diff import Upwind
 
 from .. import LAT_STR, LON_STR, PFULL_STR
 from .numerics import (latlon_deriv_prefactor, wraparound,
@@ -42,19 +42,16 @@ def zonal_advec_upwind(arr, u, radius, order=2):
                                        radius, d_dy_of_scalar_field=False)
     arr_ext = wraparound(arr, LON_STR, left=order, right=order, circumf=360.)
     lon_rad_ext = to_radians(arr_ext[LON_STR])
-    return prefactor*FiniteDiff.upwind_advec(arr_ext, u, LON_STR,
-                                             coord=lon_rad_ext, order=order,
-                                             fill_edge=False,
-                                             reverse_dim=False)
+    return prefactor*Upwind(u, arr_ext, LON_STR, coord=lon_rad_ext,
+                            order=order, fill_edge=False).advec()
 
 
 def merid_advec_upwind(arr, v, radius, order=2):
     """Advection in the meridional direction using upwind differencing."""
     lat_rad = to_radians(arr.coords[LAT_STR])
     prefactor = 1. / radius
-    return prefactor*FiniteDiff.upwind_advec(arr, v, LAT_STR, coord=lat_rad,
-                                             order=order, fill_edge=True,
-                                             reverse_dim=False)
+    return prefactor*Upwind(v, arr, LAT_STR, coord=lat_rad, order=order,
+                            fill_edge=True).advec()
 
 
 def horiz_advec_upwind(arr, u, v, radius, order=1):
@@ -67,7 +64,8 @@ def total_advec_upwind(arr, u, v, omega, p, radius,
                        p_str=PFULL_STR, order=1):
     """Total (horizontal plus vertical) upwind advection."""
     return (horiz_advec_upwind(arr, u, v, radius, order=order) +
-            vert_advec_upwind(arr, omega, p=p, p_str=p_str, order=order))
+            Upwind(omega, p_str, arr, coord=p, order=order,
+                   fill_edge=True).advec())
 
 
 def zonal_advec_const_p_from_eta(arr, u, ps, radius, bk, pk):
