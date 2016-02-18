@@ -1804,6 +1804,20 @@ energy_horiz_advec_eta_adj_time_mean = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+energy_horiz_advec_eta_upwind_adj_time_mean = Var(
+    name='energy_horiz_advec_eta_upwind_adj_time_mean',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
+               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
+               precip, ps, dp, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec_eta_upwind_adj_time_mean,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 energy_horiz_advec_adj = Var(
     name='energy_horiz_advec_adj',
     domain='atmos',
@@ -1829,6 +1843,19 @@ energy_horiz_advec_upwind = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.energy_horiz_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_horiz_advec_eta_upwind = Var(
+    name='energy_horiz_advec_eta_upwind',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, r_e, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_horiz_advec_eta_upwind,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )

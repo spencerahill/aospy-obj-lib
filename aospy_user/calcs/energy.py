@@ -2,11 +2,10 @@
 from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind,
-                         pfull_from_ps)
-from infinite_diff.advec import Upwind, EtaUpwind
+                         monthly_mean_ts, monthly_mean_at_each_ind)
+from infinite_diff.advec import Upwind, EtaUpwind, SphereEtaUpwind
 
-from .. import LON_STR, LAT_STR, PFULL_STR, PLEVEL_STR
+from .. import PFULL_STR, PLEVEL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
@@ -394,6 +393,7 @@ def energy_horiz_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
 
 def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, order=2):
     """Horizontal advection of energy using upwind scheme."""
+
     return horiz_advec_upwind(energy(temp, z, q, q_ice, u, v), u, v, radius,
                               order=order)
 
@@ -410,8 +410,24 @@ def energy_horiz_advec_upwind_time_mean(temp, z, q, q_ice, u, v, radius,
 def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, radius, bk, pk,
                                   order=2):
     """Horizontal advection of energy using upwind scheme."""
-    ea = EtaAdvec(u[LAT_STR], u[LON_STR], radius, bk, pk, u, v)
-    return ea.upwind_const_p(energy(temp, z, q, q_ice, u, v), order=order)
+    return SphereEtaUpwind(energy(temp, z, q, q_ice, u, v), pk, bk, ps,
+                           order=order).advec_horiz_const_p(u, v)
+
+
+def energy_horiz_advec_eta_upwind_adj_time_mean(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
+        order=2
+):
+    """Upwind horizontal energy advection at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    tm, zm, qm, qim, um, vm, psm = monthly_mean_ts([temp, z, q, q_ice,
+                                                    u_adj, v_adj, ps])
+    return SphereEtaUpwind(energy(tm, zm, qm, qim, um, vm), pk, bk, psm,
+                           order=order).advec_horiz_const_p(um, vm)
 
 
 def energy_vert_advec(temp, z, q, q_ice, u, v, omega):
