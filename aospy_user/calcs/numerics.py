@@ -2,45 +2,13 @@
 from animal_spharm import SpharmInterface
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
                          to_pfull_from_phalf, to_radians, to_pascal)
-from infinite_diff import FiniteDiff
+from infinite_diff import CenDeriv
 import numpy as np
 import xarray as xr
 
 from .. import LAT_STR, LON_STR, PFULL_STR, PLEVEL_STR
 
 
-def fwd_diff2(arr, dim):
-    """2nd order accurate forward differencing approximation of derivative.
-
-    :param arr: Field to take derivative of.
-    :param dim: Values of dimension over which derivative is taken.  If a
-              singleton, assumed to be the uniform spacing.  If an array,
-              assumed to be the values themselves, not the spacing, and must
-              be the same length as `arr`.
-    :out: Array containing the df/dx approximation, with length in the 0th
-          axis two less than that of the input array.
-    """
-    if isinstance(dim, (float, int)):
-        dx = dim
-        return (-arr[2:] + 4*arr[1:-1] - 3*arr[:-2]) / (2.*dx)
-    else:
-        df_dx1 = (arr[1:-1] - arr[:-2]) / (dim[1:-1] - dim[:-2])
-        df_dx2 = (arr[2:]   - arr[:-2]) / (dim[2:]   - dim[:-2])
-        return 2.*df_dx1 - df_dx2
-
-
-def cen_diff4(arr, dim):
-    """4th order accurate centered differencing."""
-    if isinstance(dim, (float, int)):
-        dx = dim
-        return (8*(arr[3:-1] - arr[1:-3]) - (arr[4:] - arr[:-4])) / (12.*dx)
-    else:
-        df_dx1 = (arr[3:-1] - arr[1:-3]) / (dim[3:-1] - dim[1:-3])
-        df_dx2 = (arr[4:] - arr[:-4]) / (dim[4:] - dim[:-4])
-        return (8.*df_dx1 - df_dx2) / 12.
-
-
-# Functions for derivatives in x, y, and p.
 def latlon_deriv_prefactor(lat, radius, radians=True,
                            d_dy_of_scalar_field=False):
     """Factor that multiplies del operations in spherical coordinates."""
@@ -51,17 +19,14 @@ def latlon_deriv_prefactor(lat, radius, radians=True,
         return 1. / (radius*np.cos(lat_rad))
 
 
-def wraparound(arr, dim, left=True, right=True, circumf=360.):
-    """Append wrap-around point(s) to the DataArray or Dataset coord.
-
-    TODO: Support arbitrary number of wraparound points on either side.
-    """
+def wraparound(arr, dim, left=1, right=1, circumf=360., spacing=1):
+    """Append wrap-around point(s) to the DataArray or Dataset coord."""
     if left:
-        edge_left = arr.isel(**{dim: 0})
+        edge_left = arr.isel(**{dim: slice(0, left, spacing)})
         edge_left[dim] += circumf
         arr = xr.concat([arr, edge_left], dim=dim)
     if right:
-        edge_right = arr.isel(**{dim: -1})
+        edge_right = arr.isel(**{dim: slice(-right, None, spacing)})
         edge_right[dim] -= circumf
         xr.concat([edge_right, arr], dim=dim)
     return arr
@@ -72,8 +37,8 @@ def d_dx_from_latlon(arr, radius):
     prefactor = latlon_deriv_prefactor(arr[LAT_STR], radius, radians=False)
     arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
     lon_rad_ext = to_radians(arr_ext[LON_STR])
-    darr_dx = (FiniteDiff.cen_diff(arr_ext, LON_STR) /
-               FiniteDiff.cen_diff(lon_rad_ext, LON_STR))
+    darr_dx = CenDeriv(arr_ext, LON_STR,
+                       coord=lon_rad_ext).deriv(fill_edge=False)
     return prefactor*darr_dx
 
 
@@ -84,10 +49,7 @@ def d_dy_from_lat(arr, radius, vec_field=False):
                                        d_dy_of_scalar_field=False)
     if vec_field:
         arr = arr * np.cos(lat_rad)
-    darr_dy = (
-        FiniteDiff.cen_diff(arr, LAT_STR, do_edges_one_sided=True) /
-        FiniteDiff.cen_diff(lat_rad, LAT_STR, do_edges_one_sided=True)
-    )
+    darr_dy = CenDeriv(arr, LAT_STR, coord=lat_rad).deriv(fill_edge=True)
     return prefactor*darr_dy
 
 
@@ -128,8 +90,8 @@ def d_dy_at_const_p_from_eta(arr, ps, radius, bk, pk, vec_field=False):
 def d_dp_from_p(arr, order=2):
     """Derivative in pressure of array defined on fixed pressure levels."""
     p = to_pascal(arr[PLEVEL_STR])
-    return FiniteDiff.cen_diff_deriv(arr, PLEVEL_STR, coord=p, order=order,
-                                     do_edges_one_sided=True)
+    return CenDeriv(arr, PLEVEL_STR, coord=p).deriv(order=order,
+                                                    fill_edge=True)
 
 
 def d_dp_from_eta(arr, ps, bk, pk, order=2):
@@ -138,8 +100,8 @@ def d_dp_from_eta(arr, ps, bk, pk, order=2):
     The array is assumed to be on full (as opposed to half) levels.
     """
     pfull = pfull_from_ps(bk, pk, ps, arr[PFULL_STR])
-    return FiniteDiff.cen_diff_deriv(arr, PFULL_STR, coord=pfull, order=order,
-                                     do_edges_one_sided=True)
+    return CenDeriv(arr, PFULL_STR, coord=pfull).deriv(order=order,
+                                                       fill_edges=True)
 
 
 def horiz_gradient_spharm(arr, radius):

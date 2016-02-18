@@ -1,6 +1,6 @@
 """Calculations involved in mass and energy budgets."""
 from aospy.utils import coord_to_new_dataarray
-from infinite_diff import FiniteDiff
+from infinite_diff import CenDeriv
 import numpy as np
 
 from .. import TIME_STR
@@ -34,6 +34,5 @@ def time_tendency_each_timestep(arr):
         time = arr[TIME_STR].copy()
         # Force time units to be seconds.
         time = (time - np.datetime64(0, 's')) / np.timedelta64(1, 's')
-        return (FiniteDiff.cen_diff(arr, TIME_STR, do_edges_one_sided=True) /
-                FiniteDiff.cen_diff(time, TIME_STR, do_edges_one_sided=True))
+        return CenDeriv(arr, TIME_STR, coord=time, fill_edge=True).deriv()
     return arr.groupby('time.year').apply(cen_diff_time)

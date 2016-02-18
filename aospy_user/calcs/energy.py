@@ -2,16 +2,17 @@
 from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind,
-                         pfull_from_ps)
+                         monthly_mean_ts, monthly_mean_at_each_ind)
+from infinite_diff.advec import Upwind, EtaUpwind, SphereEtaUpwind
 
-from .. import PFULL_STR
+from .. import PFULL_STR, PLEVEL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
-                        vert_advec_upwind, total_advec_upwind,
-                        horiz_advec_const_p_from_eta, horiz_advec_spharm)
+                        total_advec_upwind,
+                        horiz_advec_const_p_from_eta, horiz_advec_spharm,
+                        horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_dry_mass_adjusted, uv_column_budget_adjustment,
                    horiz_divg_spharm, horiz_divg_from_eta)
@@ -331,44 +332,16 @@ def energy_column_budget_energy_adj_residual(temp, z, q, q_ice, u, v, swdn_toa,
     tendency = time_tendency_each_timestep(int_dp_g(en, dp))
     transport = energy_column_divg_energy_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc,
-        swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,ps, dp, radius
+        swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, ps, dp, radius
     )
     source = energy_column_source(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
                                   lwup_sfc, lwdn_sfc, shflx, evap)
     return tendency + transport - source
 
 
-def energy_horiz_advec_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
-                           swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
-                           precip, ps, dp, radius, bk, pk ):
-    """Horizontal advection of energy at constant pressure."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    # return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
-    return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
-
-
-def energy_horiz_advec_eta_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
-                                     swup_toa, olr, swup_sfc, swdn_sfc,
-                                     lwup_sfc, lwdn_sfc, shflx, evap, precip,
-                                     ps, dp, radius, bk, pk):
-    """Horizontal energy advection at constant pressure by time-mean flow."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    monthly_terms = [monthly_mean_ts(d) for d in (en, u_adj, v_adj, ps)]
-    monthly_terms += [radius, bk, pk]
-    return horiz_advec_const_p_from_eta(*monthly_terms)
-
-
-def energy_horiz_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
-                       olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                       shflx, evap, precip, ps, dp, radius):
+def energy_horiz_advec_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                           olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                           shflx, evap, precip, ps, dp, radius):
     """Horizontal advection of energy at constant pressure."""
     u_adj, v_adj = uv_mass_energy_adjusted(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
@@ -378,11 +351,83 @@ def energy_horiz_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
     return horiz_advec(en, u_adj, v_adj, radius)
 
 
-def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, radius, ps, bk, pk,
-                                  order=1):
-    """Vertical advection of energy using upwind scheme."""
+def energy_horiz_advec_eta_adj_spharm(temp, z, q, q_ice, u, v, swdn_toa,
+                                      swup_toa, olr, swup_sfc, swdn_sfc,
+                                      lwup_sfc, lwdn_sfc, shflx, evap, precip,
+                                      ps, dp, radius, bk, pk):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_horiz_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
+                               olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+                               shflx, evap, precip, ps, dp, radius, bk, pk):
+    """Horizontal advection of energy at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    return horiz_advec_const_p_from_eta(en, u_adj, v_adj, ps, radius, bk, pk)
+
+
+def energy_horiz_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
+                                         swup_toa, olr, swup_sfc, swdn_sfc,
+                                         lwup_sfc, lwdn_sfc, shflx, evap,
+                                         precip, ps, dp, radius, bk, pk):
+    """Horizontal energy advection at constant pressure by time-mean flow."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    monthly_terms = monthly_mean_ts([en, u_adj, v_adj, ps])
+    monthly_terms += [radius, bk, pk]
+    return horiz_advec_const_p_from_eta(*monthly_terms)
+
+
+def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, order=2):
+    """Horizontal advection of energy using upwind scheme."""
+
     return horiz_advec_upwind(energy(temp, z, q, q_ice, u, v), u, v, radius,
                               order=order)
+
+
+def energy_horiz_advec_upwind_time_mean(temp, z, q, q_ice, u, v, radius,
+                                        order=2):
+    """Horizontal advection of energy using upwind scheme."""
+    u_mon, v_mon = monthly_mean_ts([u, v])
+    monthly_terms = monthly_mean_ts([temp, z, q, q_ice]) + [u_mon, v_mon]
+    return horiz_advec_upwind(energy(**monthly_terms), u_mon, v_mon, radius,
+                              order=order)
+
+
+def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, radius, bk, pk,
+                                  order=2):
+    """Horizontal advection of energy using upwind scheme."""
+    return SphereEtaUpwind(energy(temp, z, q, q_ice, u, v), pk, bk, ps,
+                           order=order).advec_horiz_const_p(u, v)
+
+
+def energy_horiz_advec_eta_upwind_adj_time_mean(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
+        order=2
+):
+    """Upwind horizontal energy advection at constant pressure."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    tm, zm, qm, qim, um, vm, psm = monthly_mean_ts([temp, z, q, q_ice,
+                                                    u_adj, v_adj, ps])
+    return SphereEtaUpwind(energy(tm, zm, qm, qim, um, vm), pk, bk, psm,
+                           order=order).advec_horiz_const_p(um, vm)
 
 
 def energy_vert_advec(temp, z, q, q_ice, u, v, omega):
@@ -396,12 +441,37 @@ def energy_vert_advec_eta(temp, z, q, q_ice, u, v, omega, ps, bk, pk):
 
 
 def energy_vert_advec_eta_upwind(temp, z, q, q_ice, u, v, omega, ps, bk, pk,
-                                 order=1):
+                                 order=2):
     """Vertical advection of energy using upwind scheme."""
-    pfull_coord = u[PFULL_STR]
-    pfull = pfull_from_ps(bk, pk, ps, pfull_coord)
-    return vert_advec_upwind(energy(temp, z, q, q_ice, u, v), omega,
-                             dim=PFULL_STR, coord=pfull, order=order)
+    return EtaUpwind(omega, energy(temp, z, q, q_ice, u, v), pk, bk, ps,
+                     order=order, fill_edge=True).advec()
+
+
+def energy_vert_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, omega,
+                                           ps, bk, pk, order=2):
+    """Time-mean vertical energy advection w/ column energy-adjusted omega."""
+    monthly_terms = monthly_mean_ts([temp, z, q, q_ice, u, v])
+    ps_mon, omega_mon = monthly_mean_ts([ps, omega])
+    return EtaUpwind(omega_mon, energy(*monthly_terms), pk, bk, ps_mon,
+                     order=order, fill_edge=True).advec()
+
+
+def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
+                                               swdn_toa, swup_toa, olr,
+                                               swup_sfc, swdn_sfc, lwup_sfc,
+                                               lwdn_sfc, shflx, evap, precip,
+                                               ps, dp, radius, bk, pk,
+                                               order=2):
+    """Time-mean vertical energy advection w/ column energy-adjusted omega."""
+    u_adj, v_adj = uv_mass_energy_adjusted(
+        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    )
+    monthly_terms = monthly_mean_ts([temp, z, q, q_ice, u_adj, v_adj])
+    omega_mon = monthly_mean_ts(omega_from_divg_eta(u_adj, v_adj, ps, radius,
+                                                    bk, pk))
+    return EtaUpwind(omega_mon, energy(*monthly_terms), pk, bk,
+                     monthly_mean_ts(ps), order=order, fill_edge=True).advec()
 
 
 def energy_vert_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -433,44 +503,11 @@ def energy_vert_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    u_mon, v_mon, ps_mon = [monthly_mean_ts(d) for d in (u_adj, v_adj, ps)]
-    omega_adj = omega_from_divg_eta(u_mon, v_mon, ps_mon, radius, bk, pk)
-    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice)]
-    monthly_terms += [u_mon, v_mon]
+    omega_adj = omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)
+    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice,
+                                                  u_adj, v_adj)]
     ps_mon = monthly_mean_ts(ps)
     return omega_adj*d_dp_from_eta(energy(*monthly_terms), ps_mon, bk, pk)
-
-
-def energy_vert_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, omega,
-                                           ps, radius, bk, pk, order=1):
-    """Time-mean vertical energy advection w/ column energy-adjusted omega."""
-    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice, u, v)]
-    pfull_coord = u[PFULL_STR]
-    ps_mon = monthly_mean_ts(ps)
-    pfull = pfull_from_ps(bk, pk, ps_mon, pfull_coord)
-    return vert_advec_upwind(energy(*monthly_terms), omega,
-                             dim=PFULL_STR, coord=pfull, order=order)
-
-
-def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
-                                               swdn_toa, swup_toa, olr,
-                                               swup_sfc, swdn_sfc, lwup_sfc,
-                                               lwdn_sfc, shflx, evap, precip,
-                                               ps, dp, radius, bk, pk,
-                                               order=1):
-    """Time-mean vertical energy advection w/ column energy-adjusted omega."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    u_mon, v_mon, ps_mon = [monthly_mean_ts(d) for d in (u_adj, v_adj, ps)]
-    omega_adj = omega_from_divg_eta(u_mon, v_mon, ps_mon, radius, bk, pk)
-    monthly_terms = [monthly_mean_ts(d) for d in (temp, z, q, q_ice)]
-    monthly_terms += [u_mon, v_mon]
-    pfull_coord = u[PFULL_STR]
-    pfull = pfull_from_ps(bk, pk, ps_mon, pfull_coord)
-    return vert_advec_upwind(energy(*monthly_terms), omega_adj,
-                             dim=PFULL_STR, coord=pfull, order=order)
 
 
 def horiz_divg_energy_adj_eta(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
@@ -511,7 +548,7 @@ def energy_column_vert_advec_as_resid(temp, z, q, q_ice, u, v, swdn_toa,
     return energy_column_divg_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
-    ) - int_dp_g(energy_horiz_advec(
+    ) - int_dp_g(energy_horiz_advec_adj(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius,
     ), dp)
@@ -628,8 +665,9 @@ def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius):
     return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius)
 
 
-def mse_vert_advec_upwind(temp, hght, sphum, omega, p):
-    return vert_advec_upwind(mse(temp, hght, sphum), omega, p)
+def mse_vert_advec_upwind(temp, hght, sphum, omega, p, order=2):
+    return Upwind(omega, mse(temp, hght, sphum), PLEVEL_STR, coord=p,
+                  order=order, fill_edge=True).advec()
 
 
 def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius):
