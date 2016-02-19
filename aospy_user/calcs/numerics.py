@@ -37,8 +37,8 @@ def d_dx_from_latlon(arr, radius):
     prefactor = latlon_deriv_prefactor(arr[LAT_STR], radius, radians=False)
     arr_ext = wraparound(arr, LON_STR, left=True, right=True, circumf=360.)
     lon_rad_ext = to_radians(arr_ext[LON_STR])
-    darr_dx = CenDeriv(arr_ext, LON_STR,
-                       coord=lon_rad_ext).deriv(fill_edge=False)
+    darr_dx = CenDeriv(arr_ext, LON_STR, coord=lon_rad_ext,
+                       fill_edge=False).deriv()
     return prefactor*darr_dx
 
 
@@ -49,7 +49,7 @@ def d_dy_from_lat(arr, radius, vec_field=False):
                                        d_dy_of_scalar_field=False)
     if vec_field:
         arr = arr * np.cos(lat_rad)
-    darr_dy = CenDeriv(arr, LAT_STR, coord=lat_rad).deriv(fill_edge=True)
+    darr_dy = CenDeriv(arr, LAT_STR, coord=lat_rad, fill_edge=True).deriv()
     return prefactor*darr_dy
 
 

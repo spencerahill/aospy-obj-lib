@@ -159,6 +159,7 @@ from .energy import (
     energy_horiz_advec_upwind,
     energy_horiz_advec_eta_upwind,
     energy_horiz_advec_eta_adj,
+    energy_horiz_advec_eta_adj_spharm,
     energy_horiz_advec_eta_adj_time_mean,
     energy_horiz_advec_eta_upwind_adj_time_mean,
     energy_horiz_divg_eta,

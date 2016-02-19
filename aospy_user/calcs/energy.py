@@ -2,9 +2,9 @@
 from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind)
-from infinite_diff.advec import Upwind, EtaUpwind, SphereEtaUpwind
-
+                         monthly_mean_ts, monthly_mean_at_each_ind, integrate)
+from infinite_diff.advec import (Upwind, EtaUpwind, SphereUpwind,
+                                 SphereEtaUpwind)
 from .. import PFULL_STR, PLEVEL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
@@ -15,7 +15,8 @@ from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
                         horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_dry_mass_adjusted, uv_column_budget_adjustment,
-                   horiz_divg_spharm, horiz_divg_from_eta)
+                   horiz_divg_spharm, mass_column_divg_adj,
+                   horiz_divg_from_eta)
 from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
                         field_total_advec, field_horiz_advec_divg_sum,
                         field_times_horiz_divg, omega_from_divg_eta)
@@ -360,9 +361,10 @@ def energy_horiz_advec_eta_adj_spharm(temp, z, q, q_ice, u, v, swdn_toa,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
-
+    # en = energy(temp, z, q, q_ice, u_adj, v_adj)
+    en = energy(temp, z, q, q_ice, u, v)
+    # return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
+    return horiz_advec_from_eta_spharm(en, u, v, ps, radius, bk, pk)
 
 def energy_horiz_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
@@ -562,7 +564,7 @@ def energy_column_vert_advec_as_resid_eta_time_mean(
     return energy_column_divg_adj_time_mean(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    ) - int_dp_g(energy_horiz_advec_eta_time_mean(
+    ) - int_dp_g(energy_horiz_advec_eta_upwind_adj_time_mean(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
     ), dp)
@@ -575,56 +577,60 @@ def energy_vert_advec_adj_eta(temp, z, q, q_ice, u, v, omega, swdn_toa,
     """Vertical advection of energy with column balance adjustment."""
     column_advec_as_resid = energy_column_vert_advec_as_resid_eta(
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk,
-
+        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
     )
     en = energy(temp, z, q, q_ice, u, v)
-    # monthly_terms = [monthly_mean_ts(d) for d in (en, ps)]
-    # monthly_terms += [bk, pk]
     advec = omega*d_dp_from_eta(en, ps, bk, pk)
     column_advec = int_dp_g(advec, dp)
     residual = column_advec_as_resid - column_advec
     return advec - (residual * grav.value / ps)
 
 
+def sel(arr, p_str):
+    sfc_sel = {p_str: arr[p_str].max()}
+    return arr.sel(**sfc_sel).drop(p_str)
+
+
 def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                         swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                         precip, ps, dp, radius):
     """Advection of energy times surface pressure."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    p_str = vert_coord_name(temp)
+    # u_adj, v_adj = uv_mass_energy_adjusted(
+        # temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+        # lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    # )
+    # tm, zm, qm, qim, um, vm, psm = monthly_mean_ts([temp, z, q, q_ice,
+                                                    # u_adj, v_adj, ps])
+    # en = energy(tm, zm, qm, qim, um, vm)
+    en = energy(temp, z, q, q_ice, u, v)
+    p_str = vert_coord_name(en)
+    en = sel(en, p_str)
+    # um = sel(um, p_str)
+    # vm = sel(vm, p_str)
+    # 2016-02-28: Neither SphereUpwind- nor spharm-based methods give
+    # reasonable answers.
+    # return en*SphereUpwind(psm).advec(um, vm) / grav.value
+    return en*horiz_advec_spharm(ps, u, v, radius) / grav.value
 
-    def sel(arr):
-        sfc_sel = {p_str: temp[p_str].max()}
-        return arr.sel(**sfc_sel).drop(p_str)
 
-    en = sel(en)
-    u_adj = sel(u_adj)
-    v_adj = sel(v_adj)
-    return horiz_advec_spharm(ps, u_adj*en, v_adj*en, radius) / grav.value
-
-
-def energy_sfc_ps_advec_as_resid(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
-                                 olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-                                 shflx, evap, precip, ps, dp, radius, bk, pk):
+def energy_sfc_ps_advec_as_resid(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
+                                 radius, bk, pk):
     """Advection of energy times surface pressure."""
-    u_adj, v_adj = uv_mass_energy_adjusted(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
-    col_divg = energy_column_divg_adj(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
-    )
+    u_adj, v_adj = uv_mass_adjusted(ps, u, v, evap, precip, radius, dp)
+    col_divg = mass_column_divg_adj(ps, u_adj, v_adj, evap, precip, radius,
+                                    dp)
     en = energy(temp, z, q, q_ice, u_adj, v_adj)
-    # 2015-11-16 S. Hill: This should have eta correction applied.
-    divg_col_int = int_dp_g(horiz_divg_from_eta(en*u_adj, en*v_adj, ps,
-                                                radius, bk, pk), dp)
-    return col_divg - divg_col_int
+    p_str = vert_coord_name(en)
+    en = sel(en, p_str)
+    divg_col_int = integrate(
+        # horiz_divg_spharm(u_adj, v_adj, radius),
+        horiz_divg_from_eta(u_adj, v_adj, ps, radius, bk, pk),
+        dp, is_pressure=True
+    )
+    # 2016-02-28: None of the combinations of methods I have tried give
+    # reasonable answers.
+    # return col_divg - divg_col_int
+    return en*(col_divg - divg_col_int) / grav.value
 
 
 def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):
