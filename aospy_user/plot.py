@@ -1,5 +1,4 @@
-#! /usr/bin/env python
-"""Script that interfaces w/ aospy.plotting to create multi-panel plots."""
+"""Tools for interfacing with aospy.plotting to create multi-panel plots."""
 import aospy
 from aospy_user import projs
 from aospy_user import variables as v
@@ -7,8 +6,8 @@ from aospy_user import regions
 import matplotlib
 
 
-def plot(plot_params, fig_kwargs):
-    fig = aospy.plotting.Fig(plot_params, **fig_kwargs)
+def plot(params):
+    fig = aospy.plotting.Fig(params, **params.fig_kwargs)
     fig.create_fig()
     fig.make_plots()
     matplotlib.pyplot.show()
@@ -17,8 +16,8 @@ def plot(plot_params, fig_kwargs):
 
 class PlotMainParams(object):
     """Interface to main routine."""
-    def __init__(self):
-        pass
+    def __init__(self, fig_kwargs):
+        self.fig_kwargs = fig_kwargs
 
     def prep_data(self):
         proj = aospy.to_proj(self.proj, projs)
@@ -35,8 +34,8 @@ class PlotMainParams(object):
         self.region = region
 
 
-def plot_main(main_params, fig_kwargs):
+def plot_main(main_params):
     matplotlib.rcParams['font.family'] = 'sans-serif'
     matplotlib.rcParams['font.sans-serif'] = 'Helvetica'
     main_params.prep_data()
-    return plot(main_params, fig_kwargs)
+    return plot(main_params)
