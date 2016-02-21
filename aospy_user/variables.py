@@ -1638,7 +1638,7 @@ energy_column_divg_adj = Var(
     def_lon=True,
     func=calcs.energy_column_divg_adj,
     units=units.W_m2,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
 energy_column_divg_adj_time_mean = Var(
     name='energy_column_divg_adj_time_mean',
@@ -1653,7 +1653,7 @@ energy_column_divg_adj_time_mean = Var(
     def_lon=True,
     func=calcs.energy_column_divg_adj_time_mean,
     units=units.W_m2,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
 energy_column_divg_adj_eddy = Var(
     name='energy_column_divg_adj_eddy',
@@ -1668,7 +1668,7 @@ energy_column_divg_adj_eddy = Var(
     def_lon=True,
     func=calcs.energy_column_divg_adj_eddy,
     units=units.W_m2,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
 energy_column_divg_mass_adj = Var(
     name='energy_column_divg_mass_adj',
@@ -1682,7 +1682,7 @@ energy_column_divg_mass_adj = Var(
     def_lon=True,
     func=calcs.energy_column_divg_mass_adj,
     units=units.W_m2,
-    colormap='RdBu_r'
+    colormap='RdBu'
 )
 energy_column_budget_adj_residual = Var(
     name='energy_column_budget_adj_residual',
@@ -2024,20 +2024,6 @@ energy_vert_advec_eta_upwind_time_mean = Var(
     description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
                ps, bk, pk),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=True,
-    func=calcs.energy_vert_advec_eta_upwind_time_mean,
-    units=units.J_kg1_s1,
-    colormap='RdBu'
-)
-en_vadv_eta_upwind_o2_tav = Var(
-    name='en_vadv_eta_upwind_o2_tav',
-    domain='atmos',
-    description='',
-    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
-               ps, r_e, bk, pk, 2),
     def_time=True,
     def_vert=True,
     def_lat=True,
