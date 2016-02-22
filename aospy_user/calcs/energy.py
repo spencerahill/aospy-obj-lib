@@ -469,11 +469,11 @@ def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    monthly_terms = monthly_mean_ts([temp, z, q, q_ice, u_adj, v_adj])
-    omega_mon = monthly_mean_ts(omega_from_divg_eta(u_adj, v_adj, ps, radius,
-                                                    bk, pk))
-    return EtaUpwind(omega_mon, energy(*monthly_terms), pk, bk,
-                     monthly_mean_ts(ps), order=order, fill_edge=True).advec()
+    return EtaUpwind(
+        monthly_mean_ts(omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)),
+        energy(monthly_mean_ts([temp, z, q, q_ice, u_adj, v_adj])),
+        pk, bk, monthly_mean_ts(ps), order=order, fill_edge=True
+    ).advec()
 
 
 def energy_vert_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
