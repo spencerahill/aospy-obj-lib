@@ -1,6 +1,7 @@
 """Gross moist stability-related quantities."""
 from aospy.constants import c_p, grav, L_v
 from aospy.utils import to_pascal
+from infinite_diff.deriv import EtaCenDeriv
 import numpy as np
 
 from . import horiz_divg, vert_divg
@@ -78,8 +79,7 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
     return (d - d[np.where(level == lev_dn)])/c_p
 
 
-# def moist_static_stab(temp, hght, sphum, p):
 def moist_static_stab(temp, hght, sphum, ps, bk, pk):
     """Moist static stability, in terms of moist static energy."""
-    return d_dp_from_eta(mse(temp, hght, sphum), ps, bk, pk)
-    # return d_dp_from_p(mse(temp, hght, sphum), p)
+    return EtaCenDeriv(mse(temp, hght, sphum), pk, bk, ps, order=2,
+                       fill_edge=True).deriv()
