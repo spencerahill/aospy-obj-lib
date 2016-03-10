@@ -103,16 +103,16 @@ J_kg1_s1 = Units(
     # plot_units='K day$^{-1}',
     # plot_units_conv=seconds_in_day.value / c_p.value,
     units=r'W kg$^{-1}$',
-    plot_units=r'10$^{-3}$ W kg$^{-1}$',
-    plot_units_conv=1e3,
+    # plot_units=r'10$^{-2}$ W kg$^{-1}$',
+    # plot_units_conv=1e2,
     vert_int_units='W m$^{-2}$',
     vert_int_plot_units='W m$^{-2}$',
     vert_int_plot_units_conv=1
 )
 J_kg1_Pa1 = Units(
     units=r'J kg$^{-1}$ Pa$^{-1}$',
-    plot_units='J kg$^{-1}$ hPa$^{-1}',
-    plot_units_conv=1e2
+    # plot_units='J kg$^{-1}$ hPa$^{-1}',
+    # plot_units_conv=1e2
 )
 Pa = Units(
     units=r'Pa',

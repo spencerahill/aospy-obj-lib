@@ -14,6 +14,10 @@ def plot(params):
     return fig
 
 
+class FigParams(dict):
+    pass
+
+
 class PlotMainParams(object):
     """Interface to main routine."""
     def __init__(self, fig_kwargs):
