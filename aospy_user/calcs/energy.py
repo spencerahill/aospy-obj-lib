@@ -409,11 +409,20 @@ def energy_horiz_advec_upwind_time_mean(temp, z, q, q_ice, u, v, radius,
                               order=order)
 
 
-def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, radius, bk, pk,
+def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, bk, pk,
                                   order=2):
     """Horizontal advection of energy using upwind scheme."""
     return SphereEtaUpwind(energy(temp, z, q, q_ice, u, v), pk, bk, ps,
                            order=order).advec_horiz_const_p(u, v)
+
+
+def energy_horiz_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, ps,
+                                            bk, pk, order=2):
+    """Upwind horizontal energy advection at constant pressure."""
+    tm, zm, qm, qim, um, vm, psm = monthly_mean_ts([temp, z, q, q_ice,
+                                                    u, v, ps])
+    return SphereEtaUpwind(energy(tm, zm, qm, qim, um, vm), pk, bk, psm,
+                           order=order).advec_horiz_const_p(um, vm)
 
 
 def energy_horiz_advec_eta_upwind_adj_time_mean(
@@ -469,11 +478,17 @@ def energy_vert_advec_eta_upwind_adj_time_mean(temp, z, q, q_ice, u, v,
         temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
         lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     )
-    return EtaUpwind(
-        monthly_mean_ts(omega_from_divg_eta(u_adj, v_adj, ps, radius, bk, pk)),
-        energy(monthly_mean_ts([temp, z, q, q_ice, u_adj, v_adj])),
-        pk, bk, monthly_mean_ts(ps), order=order, fill_edge=True
-    ).advec()
+    del (u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
+         shflx, evap, precip)
+    en = energy(*monthly_mean_ts([temp, z, q, q_ice, u_adj, v_adj]))
+    del temp, z, q, q_ice
+    omega = monthly_mean_ts(omega_from_divg_eta(u_adj, v_adj, ps, radius,
+                                                bk, pk))
+    del u_adj, v_adj
+    ps_mon = monthly_mean_ts(ps)
+    del ps
+    return EtaUpwind(omega, en, pk, bk, ps_mon, order=order,
+                     fill_edge=True).advec()
 
 
 def energy_vert_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,

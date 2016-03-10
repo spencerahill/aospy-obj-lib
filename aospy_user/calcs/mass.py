@@ -26,6 +26,7 @@ def horiz_divg(u, v, radius):
 
 def horiz_divg_spharm(u, v, radius):
     sph_int = SpharmInterface(u, v, rsphere=radius, make_vectorwind=True)
+    del u, v
     divg = sph_int.vectorwind.divergence()
     return sph_int.to_xarray(divg)
 

@@ -63,17 +63,28 @@ def field_horiz_advec_divg_sum(arr, u, v, radius, dp):
 
 def omega_from_divg_eta(u, v, ps, radius, bk, pk):
     """Omega computed from the horizontal flow on model-native coordinates."""
-    pfull_coord = u[PFULL_STR]
     ps_advec = horiz_advec_spharm(ps, u, v, radius)
+    divg = horiz_divg_spharm(u, v, radius)
+    term2 = u.copy()
+    pfull_coord = u[PFULL_STR]
+
+    del u, v
+
     term1 = to_pfull_from_phalf(bk, pfull_coord) * ps_advec
 
     db = d_deta_from_phalf(bk, pfull_coord)
-    term2 = u.copy()
     term2.values = np.cumsum(ps_advec*db, axis=1)
 
-    divg = horiz_divg_spharm(u, v, radius)
+    del ps_advec
+
     dp = dp_from_ps(bk, pk, ps, pfull_coord)
     divg_dp = divg*dp
+
+    del dp
+
     p_axis_num = divg_dp.get_axis_num(PFULL_STR)
     divg_int = np.cumsum(divg_dp, axis=p_axis_num)
+
+    del divg_dp
+
     return term1 - term2 - divg_int

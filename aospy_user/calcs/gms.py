@@ -5,8 +5,7 @@ from infinite_diff.deriv import EtaCenDeriv
 import numpy as np
 
 from . import horiz_divg, vert_divg
-from .thermo import dse, mse
-from .numerics import d_dp_from_p, d_dp_from_eta
+from .thermo import dse, mse, fmse
 
 
 def field_vert_int_max(arr, dp):
@@ -79,7 +78,7 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
     return (d - d[np.where(level == lev_dn)])/c_p
 
 
-def moist_static_stab(temp, hght, sphum, ps, bk, pk):
-    """Moist static stability, in terms of moist static energy."""
-    return EtaCenDeriv(mse(temp, hght, sphum), pk, bk, ps, order=2,
+def moist_static_stab(temp, hght, sphum, q_ice, ps, bk, pk):
+    """Moist static stability, in terms of frozen moist static energy."""
+    return EtaCenDeriv(fmse(temp, hght, sphum, q_ice), pk, bk, ps, order=2,
                        fill_edge=True).deriv()
