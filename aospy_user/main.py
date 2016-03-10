@@ -10,6 +10,15 @@ import colorama
 from . import projs, variables
 
 
+class ObjectsForCalc(tuple):
+    """Container of aospy objects to be used for a single Calc."""
+    def __new__(cls, *objects):
+        return super(ObjectsForCalc, cls).__new__(cls, objects)
+
+    def __init__(self, *objects):
+        self.objects = objects
+
+
 class MainParams(object):
     """Container for parameters specified in main routine."""
     pass
@@ -39,7 +48,10 @@ class MainParamsParser(object):
                 try:
                     run_objs.append(aospy.to_run(run, model, proj, self.projs))
                 except AttributeError as ae:
-                    print(ae)
+                    warnings.warn(str(ae))
+            run_objs = type(runs)(run_objs)
+        if isinstance(run_objs, ObjectsForCalc):
+            return run_objs
         # If flat list, return the list.  If nested, then flatten it.
         if all([isinstance(r, aospy.Run) for r in run_objs]):
             return run_objs
@@ -134,24 +146,19 @@ class CalcSuite(object):
         for params in param_combos:
             try:
                 ci = aospy.CalcInterface(**params)
-            # except AttributeError as ae:
-                # print('aospy warning:', ae)
             except:
                 raise
-            else:
-                calc = aospy.Calc(ci)
-                if exec_calcs:
-                    try:
-                        calc.compute()
-                    except:
-                        raise
-                        # print('Calc {} failed.  Skipping.'.format(calc))
-                    else:
-                        if print_table:
-                            print("{}".format(calc.load('reg.av', False,
-                                                        ci.region['sahel'],
-                                                        plot_units=False)))
-                calcs.append(calc)
+            calc = aospy.Calc(ci)
+            if exec_calcs:
+                try:
+                    calc.compute()
+                except:
+                    raise
+                if print_table:
+                    print("{}".format(calc.load('reg.av', False,
+                                                ci.region['sahel'],
+                                                plot_units=False)))
+            calcs.append(calc)
         return calcs
 
     def exec_calcs(self, calcs):
@@ -174,7 +181,7 @@ def main(main_params, exec_calcs=True, print_table=True, prompt_verify=True):
         try:
             cs.prompt_user_verify()
         except IOError as e:
-            warnings.warn(e)
+            warnings.warn(str(e))
             return
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=exec_calcs,
