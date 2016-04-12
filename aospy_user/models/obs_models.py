@@ -83,9 +83,11 @@ udel = Model(
 # Radiation
 ceres = Model(
     name='ceres',
-    grid_file_paths=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/'
-                   'CERES-EBAF/atmos/mon/v20140402/'
-                   'rsut_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',),
+    grid_file_paths=(
+        '/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/'
+        'CERES-EBAF/atmos/mon/v20140402/CERES-EBAF/'
+        'rsut_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
+    ),
     data_in_dur=14,
     data_in_start_date=2000,
     data_in_end_date='2013-03',

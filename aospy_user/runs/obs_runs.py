@@ -65,7 +65,7 @@ ceres_ebaf = Run(
     name='ebaf',
     description='CERES EBAF',
     data_in_direc=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/CERES-EBAF/'
-                   'atmos/mon/v20140402'),
+                   'atmos/mon/v20140402/CERES-EBAF'),
     data_in_dir_struc='one_dir',
     data_in_dur=14,
     data_in_start_date='2000-03-01',
