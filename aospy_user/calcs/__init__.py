@@ -207,6 +207,7 @@ from .stats import (
     lin_regr_cre_net,
     lin_regr_toa_rad_clr,
     vert_centroid,
+    vert_avg
     )
 from .water import (
     p_minus_e,
@@ -231,6 +232,7 @@ from .gms import (
     gms_each_level,
     dry_static_stab,
     moist_static_stab,
+    moist_static_stab_p,
 )
 from .zonal_mean_circ import (
     msf,

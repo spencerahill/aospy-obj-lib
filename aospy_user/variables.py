@@ -2440,6 +2440,18 @@ moist_static_stab = Var(
     units=units.J_kg1_Pa1,
     colormap='RdBu_r'
 )
+moist_static_stab_p = Var(
+    name='moist_static_stab_p',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.moist_static_stab_p,
+    units=units.J_kg1_Pa1,
+    colormap='RdBu_r'
+)
 mse = Var(
     name='mse',
     domain='atmos',
@@ -3201,7 +3213,7 @@ toa_rad_clr = Var(
     name='toa_rad_clr',
     domain='atmos',
     description='Clear-sky TOA radiative flux, positive downwards.',
-    variables=(swdn_toa_clr, swup_toa_clr, olr_clr),
+    variables=(swdn_toa, swup_toa_clr, olr_clr),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -3501,6 +3513,18 @@ v_mass_energy_adjusted = Var(
     def_lon=True,
     func=calcs.v_mass_energy_adjusted,
     units=units.m_s1
+)
+v_mid_trop = Var(
+    name='v_mid_trop',
+    units=units.m_s1,
+    domain='atmos',
+    description='Northward velocity averaged over 400-700 hPa.',
+    variables=[vcomp],
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.vert_avg,
 )
 vert_divg = Var(
     name='vert_divg',
