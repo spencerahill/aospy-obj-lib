@@ -8,6 +8,8 @@ am2 = Model(
          'pp/atmos/atmos.static.nc'),
         ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos_level/ts/monthly/30yr/atmos_level.198301-201212.temp.nc'),
+        ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
+         'pp/atmos/ts/monthly/30yr/atmos.198301-201212.temp.nc'),
     ),
     data_in_dur=1,
     data_in_start_date=1982,
@@ -242,17 +244,20 @@ am3c90 = Model(
 )
 am2p5 = Model(
     name='am2p5',
+    # The atmos.static.nc in the actual AM2.5 data directories has the wrong
+    # horizontal resolution, so use the one from HiRAM, which matches the
+    # actual AM2.5 resolution.
     grid_file_paths=(
-        '/archive/miz/hiramdp/siena_201204/c180l32_am2_C0/gfdl.ncrc2-intel-'
-        'prod/pp/atmos/atmos.static.nc',
+        '/archive/Yi.Ming/siena_201211/c180_hiram_clim/'
+        'gfdl.ncrc2-default-prod/pp/atmos/atmos.static.nc',
         ['/archive/miz/hiramdp/siena_201204/c180l32_am2_C0/gfdl.ncrc2-intel-'
          'prod/pp/atmos/ts/monthly/10yr/atmos.%04d01-%04d12.ucomp.nc'
          % (y1, y2) for (y1, y2) in zip((1981, 1991), (1990, 2000))]
     ),
     data_in_dur=10,
-    data_in_start_date='1981-01-01',
-    data_in_end_date='2000-12-31',
-    default_date_range=('1981-01-01', '2000-12-31'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    default_date_range=(1981, 2000),
     runs={
         runs.am2p5_cont,
         runs.am2p5_p2K,
