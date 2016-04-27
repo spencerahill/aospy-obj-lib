@@ -799,6 +799,7 @@ wvp = Var(
 # Grid variables.
 land_mask = Var(
     name='land_mask',
+    alt_names=['sftlf'],
     units=units.unitless,
     description='Land mask',
     def_time=False,
@@ -868,6 +869,7 @@ phalf = Var(
 )
 sfc_area = Var(
     name='sfc_area',
+    alt_names=['areacella'],
     units=units.m2,
     domain=None,
     description='Grid surface area.',
