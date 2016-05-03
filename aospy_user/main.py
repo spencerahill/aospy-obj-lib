@@ -43,8 +43,8 @@ class MainParamsParser(object):
     def create_child_run_obj(self, models, runs, proj):
         """Create child Run object(s) for each Model object."""
         run_objs = []
-        for model in models:
-            for run in runs:
+        for run in runs:
+            for model in models:
                 try:
                     run_objs.append(aospy.to_run(run, model, proj, self.projs))
                 except AttributeError as ae:
@@ -52,6 +52,10 @@ class MainParamsParser(object):
             run_objs = type(runs)(run_objs)
         if isinstance(run_objs, ObjectsForCalc):
             return run_objs
+        if 'cmip5' in [p.name for p in proj]:
+            if isinstance(run_objs[0], list):
+                return run_objs[0]
+            return [run_objs[0]]
         # If flat list, return the list.  If nested, then flatten it.
         if all([isinstance(r, aospy.Run) for r in run_objs]):
             return run_objs
@@ -129,7 +133,6 @@ class CalcSuite(object):
                       'verbose',
                       'chunk_len')
         attrs = tuple([getattr(self, name) for name in attr_names])
-
         # Each permutation becomes a dictionary, with the keys being the attr
         # names and the values being the corresponding value for that
         # permutation.  These dicts can then be directly passed to the
