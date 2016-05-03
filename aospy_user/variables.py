@@ -1865,6 +1865,32 @@ energy_horiz_advec_upwind = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
+energy_zonal_advec_upwind = Var(
+    name='energy_zonal_advec_upwind',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_zonal_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_merid_advec_upwind = Var(
+    name='energy_merid_advec_upwind',
+    domain='atmos',
+    description='',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_merid_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 energy_horiz_advec_eta_upwind = Var(
     name='energy_horiz_advec_eta_upwind',
     domain='atmos',
@@ -2601,15 +2627,34 @@ mse_budget_advec_residual = Var(
 )
 mse_horiz_advec_upwind = Var(
     name='mse_horiz_advec_upwind',
-    domain='atmos',
-    description=('Horizontal advection of moist static energy using upwind '
-                 'finite differencing scheme for derivatives.'),
     variables=(temp, hght, sphum, ucomp, vcomp, r_e),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.mse_horiz_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+mse_zonal_advec_upwind = Var(
+    name='mse_zonal_advec_upwind',
+    variables=(temp, hght, sphum, ucomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_zonal_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+mse_merid_advec_upwind = Var(
+    name='mse_merid_advec_upwind',
+    variables=(temp, hght, sphum, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_merid_advec_upwind,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )

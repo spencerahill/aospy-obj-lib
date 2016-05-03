@@ -54,7 +54,7 @@ def merid_advec_upwind(arr, v, radius, order=2):
                             fill_edge=True).advec()
 
 
-def horiz_advec_upwind(arr, u, v, radius, order=1):
+def horiz_advec_upwind(arr, u, v, radius, order=2):
     """Horizontal (meridional plus zonal) upwind advection."""
     return (zonal_advec_upwind(arr, u, radius, order=order) +
             merid_advec_upwind(arr, v, radius, order=order))
