@@ -6,7 +6,10 @@ am3_cont = Run(
     description=('1981-2000 Hurrell climatological annual cycle of SSTs and '
                  'sea ice, with PD atmospheric composition.'),
     data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10/'
-                   'gfdl.ncrc2-intel-prod/pp')
+                   'gfdl.ncrc2-intel-prod/pp'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_aero = Run(
     name='aero',
@@ -17,7 +20,10 @@ am3_aero = Run(
         'layer ocean.  PD atmospheric composition.'
     ),
     data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero/'
-                   'gfdl.ncrc2-intel-prod/pp')
+                   'gfdl.ncrc2-intel-prod/pp'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_atm = Run(
     name='aero_tm',
@@ -28,47 +34,79 @@ am3_atm = Run(
         'mixed layer ocean. PD atmospheric composition.'
     ),
     data_in_direc=('/archive/Yi.Ming/fms/siena_201211/'
-                   'c48L48_am3p10_aero_trop_mean/gfdl.ncrc2-intel-prod/pp')
+                   'c48L48_am3p10_aero_trop_mean/gfdl.ncrc2-intel-prod/pp'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_amtm = Run(
     name='aero_mtm',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, subtracting annual tropical mean equilibrium SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_m_trop_mean_fixed/gfdl.ncrc2-intel-prod-openmp/pp'
+    description=(
+        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
+        'repeated annually, subtracting annual tropical mean equilibrium SST '
+        'anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
+        'layer ocean. PD atmospheric composition.'
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_m_'
+                   'trop_mean_fixed/gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_apac = Run(
     name='aero_pac',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Pacific Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_pac/gfdl.ncrc2-intel-prod/pp'
+    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_pac/gfdl.ncrc2-intel-prod/pp',
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_aatl = Run(
     name='aero_atl',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Atlantic Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_atl/gfdl.ncrc2-intel-prod/pp'
+    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_atl/gfdl.ncrc2-intel-prod/pp',
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_aind = Run(
     name='aero_ind',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Indian Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_ind/gfdl.ncrc2-intel-prod/pp'
+    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_ind/gfdl.ncrc2-intel-prod/pp',
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_gas = Run(
     name='gas',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas/gfdl.ncrc2-intel-prod/pp'
+    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas/gfdl.ncrc2-intel-prod/pp',
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_gtm = Run(
     name='gas_tm',
     description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_trop_mean/gfdl.ncrc2-intel-prod/pp'
+    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_trop_mean/gfdl.ncrc2-intel-prod/pp',
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_gmtm = Run(
     name='gas_mtm',
-    description=('1981-2000 HadISST climatological annual cycle of SSTs and '
-                 'sea ice repeated annually, overlaid with annual cycle of '
-                 'equilibrium SST anomalies minus their annual tropical mean '
-                 'from a PI-to-PD WMGG and ozone simulation of AM2.1 with a '
-                 'mixed layer ocean.  PD atmospheric composition.'),
-    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_m_trop_mean/'
-              'gfdl.ncrc2-intel-prod/pp')
+    description=(
+        '1981-2000 HadISST climatological annual cycle of SSTs and '
+        'sea ice repeated annually, overlaid with annual cycle of '
+        'equilibrium SST anomalies minus their annual tropical mean '
+        'from a PI-to-PD WMGG and ozone simulation of AM2.1 with a '
+        'mixed layer ocean.  PD atmospheric composition.'
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_m_'
+                   'trop_mean/gfdl.ncrc2-intel-prod/pp'),
+    data_in_start_date=1981,
+    data_in_end_date=2000,
+    data_in_dur=20,
 )
 am3_amip = Run(
     name='amip',
