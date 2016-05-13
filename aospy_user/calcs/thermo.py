@@ -1,6 +1,8 @@
 """Thermodynamic functions."""
+from aospy import PLEVEL_STR
 from aospy.constants import (c_p, grav, kappa, L_f, L_v, p_trip, T_trip, c_va,
-                             c_vv, c_vl, c_vs, R_a, R_v, R_d)
+                             c_vv, c_vl, c_vs, R_a, R_v, R_d, epsilon)
+from aospy.utils import dp_from_p, get_dim_name, to_pascal
 import numpy as np
 
 
@@ -42,6 +44,34 @@ def equiv_pot_temp(temp, p, sphum, p0=1000.):
 
 def mixing_ratio_from_specific_mass(mass):
     return mass / (1 - mass)
+
+
+def virt_temp(temp, sphum, is_mixing_ratio=False):
+    """Virtual temperature computed from temperature and specific humidity."""
+    if is_mixing_ratio:
+        wv_mix = sphum
+    else:
+        wv_mix = mixing_ratio_from_specific_mass(sphum)
+    return temp * (wv_mix + epsilon.value) / (epsilon.value * (1. + wv_mix))
+
+
+def z_from_hypso(ps, temp, sphum):
+    """Compute height using the hypsometric equation w/ virtual temperature."""
+    p_names = (PLEVEL_STR, 'plev')
+    p_str = get_dim_name(temp, p_names)
+    p_ax_num = temp.get_axis_num(p_str)
+    p = to_pascal(temp[p_str])
+    dp = dp_from_p(p, ps)
+    t_virt = virt_temp(temp, sphum)
+    temp_na0 = t_virt.fillna(0.)
+    z = R_d.value / grav.value * np.cumsum(temp_na0 / p * dp.fillna(0.),
+                                           axis=p_ax_num)
+    return z.where(temp_na0)
+
+
+def mse_from_hypso(ps, temp, sphum):
+    """Moist static energy, with height computed using hypsometric eq."""
+    return mse(temp, z_from_hypso(ps, temp, sphum), sphum)
 
 
 def specific_mass_dry_air(q_v, q_l, q_s):

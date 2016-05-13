@@ -28,6 +28,9 @@ from .thermo import (
     pot_temp,
     virt_pot_temp,
     equiv_pot_temp,
+    virt_temp,
+    z_from_hypso,
+    mse_from_hypso,
     mixing_ratio_from_specific_mass,
     specific_mass_dry_air,
     specific_gas_constant_moist_air,
@@ -236,7 +239,9 @@ from .gms import (
     gms_each_level,
     dry_static_stab,
     moist_static_stab,
+    frozen_moist_static_stab,
     moist_static_stab_p,
+    frozen_moist_static_stab_p,
 )
 from .zonal_mean_circ import (
     msf,

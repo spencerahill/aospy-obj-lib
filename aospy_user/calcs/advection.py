@@ -17,13 +17,12 @@ def zonal_advec(arr, u, radius):
 
 def merid_advec(arr, v, radius):
     """Meridional advection of the given field."""
-    return v*d_dy_from_lat(arr, radius, vec_field=False)
+    return v*d_dy_from_lat(arr, radius)
 
 
 def horiz_advec(arr, u, v, radius):
     """Horizontal advection of the given field."""
-    return (zonal_advec(arr, u, radius) +
-            merid_advec(arr, v, radius, vec_field=False))
+    return zonal_advec(arr, u, radius) + merid_advec(arr, v, radius)
 
 
 def vert_advec(arr, omega, p):
