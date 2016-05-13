@@ -49,6 +49,7 @@ am2 = Model(
         runs.am2_reyoi_m6,
         runs.am2_reyoi_m8,
         runs.am2_reyoi_m10,
+        runs.am2_reyoi_m15,
         runs.am2_reyoi_p10,
         runs.am2_reyoi_wpwp_p2,
         runs.am2_reyoi_wpwp_m2,
@@ -77,6 +78,9 @@ am2 = Model(
         runs.am2_cld_seed_np_p2,
         runs.am2_cld_seed_sp_p2,
         runs.am2_cld_seed_sa_p2,
+        runs.am2_zshen_cont,
+        runs.am2_atmos_heat_wpwp,
+        runs.am2_atmos_heat_wpwp_small,
         runs.am2_reyoi_w_ice,
         runs.am2_test,
     },
@@ -96,7 +100,7 @@ am3 = Model(
          'openmp/pp/atmos_level/ts/monthly/1yr/'
          'atmos_level.198101-198112.ucomp.nc')
     ),
-    data_in_dur=1,
+    data_in_dur=20,
     data_in_start_date=1980,
     data_in_end_date=2010,
     default_date_range=(1981, 2010),
@@ -240,6 +244,10 @@ am3c90 = Model(
     runs={
         runs.am3c90_cont,
         runs.am3c90_p2K,
+    },
+    default_runs={
+        runs.am3c90_cont,
+        runs.am3c90_p2K,
     }
 )
 am2p5 = Model(
@@ -259,6 +267,10 @@ am2p5 = Model(
     data_in_end_date=2000,
     default_date_range=(1981, 2000),
     runs={
+        runs.am2p5_cont,
+        runs.am2p5_p2K,
+    },
+    default_runs={
         runs.am2p5_cont,
         runs.am2p5_p2K,
     }

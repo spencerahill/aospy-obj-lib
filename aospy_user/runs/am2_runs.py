@@ -715,6 +715,44 @@ am2_cld_seed_sa_p2 = Run(
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
+am2_zshen_cont = Run(
+    name='zshen_cont',
+    description="Control run for Zhaoyi Shen's simulations",
+    data_in_direc=('/archive/Zhaoyi.Shen/quickstart/m45_am2p14_1990_base/'
+                   'gfdl.ncrc2-default-prod/pp/'),
+    data_in_dur=16,
+    data_in_start_date=1983,
+    data_in_end_date=1998,
+    default_date_range=(1983, 1998)
+)
+am2_atmos_heat_wpwp = Run(
+    name='atmos_heat_wpwp',
+    description=(
+        "Created by Zhaoyi Shen.  Prescribed PD SSTs (standard AM2 control "
+        "simulation) but with a prescribed heating in the upper troposphere "
+        "above the Indo-Pacific Warm Pool, defined as 10S-10N,90E-150E."
+    ),
+    data_in_direc=('/archive/Zhaoyi.Shen/quickstart/m45_am2p14_1990_bc_l8_'
+                   'WPWP/gfdl.ncrc2-default-prod-openmp/pp/'),
+    data_in_dur=16,
+    data_in_start_date=1983,
+    data_in_end_date=1998,
+    default_date_range=(1983, 1998)
+)
+am2_atmos_heat_wpwp_small = Run(
+    name='atmos_heat_wpwp_small',
+    description=(
+        "Created by Zhaoyi Shen.  Prescribed PD SSTs (standard AM2 control "
+        "simulation) but with a prescribed heating in the upper troposphere "
+        "above the Indo-Pacific Warm Pool, defined as 5S-5N, 105E-125E."
+    ),
+    data_in_direc=('/archive/Zhaoyi.Shen/quickstart/m45_am2p14_1990_bc_l8_'
+                   'WPWPs/gfdl.ncrc2-default-prod/pp/'),
+    data_in_dur=16,
+    data_in_start_date=1983,
+    data_in_end_date=1998,
+    default_date_range=(1983, 1998)
+)
 am2_reyoi_w_ice = Run(
     name='reyoi_w_ice_file',
     description='Standard climatological OI SSTs run but including ice file',
