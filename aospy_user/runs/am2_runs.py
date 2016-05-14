@@ -17,10 +17,10 @@ am2_cont = Run(
 am2_aero = Run(
     name='aero',
     description=(
-        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
-        'repeated annually, overlaid with annual cycle of equilibrium SST '
-        'anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
-        'layer ocean.  PD atmospheric composition.'
+        """1981-2000 HadISST climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid with annual cycle of equilibrium SST
+        anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed
+        layer ocean.  PD atmospheric composition."""
     ),
     data_in_direc=('/archive/Yi.Ming/siena_201203/m45_am2p14_1990_clim_aero/'
                    'gfdl.ncrc2-intel-prod/pp'),
@@ -185,8 +185,7 @@ am2_reyoi_cont = Run(
     description='PI atmos and Reynolds OI climatological SSTs',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    # data_in_dur=30,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -196,8 +195,8 @@ am2_reyoi_m0p25 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-0p25K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -206,7 +205,7 @@ am2_reyoi_m0p5 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-0p5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=15,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -216,7 +215,7 @@ am2_reyoi_m1 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-1K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=15,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -226,8 +225,8 @@ am2_reyoi_m1p5 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-1p5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -237,7 +236,7 @@ am2_reyoi_m2 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=15,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -247,8 +246,8 @@ am2_reyoi_m3 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-3K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -257,8 +256,8 @@ am2_reyoi_m4 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-4K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -267,8 +266,8 @@ am2_reyoi_m6 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-6K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -277,8 +276,8 @@ am2_reyoi_m8 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-8K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -287,8 +286,8 @@ am2_reyoi_m10 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-10K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -297,8 +296,8 @@ am2_reyoi_m15 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi-15K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=31,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -307,8 +306,8 @@ am2_reyoi_p0p25 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+0p25K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -317,7 +316,7 @@ am2_reyoi_p0p5 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+0p5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=15,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -327,7 +326,7 @@ am2_reyoi_p1 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+1K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=15,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -337,8 +336,8 @@ am2_reyoi_p1p5 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+1p5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -348,8 +347,7 @@ am2_reyoi_p2 = Run(
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
     data_in_dur=30,
-    # data_in_dur=1,
-    data_in_start_date=1983,
+     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -358,8 +356,8 @@ am2_reyoi_p3 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+3K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -368,8 +366,8 @@ am2_reyoi_p4 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+4K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -378,8 +376,8 @@ am2_reyoi_p6 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+6K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -388,8 +386,8 @@ am2_reyoi_p8 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+8K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -398,8 +396,8 @@ am2_reyoi_p10 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi+10K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -408,8 +406,8 @@ am2_reyoi_wpwp_p2 = Run(
     description='',
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_wpwp+2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    data_in_start_date=1982,
+    data_in_dur=30,
+    data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
 )
@@ -431,8 +429,7 @@ am2_reyoi_uw = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    # data_in_dur=30,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -445,7 +442,7 @@ am2_reyoi_uw_p2 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -458,7 +455,7 @@ am2_reyoi_uw_p5 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -471,8 +468,7 @@ am2_reyoi_uw_p10 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv+10K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    # data_in_dur=30,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -485,7 +481,7 @@ am2_reyoi_uw_m2 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -498,7 +494,7 @@ am2_reyoi_uw_m5 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-5K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -511,8 +507,7 @@ am2_reyoi_uw_m10 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_conv-10K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
-    # data_in_dur=30,
+    data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -526,7 +521,6 @@ am2_reyoi_uw_lo_0p5 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.5/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    # data_in_dur=1,
     data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
@@ -541,7 +535,6 @@ am2_reyoi_uw_lo_0p5_p2k = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.5+2K/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    # data_in_dur=1,
     data_in_dur=30,
     data_in_start_date=1983,
     data_in_end_date=2012,
@@ -556,7 +549,7 @@ am2_reyoi_uw_lo_0p25 = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.25/'
                    'gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
@@ -570,7 +563,7 @@ am2_reyoi_uw_lo_0p25_p2k = Run(
     ),
     data_in_direc=('/archive/Spencer.Hill/am2/am2clim_reyoi_uw_lofactor0.25'
                    '+2K/gfdl.ncrc2-default-prod/pp/'),
-    data_in_dur=1,
+    data_in_dur=30,
     data_in_start_date=1982,
     data_in_end_date=2012,
     default_date_range=(1983, 2012)
