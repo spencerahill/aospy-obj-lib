@@ -14,7 +14,7 @@ am3_cont = Run(
 am3_aero = Run(
     name='aero',
     description=(
-        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
+        '1981-2000 Hurrell climatological annual cycle of SSTs and sea ice '
         'repeated annually, overlaid with annual cycle of equilibrium SST '
         'anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
         'layer ocean.  PD atmospheric composition.'
@@ -28,7 +28,7 @@ am3_aero = Run(
 am3_atm = Run(
     name='aero_tm',
     description=(
-        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
+        '1981-2000 Hurrell climatological annual cycle of SSTs and sea ice '
         'repeated annually, overlaid with annual tropical mean equilibrium '
         'SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a '
         'mixed layer ocean. PD atmospheric composition.'
@@ -42,7 +42,7 @@ am3_atm = Run(
 am3_amtm = Run(
     name='aero_mtm',
     description=(
-        '1981-2000 HadISST climatological annual cycle of SSTs and sea ice '
+        '1981-2000 Hurrell climatological annual cycle of SSTs and sea ice '
         'repeated annually, subtracting annual tropical mean equilibrium SST '
         'anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
         'layer ocean. PD atmospheric composition.'
@@ -55,40 +55,70 @@ am3_amtm = Run(
 )
 am3_apac = Run(
     name='aero_pac',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Pacific Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_pac/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        """1981-2000 Hurrell climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid in Pacific Ocean only with annual cycle of
+        equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1
+        with a mixed layer ocean. PD atmospheric composition."""
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_pac/'
+                   'gfdl.ncrc2-intel-prod/pp'),
     data_in_start_date=1981,
     data_in_end_date=2000,
     data_in_dur=20,
 )
 am3_aatl = Run(
     name='aero_atl',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Atlantic Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_atl/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        """1981-2000 Hurrell climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid in Atlantic Ocean only with annual cycle of
+        equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1
+        with a mixed layer ocean. PD atmospheric composition."""
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_atl/'
+                   'gfdl.ncrc2-intel-prod/pp'),
     data_in_start_date=1981,
     data_in_end_date=2000,
     data_in_dur=20,
 )
 am3_aind = Run(
     name='aero_ind',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid in Indian Ocean only with annual cycle of equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_ind/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        """1981-2000 Hurrell climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid in Indian Ocean only with annual cycle of
+        equilibrium SST anomalies from a PI-to-PD aerosols simulation of AM2.1
+        with a mixed layer ocean. PD atmospheric composition."""
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_aero_ind/'
+                   'gfdl.ncrc2-intel-prod/pp'),
     data_in_start_date=1981,
     data_in_end_date=2000,
     data_in_dur=20,
 )
 am3_gas = Run(
     name='gas',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual cycle of equilibrium SST anomalies from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        """1981-2000 Hurrell climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid with annual cycle of equilibrium SST
+        anomalies from a PI-to-PD WMGG and ozone simulation of AM2.1 with a
+        mixed layer ocean. PD atmospheric composition."""
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas/'
+                   'gfdl.ncrc2-intel-prod/pp'),
     data_in_start_date=1981,
     data_in_end_date=2000,
     data_in_dur=20,
 )
 am3_gtm = Run(
     name='gas_tm',
-    description='1981-2000 HadISST climatological annual cycle of SSTs and sea ice repeated annually, overlaid with annual tropical mean equilibrium SST anomaly from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed layer ocean. PD atmospheric composition.',
-    data_in_direc='/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_trop_mean/gfdl.ncrc2-intel-prod/pp',
+    description=(
+        """1981-2000 Hurrell climatological annual cycle of SSTs and sea ice
+        repeated annually, overlaid with annual tropical mean equilibrium SST
+        anomaly from a PI-to-PD WMGG and ozone simulation of AM2.1 with a mixed
+        layer ocean. PD atmospheric composition."""
+    ),
+    data_in_direc=('/archive/Yi.Ming/fms/siena_201211/c48L48_am3p10_gas_trop'
+                   '_mean/gfdl.ncrc2-intel-prod/pp'),
     data_in_start_date=1981,
     data_in_end_date=2000,
     data_in_dur=20,
@@ -96,7 +126,7 @@ am3_gtm = Run(
 am3_gmtm = Run(
     name='gas_mtm',
     description=(
-        '1981-2000 HadISST climatological annual cycle of SSTs and '
+        '1981-2000 Hurrell climatological annual cycle of SSTs and '
         'sea ice repeated annually, overlaid with annual cycle of '
         'equilibrium SST anomalies minus their annual tropical mean '
         'from a PI-to-PD WMGG and ozone simulation of AM2.1 with a '
@@ -117,15 +147,15 @@ am3_amip = Run(
     data_in_dur=136,
     data_in_start_date=1870,
     data_in_end_date=2005,
-    default_date_range=(1870,2005)
+    default_date_range=(1870, 2005)
 )
 am3_hc = Run(
     name='hurrell_cont',
     description='',
-    data_in_direc='/archive/Spencer.Hill/am3/am3clim_hurrell/' + \
-             'gfdl.ncrc2-intel-prod-openmp/pp',
-    data_in_dur=1,
-    data_in_start_date=1980,
+    data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell/'
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -133,9 +163,9 @@ am3_hp1k = Run(
     name='hurrell+1K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+1K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -143,9 +173,9 @@ am3_hp2k = Run(
     name='hurrell+2K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+2K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=1,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -153,9 +183,9 @@ am3_hp4k = Run(
     name='hurrell+4K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+4K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=1,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -163,9 +193,9 @@ am3_hp6k = Run(
     name='hurrell+6K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+6K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -173,9 +203,9 @@ am3_hp8k = Run(
     name='hurrell+8K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+8K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -183,9 +213,9 @@ am3_hp10k = Run(
     name='hurrell+10K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+10K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -193,9 +223,9 @@ am3_hm1k = Run(
     name='hurrell-1K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-1K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=1,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -203,9 +233,9 @@ am3_hm2k = Run(
     name='hurrell-2K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-2K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=1,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -213,9 +243,9 @@ am3_hm4k = Run(
     name='hurrell-4K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-4K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -223,9 +253,9 @@ am3_hm6k = Run(
     name='hurrell-6K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-6K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -233,9 +263,9 @@ am3_hm8k = Run(
     name='hurrell-8K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-8K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -243,9 +273,9 @@ am3_hm10k = Run(
     name='hurrell-10K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-10K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
@@ -253,17 +283,17 @@ am3_hm15k = Run(
     name='hurrell-15K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell-15K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
-    data_in_dur=31,
-    data_in_start_date=1980,
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+    data_in_dur=30,
+    data_in_start_date=1981,
     data_in_end_date=2010,
     default_date_range=(1981, 2010)
 )
 am3_hwpwp_p2k = Run(
     name='hurrell_wpwp+2K',
     description='',
-    data_in_direc='/archive/Spencer.Hill/am3/am3clim_hurrell_wpwp+2K/' + \
-             'gfdl.ncrc2-intel-prod-openmp/pp',
+    data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell_wpwp+2K/'
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
     data_in_dur=1,
     data_in_start_date=1980,
     data_in_end_date=2010,
@@ -274,7 +304,7 @@ am3_hc_static_veg = Run(
     description=('Climatological SST annual cycle from Hurrell dataset '
                  'repeated annually, with static year 2000 vegetation'),
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell_static_veg/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
     data_in_dur=30,
     data_in_start_date=1981,
     data_in_end_date=2010,
@@ -284,7 +314,7 @@ am3_hc_static_veg_p4k = Run(
     name='hurrell_static_veg+4K',
     description='Hurrell climatological SSTs w/ uniform +4K and static veg',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell_static_veg+4K/'
-              'gfdl.ncrc2-intel-prod-openmp/pp'),
+                   'gfdl.ncrc2-intel-prod-openmp/pp'),
     data_in_dur=30,
     data_in_start_date=1981,
     data_in_end_date=2010,
