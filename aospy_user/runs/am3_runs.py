@@ -147,7 +147,7 @@ am3_amip = Run(
     data_in_dur=136,
     data_in_start_date=1870,
     data_in_end_date=2005,
-    default_date_range=(1870, 2005)
+    default_date_range=(1870, 2004)
 )
 am3_hc = Run(
     name='hurrell_cont',
