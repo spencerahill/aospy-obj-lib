@@ -45,6 +45,8 @@ aero_3agcm = Proj(
         regions.sahel_north,
         regions.sahel_east,
         regions.sahel_west,
-        regions.east_asia_monsoon
+        regions.east_asia_monsoon,
+        regions.china_east,
+        regions.china_west,
     )
 )
