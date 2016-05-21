@@ -154,6 +154,18 @@ high_cld_amt = Var(
     def_lon=True,
     in_nc_grid=False
 )
+iwp = Var(
+    name='IWP',
+    alt_names=('iwp',),
+    units=units.kg_m2,
+    domain='atmos',
+    description='Ice water path',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False,
+)
 lai = Var(
     name='lai',
     alt_names=('LAI',),
@@ -201,6 +213,18 @@ lwdn_sfc_clr = Var(
     def_lat=True,
     def_lon=True,
     in_nc_grid=False
+)
+lwp = Var(
+    name='LWP',
+    alt_names=('lwp',),
+    units=units.kg_m2,
+    domain='atmos',
+    description='Liquid water path',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False,
 )
 lwup_sfc = Var(
     name='lwup_sfc',
@@ -784,8 +808,8 @@ vort = Var(
     in_nc_grid=False
 )
 wvp = Var(
-    name='wvp',
-    alt_names=('WVP', 'prw'),
+    name='WVP',
+    alt_names=('wvp', 'prw'),
     units=units.kg_m2,
     domain='atmos',
     description='Water vapor path',
@@ -1175,7 +1199,7 @@ evap_frac = Var(
     def_lat=True,
     def_lon=True,
     func=calcs.evap_frac,
-    units=units.kg_s1
+    units=units.unitless
 )
 fmse = Var(
     name='fmse',
