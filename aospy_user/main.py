@@ -2,6 +2,7 @@
 """Main script for automating computations using aospy."""
 from __future__ import print_function
 import itertools
+import logging
 import warnings
 
 import aospy
@@ -48,7 +49,7 @@ class MainParamsParser(object):
                 try:
                     run_objs.append(aospy.to_run(run, model, proj, self.projs))
                 except AttributeError as ae:
-                    warnings.warn(str(ae))
+                    logging.info(str(ae))
             run_objs = type(runs)(run_objs)
         if isinstance(run_objs, ObjectsForCalc):
             return run_objs
@@ -155,17 +156,28 @@ class CalcSuite(object):
             if exec_calcs:
                 try:
                     calc.compute()
+                except RuntimeError as e:
+                    logging.warn(repr(e))
                 except:
                     raise
                 if print_table:
-                    print("{}".format(calc.load('reg.av', False,
-                                                ci.region['sahel'],
-                                                plot_units=False)))
+                    print("{}".format(calc.load(
+                        'reg.av', dtype_out_vert=False,
+                        region=ci.region['sahel'], plot_units=True))
+                    )
             calcs.append(calc)
         return calcs
 
     def exec_calcs(self, calcs):
-        return [calc.compute() for calc in calcs]
+        out = []
+        for calc in calcs:
+            try:
+                o = calc.compute()
+            except RuntimeError as e:
+                logging.warn(repr(e))
+            else:
+                out.append(o)
+        return out
 
     def print_results(self, calcs):
         for calc in calcs:
@@ -184,7 +196,7 @@ def main(main_params, exec_calcs=True, print_table=True, prompt_verify=True):
         try:
             cs.prompt_user_verify()
         except IOError as e:
-            warnings.warn(str(e))
+            logging.warn(repr(e))
             return
     param_combos = cs.create_params_all_calcs()
     calcs = cs.create_calcs(param_combos, exec_calcs=exec_calcs,
