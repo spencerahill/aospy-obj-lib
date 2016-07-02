@@ -1,9 +1,10 @@
 """Gross moist stability-related quantities."""
 from aospy.constants import c_p, grav, L_v
 from aospy.utils import to_pascal
-from infinite_diff.deriv import EtaCenDeriv
+from infinite_diff.deriv import EtaCenDeriv, CenDeriv
 import numpy as np
 
+from .. import PLEVEL_STR
 from . import horiz_divg, vert_divg
 from .thermo import dse, mse, fmse
 
@@ -78,7 +79,37 @@ def dry_static_stab(temp, hght, level, lev_dn=925.):
     return (d - d[np.where(level == lev_dn)])/c_p
 
 
-def moist_static_stab(temp, hght, sphum, q_ice, ps, bk, pk):
-    """Moist static stability, in terms of frozen moist static energy."""
+def frozen_moist_static_stab(temp, hght, sphum, q_ice, ps, bk, pk):
+    """Frozen moist static stability using model-native coordinate data."""
     return EtaCenDeriv(fmse(temp, hght, sphum, q_ice), pk, bk, ps, order=2,
                        fill_edge=True).deriv()
+
+
+def moist_static_stab(temp, hght, sphum, ps, bk, pk):
+    """Moist static stability using model-native coordinate data.  No ice."""
+    return EtaCenDeriv(mse(temp, hght, sphum), pk, bk, ps, order=2,
+                       fill_edge=True).deriv()
+
+
+def frozen_moist_static_stab_p(temp, hght, sphum, q_ice):
+    """Frozen moist static stability using pressure-interpolated data.
+
+    Note that the values in the stratosphere become unphysical using pressure
+    interpolated data, but otherwise in the troposphere they agree well with
+    data on model-native coordinates.
+    """
+    p = to_pascal(temp[PLEVEL_STR])
+    return CenDeriv(fmse(temp, hght, sphum, q_ice), PLEVEL_STR, coord=p,
+                    order=2, fill_edge=True).deriv()
+
+
+def moist_static_stab_p(temp, hght, sphum):
+    """Moist static stability using pressure-interpolated data.  No ice.
+
+    Note that the values in the stratosphere become unphysical using pressure
+    interpolated data, but otherwise in the troposphere they agree well with
+    data on model-native coordinates.
+    """
+    p = to_pascal(temp[PLEVEL_STR])
+    return CenDeriv(mse(temp, hght, sphum), PLEVEL_STR, coord=p,
+                    order=2, fill_edge=True).deriv()

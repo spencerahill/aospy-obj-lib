@@ -12,6 +12,14 @@ bcc_csm1 = Model(
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'BCC/BCC-CSM1-1')),
+    grid_file_paths=[
+        '/archive/pcmdi/repo/CMIP5/output/BCC/BCC-CSM1-1/historical/fx/atmos/'
+        'fx/r0i0p0/v1/orog/orog_fx_bcc-csm1-1_historical_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/BCC/BCC-CSM1-1/historical/fx/atmos/'
+        'fx/r0i0p0/v1/sftlf/sftlf_fx_bcc-csm1-1_historical_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/BCC/BCC-CSM1-1/historical/fx/atmos/'
+        'fx/r0i0p0/v1/areacella/areacella_fx_bcc-csm1-1_historical_r0i0p0.nc',
+    ],
     # data_in_dur=30,
     # data_in_start_date=1979,
     # data_in_end_date=2008,
@@ -40,6 +48,7 @@ cccma_canam4 = Model(
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'CCCma/CanAM4')),
+    repo_version=0,
     # data_in_dur=30,
     # data_in_start_date=1950,
     # data_in_end_date=2009,
@@ -121,7 +130,7 @@ cnrm_cm5 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 cnrm_cm5_2 = Model(
     name='cnrc-cm5-2',
@@ -133,7 +142,7 @@ cnrm_cm5_2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # COLA-CFS
@@ -147,7 +156,7 @@ cola_cfsv2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # CSIRO-BOM
@@ -161,7 +170,7 @@ csiro_bom_access1_0 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 csiro_bom_access1_3 = Model(
     name='csiro-bom-access1-3',
@@ -173,7 +182,7 @@ csiro_bom_access1_3 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # CSIRO-QCCCE
@@ -187,7 +196,7 @@ csiro_qccce_mk3_6_0 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # FIO
@@ -201,12 +210,12 @@ fio_esm = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # ICHEC
 ichec_ec_earth = Model(
-    name='ichec-ec-earth',
+    name='ichec_ec_earth',
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'ICHEC/EC-EARTH')),
@@ -214,8 +223,9 @@ ichec_ec_earth = Model(
     data_in_start_date=1979,
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
+    repo_ens_mem='r3i1p1',
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # INM
@@ -229,7 +239,7 @@ inm_cm4 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # INPE
@@ -243,7 +253,7 @@ inpe_hadgem2_es = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # IPSL
@@ -257,7 +267,7 @@ ipsl_cm5a_lr = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 ipsl_cm5a_mr = Model(
     name='ipsl-cm5a-mr',
@@ -269,19 +279,30 @@ ipsl_cm5a_mr = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 ipsl_cm5b_lr = Model(
     name='ipsl-cm5b-lr',
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'IPSL/IPSL-CM5B-LR')),
+    grid_file_paths=[
+        '/archive/pcmdi/repo/CMIP5/output/IPSL/IPSL-CM5B-LR/piControl/fx/'
+        'atmos/fx/r0i0p0/v20120430/orog/'
+        'orog_fx_IPSL-CM5B-LR_piControl_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/IPSL/IPSL-CM5B-LR/piControl/fx/'
+        'atmos/fx/r0i0p0/v20120430/areacella/'
+        'areacella_fx_IPSL-CM5B-LR_piControl_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/IPSL/IPSL-CM5B-LR/piControl/fx/'
+        'atmos/fx/r0i0p0/v20120430/sftlf/'
+        'sftlf_fx_IPSL-CM5B-LR_piControl_r0i0p0.nc',
+    ],
     data_in_dur=30,
     data_in_start_date=1979,
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # LASG-CESS
@@ -296,7 +317,7 @@ lasg_cess_fgoals_g2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # LASG-IAP
@@ -310,7 +331,7 @@ lasg_iap_fgoals_g1 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 lasg_iap_fgoals_s2 = Model(
     name='lasg-iap-fgoals-s2',
@@ -322,7 +343,7 @@ lasg_iap_fgoals_s2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # MIROC
@@ -336,7 +357,7 @@ miroc4h = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 miroc5 = Model(
     name='miroc5',
@@ -348,7 +369,7 @@ miroc5 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 miroc_esm = Model(
     name='miroc-esm',
@@ -360,7 +381,7 @@ miroc_esm = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 miroc_esm_chem = Model(
     name='miroc-esm-chem',
@@ -372,12 +393,12 @@ miroc_esm_chem = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # MOHC (Met Office Hadley Centre)
 mohc_hadcm3 = Model(
-    name='hadcm3',
+    name='mohc_hadcm3',
     description='',
     # data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'MOHC/HadCM3')),
@@ -386,10 +407,10 @@ mohc_hadcm3 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mohc_hadgem2_a = Model(
-    name='hadgem2-a',
+    name='mohc_hadgem2a',
     description='',
     data_in_dir_struc='gfdl_repo',
     repo_version=1,
@@ -399,10 +420,10 @@ mohc_hadgem2_a = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mohc_hadgem2_cc = Model(
-    name='hadgem2-cc',
+    name='mohc_hadgem2cc',
     description='',
     # data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'MOHC/HadGEM2-CC')),
@@ -411,7 +432,7 @@ mohc_hadgem2_cc = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mohc_hadgem2_es = Model(
     name='hadgem2-es',
@@ -423,7 +444,7 @@ mohc_hadgem2_es = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # MPI-M
@@ -437,7 +458,7 @@ mpi_m_esm_lr = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mpi_m_esm_mr = Model(
     name='mpi-esm-mr',
@@ -449,7 +470,7 @@ mpi_m_esm_mr = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mpi_m_esm_p = Model(
     name='mpi-esm-p',
@@ -461,7 +482,7 @@ mpi_m_esm_p = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # MRI
@@ -475,7 +496,7 @@ mri_agcm3_2h = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mri_agcm3_2s = Model(
     name='mri-agcm3-2s',
@@ -487,7 +508,7 @@ mri_agcm3_2s = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mri_cgcm3 = Model(
     name='mri-cgcm3',
@@ -499,7 +520,7 @@ mri_cgcm3 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 mri_esm1 = Model(
     name='mri-esm1',
@@ -511,7 +532,7 @@ mri_esm1 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NASA-GISS
@@ -525,7 +546,7 @@ nasa_giss_e2_h = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 nasa_giss_e2_h_cc = Model(
     name='giss-e2-h-cc',
@@ -537,7 +558,7 @@ nasa_giss_e2_h_cc = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 nasa_giss_e2_r = Model(
     name='giss-e2-r',
@@ -549,7 +570,7 @@ nasa_giss_e2_r = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 nasa_giss_e2_r_cc = Model(
     name='giss-e2-r-cc',
@@ -561,7 +582,7 @@ nasa_giss_e2_r_cc = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NASA-GMAO
@@ -575,7 +596,7 @@ nasa_gmao_geos_5 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NCAR
@@ -584,12 +605,20 @@ ncar_ccsm4 = Model(
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'NCAR/CCSM4')),
+    grid_file_paths=[
+        '/archive/pcmdi/repo/CMIP5/output/NCAR/CCSM4/piControl/fx/atmos/fx/'
+        'r0i0p0/v20120413/orog/orog_fx_CCSM4_piControl_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/NCAR/CCSM4/piControl/fx/atmos/fx/'
+        'r0i0p0/v20120413/sftlf/sftlf_fx_CCSM4_piControl_r0i0p0.nc',
+        '/archive/pcmdi/repo/CMIP5/output/NCAR/CCSM4/piControl/fx/atmos/fx/'
+        'r0i0p0/v20120213/areacella/areacella_fx_CCSM4_piControl_r0i0p0.nc',
+        ],
     data_in_dur=30,
     data_in_start_date=1979,
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NCC
@@ -603,7 +632,7 @@ ncc_noresm1_m = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 ncc_noresm1_me = Model(
     name='ncc-noresm1-me',
@@ -615,7 +644,7 @@ ncc_noresm1_me = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NCEP
@@ -629,7 +658,7 @@ ncep_cfsv2_2011 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NIMR-KMA
@@ -643,7 +672,7 @@ nimr_kma_hadgem2_ao = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NOAA-GFDL
@@ -657,7 +686,7 @@ gfdl_cm2_1 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 gfdl_cm3 = Model(
     name='gfdl_cm3',
@@ -669,7 +698,7 @@ gfdl_cm3 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 gfdl_esm2m = Model(
     name='gfdl_esm2m',
@@ -681,7 +710,7 @@ gfdl_esm2m = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 gfdl_esm2g = Model(
     name='gfdl_esm2g',
@@ -693,7 +722,7 @@ gfdl_esm2g = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 gfdl_hiram_c180 = Model(
     name='gfdl_hiram-c180',
@@ -705,7 +734,7 @@ gfdl_hiram_c180 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 gfdl_hiram_c360 = Model(
     name='gfdl_hiram-c360',
@@ -717,7 +746,7 @@ gfdl_hiram_c360 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # NSF-DOE-NCAR
@@ -731,19 +760,20 @@ cesm1_bgc = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 cesm1_cam5 = Model(
-    name='cesm1-cam5',
+    name='ncar_cesm1_cam5',
     description='',
     data_in_dir_struc='gfdl_repo',
     data_in_direc=os.path.realpath(os.path.join(root_dir, 'NSF-DOE-NCAR/CESM1-CAM5')),
+    grid_file_paths=['/archive/s1h/cmip5/cam5_land_mask/cam5_land_mask.nc'],
     data_in_dur=30,
     data_in_start_date=1979,
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 cesm1_cam5_1_fv2 = Model(
     name='cesm1-cam5-1-fv2',
@@ -755,7 +785,7 @@ cesm1_cam5_1_fv2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 cesm1_fastchem = Model(
     name='cesm1-fastchem',
@@ -767,7 +797,7 @@ cesm1_fastchem = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 cesm1_waccm = Model(
     name='cesm1-waccm',
@@ -779,7 +809,7 @@ cesm1_waccm = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # SMHI
@@ -793,7 +823,7 @@ smhi_ec_earth = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )
 
 # UNSW
@@ -807,5 +837,5 @@ unsw_csiro_mk3l_1_2 = Model(
     data_in_end_date=2008,
     default_date_range=(1979, 2008),
     runs=[runs.amip, runs.amip4K],
-    default_runs=False
+    default_runs=[runs.amip, runs.amip4K]
 )

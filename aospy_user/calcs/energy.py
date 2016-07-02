@@ -2,14 +2,15 @@
 from aospy.constants import grav, c_p, L_v
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind, integrate)
-from infinite_diff.advec import (Upwind, EtaUpwind, SphereUpwind,
-                                 SphereEtaUpwind)
+                         monthly_mean_ts, monthly_mean_at_each_ind, integrate,
+                         get_dim_name)
+from infinite_diff.advec import Upwind, EtaUpwind, SphereEtaUpwind
 from .. import PFULL_STR, PLEVEL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
+                        zonal_advec_upwind, merid_advec_upwind,
                         total_advec_upwind,
                         horiz_advec_const_p_from_eta, horiz_advec_spharm,
                         horiz_advec_from_eta_spharm)
@@ -366,6 +367,7 @@ def energy_horiz_advec_eta_adj_spharm(temp, z, q, q_ice, u, v, swdn_toa,
     # return horiz_advec_from_eta_spharm(en, u_adj, v_adj, ps, radius, bk, pk)
     return horiz_advec_from_eta_spharm(en, u, v, ps, radius, bk, pk)
 
+
 def energy_horiz_advec_eta_adj(temp, z, q, q_ice, u, v, swdn_toa, swup_toa,
                                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
                                shflx, evap, precip, ps, dp, radius, bk, pk):
@@ -391,6 +393,18 @@ def energy_horiz_advec_eta_adj_time_mean(temp, z, q, q_ice, u, v, swdn_toa,
     monthly_terms = monthly_mean_ts([en, u_adj, v_adj, ps])
     monthly_terms += [radius, bk, pk]
     return horiz_advec_const_p_from_eta(*monthly_terms)
+
+
+def energy_zonal_advec_upwind(temp, z, q, q_ice, u, v, radius, order=2):
+    """Zonal advection of energy using upwind scheme."""
+    return zonal_advec_upwind(energy(temp, z, q, q_ice, u, v), u, radius,
+                              order=order)
+
+
+def energy_merid_advec_upwind(temp, z, q, q_ice, u, v, radius, order=2):
+    """Meridional advection of energy using upwind scheme."""
+    return merid_advec_upwind(energy(temp, z, q, q_ice, u, v), v, radius,
+                              order=order)
 
 
 def energy_horiz_advec_upwind(temp, z, q, q_ice, u, v, radius, order=2):
@@ -611,11 +625,11 @@ def energy_sfc_ps_advec(temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr,
                         precip, ps, dp, radius):
     """Advection of energy times surface pressure."""
     # u_adj, v_adj = uv_mass_energy_adjusted(
-        # temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        # lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
+    #     temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+    #     lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius
     # )
     # tm, zm, qm, qim, um, vm, psm = monthly_mean_ts([temp, z, q, q_ice,
-                                                    # u_adj, v_adj, ps])
+    #                                                 u_adj, v_adj, ps])
     # en = energy(tm, zm, qm, qim, um, vm)
     en = energy(temp, z, q, q_ice, u, v)
     p_str = vert_coord_name(en)
@@ -682,11 +696,27 @@ def mse_total_advec(temp, hght, sphum, u, v, omega, p, radius):
     return field_total_advec(mse_, u, v, omega, p, radius)
 
 
-def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius):
-    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius)
+def mse_zonal_advec_upwind(temp, z, q, u, radius, order=2):
+    """Zonal advection of moist static energy using upwind scheme."""
+    return zonal_advec_upwind(mse(temp, z, q), u, radius, order=order)
+
+
+def mse_merid_advec_upwind(temp, z, q, v, radius, order=2):
+    """Meridional advection of moist static energy using upwind scheme."""
+    return merid_advec_upwind(mse(temp, z, q), v, radius, order=order)
+
+
+def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius, order=2):
+    """Horizontal moist static energy advection using upwind scheme."""
+    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius,
+                              order=order)
 
 
 def mse_vert_advec_upwind(temp, hght, sphum, omega, p, order=2):
+    """Upwind vertical advection of moist static energy."""
+    # p_names = ['plev', PLEVEL_STR]
+    # p_str = get_dim_name(p, p_names)
+    # p = p.rename({p_str: PLEVEL_STR})
     return Upwind(omega, mse(temp, hght, sphum), PLEVEL_STR, coord=p,
                   order=order, fill_edge=True).advec()
 

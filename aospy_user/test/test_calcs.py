@@ -17,7 +17,7 @@ def tend_each_timestep(arr):
 
 def load(var_name):
     path = ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
-            'pp/atmos_level/ts/monthly/1yr/atmos_level.198301-198312.')
+            'pp/atmos_level/ts/monthly/30yr/atmos_level.198301-201212.')
 
     ds = xr.open_dataset(path + var_name + '.nc',
                          drop_variables=['nv', 'time_bounds'])

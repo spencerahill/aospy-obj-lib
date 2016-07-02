@@ -2,6 +2,20 @@
 from aospy.region import Region
 
 
+china_west = Region(
+    name='china_west',
+    description='Western China',
+    lat_bounds=(35, 45),
+    lon_bounds=(75, 100),
+    do_land_mask=False
+)
+china_east = Region(
+    name='china_east',
+    description='Eastern China',
+    lat_bounds=(22, 32),
+    lon_bounds=(105, 120),
+    do_land_mask=True
+)
 globe = Region(
     name='globe',
     description='Entire globe',
@@ -109,7 +123,7 @@ sahel2 = Region(
     name='sahel2',
     description='African Sahel w/ longitude bounds 15W-30E',
     mask_bounds=[((10, 20), (0, 30)), ((10, 20), (345, 360))],
-    do_land_mask='strict'
+    do_land_mask=True
 )
 sahel3 = Region(
     name='sahel3',

@@ -28,6 +28,9 @@ from .thermo import (
     pot_temp,
     virt_pot_temp,
     equiv_pot_temp,
+    virt_temp,
+    z_from_hypso,
+    mse_from_hypso,
     mixing_ratio_from_specific_mass,
     specific_mass_dry_air,
     specific_gas_constant_moist_air,
@@ -156,6 +159,8 @@ from .energy import (
     energy_sfc_ps_advec,
     energy_sfc_ps_advec_as_resid,
     energy_horiz_advec_adj,
+    energy_zonal_advec_upwind,
+    energy_merid_advec_upwind,
     energy_horiz_advec_upwind,
     energy_horiz_advec_eta_adj,
     energy_horiz_advec_eta_adj_spharm,
@@ -182,6 +187,8 @@ from .energy import (
     mse_vert_advec,
     mse_total_advec,
     mse_horiz_advec_upwind,
+    mse_merid_advec_upwind,
+    mse_zonal_advec_upwind,
     mse_vert_advec_upwind,
     mse_total_advec_upwind,
     mse_budget_advec_residual,
@@ -207,6 +214,7 @@ from .stats import (
     lin_regr_cre_net,
     lin_regr_toa_rad_clr,
     vert_centroid,
+    vert_avg
     )
 from .water import (
     p_minus_e,
@@ -231,6 +239,9 @@ from .gms import (
     gms_each_level,
     dry_static_stab,
     moist_static_stab,
+    frozen_moist_static_stab,
+    moist_static_stab_p,
+    frozen_moist_static_stab_p,
 )
 from .zonal_mean_circ import (
     msf,

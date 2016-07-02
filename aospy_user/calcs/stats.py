@@ -3,6 +3,7 @@ from aospy.utils import level_thickness
 import numpy as np
 import scipy
 
+from .. import PLEVEL_STR
 from .toa_sfc_fluxes import cre_sw, cre_lw, cre_net, toa_rad_clr
 
 
@@ -81,6 +82,7 @@ def lin_regr_toa_rad_clr(swdn_toa_clr, swup_toa_clr, olr_clr, var2):
     )
 
 
+# TODO: Update this to xarray.
 def vert_centroid(arr, level, p_bot=850., p_top=150.):
     """
     Compute the vertical centroid of some vertically defined field.
@@ -99,3 +101,13 @@ def vert_centroid(arr, level, p_bot=850., p_top=150.):
         arr = np.atleast_3d(arr)
     return (np.sum(arr*level*lev_thick, axis=0) /
             np.sum(arr*lev_thick, axis=0))
+
+
+def vert_avg(field, p_bot=700, p_top=400):
+    """Average the field vertically between the specified pressure bounds."""
+    # TODO: Determine p_str from the data.
+    p_str = PLEVEL_STR
+    p = field[p_str]
+    field = field.where((p >= p_top) & (p <= p_bot))
+    # TODO: This assumes evenly spaced levels.  Remove that assumption.
+    return field.mean(p_str, skipna=True)
