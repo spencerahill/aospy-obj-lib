@@ -61,7 +61,6 @@ temp = Var(
     def_lat=True,
     def_lon=True,
     in_nc_grid=False,
-    colormap='RdBu_r'
 )
 dp = Var(
     name='dp',
@@ -418,6 +417,28 @@ pv = Var(
     units=units.s1,
     domain='atmos',
     description='Potential vorticity',
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
+qdt_conv = Var(
+    name='qdt_conv',
+    units=units.s1_spec_mass,
+    domain='atmos',
+    description='Moisture tendency from convective parameterization.',
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    in_nc_grid=False
+)
+qdt_ls = Var(
+    name='qdt_ls',
+    units=units.s1_spec_mass,
+    domain='atmos',
+    description='Moisture tendency from large-scale condensation.',
     def_time=True,
     def_vert=True,
     def_lat=True,
@@ -921,7 +942,7 @@ aht = Var(
     domain='atmos',
     description='Total northward atmospheric heat transport.',
     variables=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc,
-          lwdn_sfc, shflx, evap, snow_ls, snow_conv, sfc_area),
+               lwdn_sfc, shflx, evap, snow_ls, snow_conv, sfc_area),
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -979,7 +1000,6 @@ column_energy = Var(
     def_lon=True,
     func=calcs.column_energy,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 column_lw = Var(
     name='column_lw',
@@ -992,7 +1012,6 @@ column_lw = Var(
     def_lon=True,
     func=calcs.column_lw,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 column_sw = Var(
     name='column_sw',
@@ -1005,7 +1024,6 @@ column_sw = Var(
     def_lon=True,
     func=calcs.column_sw,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 cre_lw = Var(
     name='cre_lw',
@@ -1144,7 +1162,6 @@ dse_horiz_advec_divg_sum = Var(
 du_dx = Var(
     name='du_dx',
     domain='atmos',
-    description='',
     variables=(ucomp, r_e),
     def_time=True,
     def_vert=True,
@@ -1156,7 +1173,6 @@ du_dx = Var(
 dv_dy = Var(
     name='dv_dy',
     domain='atmos',
-    description='',
     variables=(vcomp, r_e),
     def_time=True,
     def_vert=True,
@@ -1212,7 +1228,28 @@ fmse = Var(
     def_lon=True,
     func=calcs.fmse,
     units=units.J_kg1,
-    colormap='RdBu_r'
+)
+fmse_merid_deriv_eta = Var(
+    name='fmse_merid_deriv_eta',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.fmse_merid_deriv_eta,
+    units=units.J_kg1_m1,
+)
+fmse_zonal_deriv_eta = Var(
+    name='fmse_zonal_deriv_eta',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.fmse_zonal_deriv_eta,
+    units=units.J_kg1_m1,
 )
 fmse_budget_advec_residual = Var(
     name='fmse_budget_advec_residual',
@@ -1370,7 +1407,6 @@ gross_moist_stab = Var(
 gross_moist_strat = Var(
     name='gross_moist_strat',
     domain='atmos',
-    description='',
     variables=(sphum, ucomp, vcomp, r_e, dp),
     def_time=True,
     def_vert=False,
@@ -1458,7 +1494,6 @@ horiz_divg_spharm = Var(
 horiz_divg_mass_adj = Var(
     name='horiz_divg_mass_adj',
     domain='atmos',
-    description='',
     variables=(ucomp, vcomp, evap, precip, ps, r_e, dp),
     def_time=True,
     def_vert=True,
@@ -1471,7 +1506,6 @@ horiz_divg_mass_adj = Var(
 horiz_divg_mass_adj_spharm = Var(
     name='horiz_divg_mass_adj_spharm',
     domain='atmos',
-    description='',
     variables=(ucomp, vcomp, evap, precip, ps, r_e, dp),
     def_time=True,
     def_vert=True,
@@ -1484,7 +1518,6 @@ horiz_divg_mass_adj_spharm = Var(
 horiz_divg_mass_adj_from_eta = Var(
     name='horiz_divg_mass_adj_from_eta',
     domain='atmos',
-    description='',
     variables=(ucomp, vcomp, evap, precip, ps, r_e, dp, bk, pk),
     def_time=True,
     def_vert=True,
@@ -1520,7 +1553,6 @@ dry_mass_column_tendency = Var(
     func=calcs.dry_mass_column_tendency,
     units=units.Pa_s1_mass,
     math_str=r'$\partial p_s/\partial t - g\partial \mathrm{WVP}/\partial t$',
-    colormap='RdBu_r'
 )
 dry_mass_column_divg = Var(
     name='dry_mass_column_divg',
@@ -1595,7 +1627,6 @@ energy_column_source = Var(
     def_lon=True,
     func=calcs.energy_column_source,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_divg = Var(
     name='energy_column_divg',
@@ -1621,7 +1652,6 @@ energy_column_tendency = Var(
     def_lon=True,
     func=calcs.energy_column_tendency,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_tendency_each_timestep = Var(
     name='energy_column_tendency_each_timestep',
@@ -1634,7 +1664,6 @@ energy_column_tendency_each_timestep = Var(
     def_lon=True,
     func=calcs.energy_column_tendency_each_timestep,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_budget_residual = Var(
     name='energy_column_budget_residual',
@@ -1649,12 +1678,10 @@ energy_column_budget_residual = Var(
     def_lon=True,
     func=calcs.energy_column_budget_residual,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_divg_adj = Var(
     name='energy_column_divg_adj',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -1669,7 +1696,6 @@ energy_column_divg_adj = Var(
 energy_column_divg_adj_time_mean = Var(
     name='energy_column_divg_adj_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -1684,7 +1710,6 @@ energy_column_divg_adj_time_mean = Var(
 energy_column_divg_adj_eddy = Var(
     name='energy_column_divg_adj_eddy',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -1699,7 +1724,6 @@ energy_column_divg_adj_eddy = Var(
 energy_column_divg_mass_adj = Var(
     name='energy_column_divg_mass_adj',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, evap, precip, ps,
                dp, r_e),
     def_time=True,
@@ -1723,7 +1747,6 @@ energy_column_budget_adj_residual = Var(
     def_lon=True,
     func=calcs.energy_column_budget_adj_residual,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_budget_energy_adj_residual = Var(
     name='energy_column_budget_energy_adj_residual',
@@ -1738,7 +1761,6 @@ energy_column_budget_energy_adj_residual = Var(
     def_lon=True,
     func=calcs.energy_column_budget_energy_adj_residual,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_budget_mass_adj_residual = Var(
     name='energy_column_budget_mass_adj_residual',
@@ -1753,7 +1775,6 @@ energy_column_budget_mass_adj_residual = Var(
     def_lon=True,
     func=calcs.energy_column_budget_mass_adj_residual,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_column_budget_dry_mass_adj_residual = Var(
     name='energy_column_budget_dry_mass_adj_residual',
@@ -1768,7 +1789,6 @@ energy_column_budget_dry_mass_adj_residual = Var(
     def_lon=True,
     func=calcs.energy_column_budget_dry_mass_adj_residual,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 energy_ps_horiz_advec = Var(
     name='energy_ps_horiz_advec',
@@ -1864,7 +1884,6 @@ energy_horiz_advec_eta_upwind_adj_time_mean = Var(
 energy_horiz_advec_adj = Var(
     name='energy_horiz_advec_adj',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -1879,7 +1898,6 @@ energy_horiz_advec_adj = Var(
 energy_horiz_advec_upwind = Var(
     name='energy_horiz_advec_upwind',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e),
     def_time=True,
     def_vert=True,
@@ -1892,7 +1910,6 @@ energy_horiz_advec_upwind = Var(
 energy_zonal_advec_upwind = Var(
     name='energy_zonal_advec_upwind',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e),
     def_time=True,
     def_vert=True,
@@ -1905,7 +1922,6 @@ energy_zonal_advec_upwind = Var(
 energy_merid_advec_upwind = Var(
     name='energy_merid_advec_upwind',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, r_e),
     def_time=True,
     def_vert=True,
@@ -1918,13 +1934,36 @@ energy_merid_advec_upwind = Var(
 energy_horiz_advec_eta_upwind = Var(
     name='energy_horiz_advec_eta_upwind',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, bk, pk),
     def_time=True,
     def_vert=True,
     def_lat=True,
     def_lon=True,
     func=calcs.energy_horiz_advec_eta_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_merid_advec_eta_upwind = Var(
+    name='energy_merid_advec_eta_upwind',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_merid_advec_eta_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+energy_zonal_advec_eta_upwind = Var(
+    name='energy_zonal_advec_eta_upwind',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.energy_zonal_advec_eta_upwind,
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
@@ -1970,7 +2009,6 @@ energy_horiz_advec_eta_upwind_covar = Var(
 energy_horiz_advec_eta_upwind_time_mean = Var(
     name='energy_horiz_advec_eta_upwind_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps, bk, pk),
     def_time=True,
     def_vert=True,
@@ -1998,7 +2036,6 @@ energy_horiz_divg_eta = Var(
 energy_column_vert_advec_as_resid_eta_time_mean = Var(
     name='energy_column_vert_advec_as_resid_eta_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
@@ -2013,7 +2050,6 @@ energy_column_vert_advec_as_resid_eta_time_mean = Var(
 energy_column_vert_advec_as_resid = Var(
     name='energy_column_vert_advec_as_resid',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -2069,7 +2105,6 @@ energy_vert_advec = Var(
 energy_vert_advec_eta_upwind = Var(
     name='energy_vert_advec_eta_upwind',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, ps, bk, pk),
     def_time=True,
     def_vert=True,
@@ -2121,7 +2156,6 @@ energy_vert_advec_eta_upwind_covar = Var(
 energy_vert_advec_eta_adj = Var(
     name='energy_vert_advec_eta_adj',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
@@ -2136,7 +2170,6 @@ energy_vert_advec_eta_adj = Var(
 energy_vert_advec_eta_time_mean = Var(
     name='energy_vert_advec_eta_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega, ps, bk, pk),
     def_time=True,
     def_vert=True,
@@ -2149,7 +2182,6 @@ energy_vert_advec_eta_time_mean = Var(
 energy_vert_advec_eta_adj_time_mean = Var(
     name='energy_vert_advec_eta_adj_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
@@ -2164,7 +2196,6 @@ energy_vert_advec_eta_adj_time_mean = Var(
 energy_vert_advec_eta_upwind_time_mean = Var(
     name='energy_vert_advec_eta_upwind_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
                ps, bk, pk),
     def_time=True,
@@ -2178,7 +2209,6 @@ energy_vert_advec_eta_upwind_time_mean = Var(
 energy_vert_advec_eta_upwind_adj_time_mean = Var(
     name='energy_vert_advec_eta_upwind_adj_time_mean',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e, bk, pk),
@@ -2204,7 +2234,6 @@ mass_column = Var(
     func=calcs.mass_column,
     func_input_dtype='numpy',
     units=units.kg_m2,
-    colormap='RdBu_r'
 )
 mass_column_integral = Var(
     name='mass_column_integral',
@@ -2221,7 +2250,6 @@ mass_column_integral = Var(
     def_lon=True,
     func=calcs.mass_column_integral,
     units=units.kg_m2,
-    colormap='RdBu_r'
 )
 mass_column_divg = Var(
     name='mass_column_divg',
@@ -2256,7 +2284,6 @@ mass_column_divg_spharm = Var(
 mass_column_divg_adj = Var(
     name='mass_column_divg_adj',
     domain='atmos',
-    description='',
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
@@ -2271,7 +2298,6 @@ mass_column_divg_adj = Var(
 mass_column_source = Var(
     name='mass_column_source',
     domain='atmos',
-    description='',
     variables=(evap, precip),
     def_time=True,
     def_vert=False,
@@ -2294,7 +2320,6 @@ mass_column_tendency = Var(
     func=calcs.time_tendency_first_to_last,
     # func=calcs.time_tendency_each_timestep,
     units=units.Pa_s1_mass,
-    colormap='RdBu_r'
 )
 mass_column_budget_lhs = Var(
     name='mass_column_budget_lhs',
@@ -2309,7 +2334,6 @@ mass_column_budget_lhs = Var(
     def_lon=True,
     func=calcs.mass_column_budget_lhs,
     units=units.Pa_s1_mass,
-    colormap='RdBu_r'
 )
 mass_column_budget_with_adj_lhs = Var(
     name='mass_column_budget_with_adj_lhs',
@@ -2324,7 +2348,6 @@ mass_column_budget_with_adj_lhs = Var(
     def_lon=True,
     func=calcs.mass_column_budget_with_adj_lhs,
     units=units.Pa_s1_mass,
-    colormap='RdBu_r'
 )
 mass_column_budget_residual = Var(
     name='mass_column_budget_residual',
@@ -2339,7 +2362,6 @@ mass_column_budget_residual = Var(
     def_lon=True,
     func=calcs.mass_column_budget_residual,
     units=units.Pa_s1_mass,
-    colormap='RdBu_r'
 )
 mass_column_budget_adj_residual = Var(
     name='mass_column_budget_adj_residual',
@@ -2354,7 +2376,6 @@ mass_column_budget_adj_residual = Var(
     def_lon=True,
     func=calcs.mass_column_budget_adj_residual,
     units=units.Pa_s1_mass,
-    colormap='RdBu_r'
 )
 moisture_column_source = Var(
     name='moisture_column_source',
@@ -2537,7 +2558,6 @@ mse = Var(
     func=calcs.mse,
     units=units.J_kg1,
     valid_range=(3.05e5, 5e6),
-    colormap='RdBu_r'
 )
 mse_from_hypso = Var(
     name='mse_from_hypso',
@@ -2562,11 +2582,122 @@ z_from_hypso = Var(
     func=calcs.z_from_hypso,
     units=units.m
 )
+mse_from_hypso_zonal_advec_upwind = Var(
+    name='mse_from_hypso_zonal_advec_upwind',
+    variables=(ps, temp, sphum, ucomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_from_hypso_zonal_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+mse_from_hypso_merid_advec_upwind = Var(
+    name='mse_from_hypso_merid_advec_upwind',
+    variables=(ps, temp, sphum, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_from_hypso_merid_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+mse_from_hypso_horiz_advec_upwind = Var(
+    name='mse_from_hypso_horiz_advec_upwind',
+    variables=(ps, temp, sphum, ucomp, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_from_hypso_horiz_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+mse_from_hypso_vert_advec_upwind = Var(
+    name='mse_from_hypso_vert_advec_upwind',
+    variables=(ps, temp, sphum, omega, p),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.mse_from_hypso_vert_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+cpt_lvq = Var(
+    name='cpt_lvq',
+    domain='atmos',
+    math_str=r'$h$',
+    variables=(temp, sphum),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq,
+    units=units.J_kg1,
+)
+cpt_lvq_zonal_deriv = Var(
+    name='cpt_lvq_zonal_deriv',
+    variables=(temp, sphum),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq_zonal_deriv,
+    units=units.J_kg1_m1,
+    colormap='RdBu'
+)
+cpt_lvq_merid_deriv = Var(
+    name='cpt_lvq_merid_deriv',
+    variables=(temp, sphum),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq_merid_deriv,
+    units=units.J_kg1_m1,
+    colormap='RdBu'
+)
+cpt_lvq_zonal_advec_upwind = Var(
+    name='cpt_lvq_zonal_advec_upwind',
+    variables=(temp, sphum, ucomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq_zonal_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+cpt_lvq_merid_advec_upwind = Var(
+    name='cpt_lvq_merid_advec_upwind',
+    variables=(temp, sphum, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq_merid_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
+cpt_lvq_horiz_advec_upwind = Var(
+    name='cpt_lvq_horiz_advec_upwind',
+    variables=(temp, sphum, ucomp, vcomp, r_e),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.cpt_lvq_horiz_advec_upwind,
+    units=units.J_kg1_s1,
+    colormap='RdBu'
+)
 mse_tendency = Var(
     name='mse_tendency',
     domain='atmos',
-    description='',
-    variables=(tdt_lw, tdt_sw, tdt_vdif, qdt_vdif),
+    variables=(tdt_lw, tdt_sw, tdt_conv, tdt_ls, tdt_vdif,
+               qdt_conv, qdt_ls, qdt_vdif),
     def_time=True,
     def_vert=True,
     def_lat=True,
@@ -2800,6 +2931,19 @@ omega_from_divg_eta_adj = Var(
     func=calcs.omega_from_divg_eta,
     units=units.Pa_s1
 )
+omega_change_from_fmse_budget = Var(
+    name='omega_change_from_fmse_budget',
+    domain='atmos',
+    variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, ps,
+               temp, hght, sphum, ice_wat, ucomp, vcomp, ps,
+               bk, pk),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.omega_change_from_fmse_budget,
+    units=units.Pa_s1
+)
 p_minus_e = Var(
     name='p-e',
     domain='atmos',
@@ -2873,7 +3017,6 @@ q_merid_advec = Var(
     def_time=True,
     def_vert=True,
     def_lat=True,
-
     def_lon=True,
     func=calcs.merid_advec,
     units=units.s1_spec_mass,
@@ -2895,7 +3038,6 @@ q_horiz_advec = Var(
 q_horiz_advec_mass_adj = Var(
     name='q_horiz_advec_mass_adj',
     domain='atmos',
-    description='',
     variables=(sphum, ucomp, vcomp, sphum, ps, r_e, dp, p),
     def_time=True,
     def_vert=True,
@@ -2908,7 +3050,6 @@ q_horiz_advec_mass_adj = Var(
 q_horiz_advec_const_p_from_eta = Var(
     name='q_horiz_advec_const_p_from_eta',
     domain='atmos',
-    description='',
     variables=(sphum, ucomp, vcomp, ps, r_e, bk, pk),
     def_time=True,
     def_vert=True,
@@ -2921,7 +3062,6 @@ q_horiz_advec_const_p_from_eta = Var(
 q_times_horiz_divg_mass_adj = Var(
     name='q_times_horiz_divg_mass_adj',
     domain='atmos',
-    description='',
     variables=(sphum, ucomp, vcomp, sphum, ps, r_e, dp, p),
     def_time=True,
     def_vert=True,
@@ -2934,7 +3074,6 @@ q_times_horiz_divg_mass_adj = Var(
 q_horiz_flux_divg_mass_adj = Var(
     name='q_horiz_flux_divg_mass_adj',
     domain='atmos',
-    description='',
     variables=(sphum, ucomp, vcomp, sphum, ps, r_e, dp, p),
     def_time=True,
     def_vert=True,
@@ -3300,7 +3439,6 @@ tdt_sw_cld = Var(
 tdt_moist_diabatic = Var(
     name='tdt_moist_diabatic',
     domain='atmos',
-    description='',
     variables=(tdt_lw, tdt_sw, tdt_vdif),
     def_time=True,
     def_vert=True,
@@ -3321,7 +3459,6 @@ toa_rad = Var(
     def_lon=True,
     func=calcs.toa_rad,
     units=units.W_m2,
-    colormap='RdBu_r'
 )
 toa_rad_clr = Var(
     name='toa_rad_clr',
@@ -3410,7 +3547,6 @@ evap_precip_corr = Var(
 toa_rad_clr_precip_corr = Var(
     name='toa_rad_clr_precip_corr',
     domain='atmos',
-    description='',
     variables=(swdn_toa_clr, swup_toa_clr, olr_clr, precip),
     def_time=False,
     def_vert=False,
@@ -3434,7 +3570,6 @@ t_surf_precip_corr = Var(
 cre_net_precip_lin_regr = Var(
     name='cre_net_precip_lin_regr',
     domain='atmos',
-    description='',
     variables=(swup_toa, olr, swup_toa_clr, olr_clr, precip),
     def_time=False,
     def_vert=False,
@@ -3446,7 +3581,6 @@ cre_net_precip_lin_regr = Var(
 toa_rad_clr_precip_lin_regr = Var(
     name='toa_rad_clr_precip_lin_regr',
     domain='atmos',
-    description='',
     variables=(swdn_toa_clr, swup_toa_clr, olr_clr, precip),
     def_time=False,
     def_vert=False,
@@ -3471,7 +3605,6 @@ t_surf_precip_lin_regr = Var(
 u_energy_adjustment = Var(
     name='u_energy_adjustment',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
                r_e),
@@ -3485,7 +3618,6 @@ u_energy_adjustment = Var(
 u_energy_adjusted = Var(
     name='u_energy_adjusted',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
                r_e),
@@ -3499,7 +3631,6 @@ u_energy_adjusted = Var(
 u_mass_adjustment = Var(
     name='u_mass_adjustment',
     domain='atmos',
-    description='',
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
@@ -3511,7 +3642,6 @@ u_mass_adjustment = Var(
 u_mass_adjusted = Var(
     name='u_mass_adjusted',
     domain='atmos',
-    description='',
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=True,
@@ -3523,7 +3653,6 @@ u_mass_adjusted = Var(
 u_mass_energy_adjustment = Var(
     name='u_mass_energy_adjustment',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -3537,7 +3666,6 @@ u_mass_energy_adjustment = Var(
 u_mass_energy_adjusted = Var(
     name='u_mass_energy_adjusted',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -3551,7 +3679,6 @@ u_mass_energy_adjusted = Var(
 v_energy_adjustment = Var(
     name='v_energy_adjustment',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
                r_e),
@@ -3565,7 +3692,6 @@ v_energy_adjustment = Var(
 v_energy_adjusted = Var(
     name='v_energy_adjusted',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap, dp,
                r_e),
@@ -3579,7 +3705,6 @@ v_energy_adjusted = Var(
 v_mass_adjustment = Var(
     name='v_mass_adjustment',
     domain='atmos',
-    description='',
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=False,
@@ -3591,7 +3716,6 @@ v_mass_adjustment = Var(
 v_mass_adjusted = Var(
     name='v_mass_adjusted',
     domain='atmos',
-    description='',
     variables=(ps, ucomp, vcomp, evap, precip, r_e, dp),
     def_time=True,
     def_vert=True,
@@ -3603,7 +3727,6 @@ v_mass_adjusted = Var(
 v_mass_energy_adjustment = Var(
     name='v_mass_energy_adjustment',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -3617,7 +3740,6 @@ v_mass_energy_adjustment = Var(
 v_mass_energy_adjusted = Var(
     name='v_mass_energy_adjusted',
     domain='atmos',
-    description='',
     variables=(temp, hght, sphum, ice_wat, ucomp, vcomp, swdn_toa, swup_toa,
                olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap,
                precip, ps, dp, r_e),
@@ -3643,7 +3765,6 @@ v_mid_trop = Var(
 vert_divg = Var(
     name='vert_divg',
     domain='atmos',
-    description='',
     variables=(omega, p),
     def_time=True,
     def_vert='pfull',

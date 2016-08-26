@@ -98,6 +98,9 @@ J_kg1 = Units(
     vert_int_plot_units='10$^6$ J m$^{-2}$',
     vert_int_plot_units_conv=1e-6
 )
+J_kg1_m1 = Units(
+    units=r'J kg$^{-1}$ m$^{-1}$',
+)
 J_kg1_s1 = Units(
     # units=r'J kg$^{-1}$ s$^{-1}$',
     # plot_units='K day$^{-1}',
