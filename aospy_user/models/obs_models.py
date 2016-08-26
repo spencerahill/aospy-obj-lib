@@ -101,7 +101,7 @@ era = Model(
     name='era',
     description='ERA reanalyses',
     grid_file_paths=('/archive/pcmdi/repo/ana4MIPs/ECMWF/ERA-Interim/atmos/'
-                   'mon/v20140416/wap_*.nc'),
+                     'mon/v20140416/wap_Amon_reanalysis_IFS-Cy31r2_197901-197912.nc'),
     data_in_dur=1,
     data_in_start_date=1979,
     data_in_end_date=2013,

@@ -1,37 +1,24 @@
 """Energy budget-related fields"""
-from aospy.constants import grav, c_p, L_v
+from aospy.constants import grav
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
                          to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind, integrate,
-                         get_dim_name)
-from infinite_diff.advec import Upwind, EtaUpwind, SphereEtaUpwind
-from .. import PFULL_STR, PLEVEL_STR
+                         monthly_mean_ts, monthly_mean_at_each_ind, integrate)
+from infinite_diff.advec import EtaUpwind, SphereEtaUpwind
+from .. import PFULL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p
 from .tendencies import (time_tendency_first_to_last,
                          time_tendency_each_timestep)
-from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,
+from .advection import (horiz_advec, horiz_advec_upwind,
                         zonal_advec_upwind, merid_advec_upwind,
-                        total_advec_upwind,
                         horiz_advec_const_p_from_eta, horiz_advec_spharm,
                         horiz_advec_from_eta_spharm)
 from .mass import (column_flux_divg, budget_residual, uv_mass_adjusted,
                    uv_dry_mass_adjusted, uv_column_budget_adjustment,
                    horiz_divg_spharm, mass_column_divg_adj,
                    horiz_divg_from_eta)
-from .transport import (field_horiz_flux_divg, field_vert_flux_divg,
-                        field_total_advec, field_horiz_advec_divg_sum,
-                        field_times_horiz_divg, omega_from_divg_eta)
-from .thermo import dse, mse, fmse
+from .transport import omega_from_divg_eta
+from .thermo import energy
 from .toa_sfc_fluxes import column_energy
-
-
-def kinetic_energy(u, v):
-    """Kinetic energy per unit mass, neglecting vertical motion."""
-    return 0.5*(u*u + v*v)
-
-
-def energy(temp, z, q, q_ice, u, v):
-    return fmse(temp, z, q, q_ice) + kinetic_energy(u, v)
 
 
 def energy_column(temp, z, q, q_ice, u, v, dp):
@@ -430,6 +417,20 @@ def energy_horiz_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, bk, pk,
                            order=order).advec_horiz_const_p(u, v)
 
 
+def energy_zonal_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, bk, pk,
+                                  order=2):
+    """Zonal advection of energy using upwind scheme."""
+    return SphereEtaUpwind(energy(temp, z, q, q_ice, u, v), pk, bk, ps,
+                           order=order).advec_x_const_p(u)
+
+
+def energy_merid_advec_eta_upwind(temp, z, q, q_ice, u, v, ps, bk, pk,
+                                  order=2):
+    """Meridional advection of energy using upwind scheme."""
+    return SphereEtaUpwind(energy(temp, z, q, q_ice, u, v), pk, bk, ps,
+                           order=order).advec_y_const_p(v)
+
+
 def energy_horiz_advec_eta_upwind_time_mean(temp, z, q, q_ice, u, v, ps,
                                             bk, pk, order=2):
     """Upwind horizontal energy advection at constant pressure."""
@@ -604,15 +605,16 @@ def energy_vert_advec_adj_eta(temp, z, q, q_ice, u, v, omega, swdn_toa,
                               lwdn_sfc, shflx, evap, precip, ps, dp, radius,
                               bk, pk):
     """Vertical advection of energy with column balance adjustment."""
-    column_advec_as_resid = energy_column_vert_advec_as_resid_eta(
-        temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-        lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
-    )
-    en = energy(temp, z, q, q_ice, u, v)
-    advec = omega*d_dp_from_eta(en, ps, bk, pk)
-    column_advec = int_dp_g(advec, dp)
-    residual = column_advec_as_resid - column_advec
-    return advec - (residual * grav.value / ps)
+    pass
+    # column_advec_as_resid = energy_column_vert_advec_as_resid_eta(
+    #     temp, z, q, q_ice, u, v, swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
+    #     lwup_sfc, lwdn_sfc, shflx, evap, precip, ps, dp, radius, bk, pk
+    # )
+    # en = energy(temp, z, q, q_ice, u, v)
+    # advec = omega*d_dp_from_eta(en, ps, bk, pk)
+    # column_advec = int_dp_g(advec, dp)
+    # residual = column_advec_as_resid - column_advec
+    # return advec - (residual * grav.value / ps)
 
 
 def sel(arr, p_str):
@@ -660,141 +662,3 @@ def energy_sfc_ps_advec_as_resid(temp, z, q, q_ice, u, v, evap, precip, ps, dp,
     # reasonable answers.
     # return col_divg - divg_col_int
     return en*(col_divg - divg_col_int) / grav.value
-
-
-def mse_horiz_flux_divg(temp, hght, sphum, u, v, radius):
-    """Horizontal flux convergence of moist static energy."""
-    return field_horiz_flux_divg(mse(temp, hght, sphum), u, v, radius)
-
-
-def mse_horiz_advec(temp, hght, sphum, u, v, radius):
-    """Horizontal advection of moist static energy."""
-    return horiz_advec(mse(temp, hght, sphum), u, v, radius)
-
-
-def mse_times_horiz_divg(temp, hght, sphum, u, v, radius, dp):
-    """Horizontal divergence of moist static energy."""
-    return field_times_horiz_divg(mse(temp, hght, sphum), u, v, radius, dp)
-
-
-def mse_horiz_advec_divg_sum(T, z, q, u, v, rad, dp):
-    return field_horiz_advec_divg_sum(mse(T, z, q), u, v, rad, dp)
-
-
-def mse_vert_flux_divg(T, z, q, omega, p):
-    """Vertical divergence times moist static energy."""
-    return field_vert_flux_divg(mse(T, z, q), omega, p)
-
-
-def mse_vert_advec(temp, hght, sphum, omega, p):
-    """Vertical advection of moist static energy."""
-    return vert_advec(mse(temp, hght, sphum), omega, p)
-
-
-def mse_total_advec(temp, hght, sphum, u, v, omega, p, radius):
-    mse_ = mse(temp, hght, sphum)
-    return field_total_advec(mse_, u, v, omega, p, radius)
-
-
-def mse_zonal_advec_upwind(temp, z, q, u, radius, order=2):
-    """Zonal advection of moist static energy using upwind scheme."""
-    return zonal_advec_upwind(mse(temp, z, q), u, radius, order=order)
-
-
-def mse_merid_advec_upwind(temp, z, q, v, radius, order=2):
-    """Meridional advection of moist static energy using upwind scheme."""
-    return merid_advec_upwind(mse(temp, z, q), v, radius, order=order)
-
-
-def mse_horiz_advec_upwind(temp, hght, sphum, u, v, radius, order=2):
-    """Horizontal moist static energy advection using upwind scheme."""
-    return horiz_advec_upwind(mse(temp, hght, sphum), u, v, radius,
-                              order=order)
-
-
-def mse_vert_advec_upwind(temp, hght, sphum, omega, p, order=2):
-    """Upwind vertical advection of moist static energy."""
-    # p_names = ['plev', PLEVEL_STR]
-    # p_str = get_dim_name(p, p_names)
-    # p = p.rename({p_str: PLEVEL_STR})
-    return Upwind(omega, mse(temp, hght, sphum), PLEVEL_STR, coord=p,
-                  order=order, fill_edge=True).advec()
-
-
-def mse_total_advec_upwind(temp, hght, sphum, u, v, omega, p, radius):
-    return total_advec_upwind(mse(temp, hght, sphum), u, v, omega, p, radius)
-
-
-def mse_budget_advec_residual(temp, hght, sphum, ucomp, vcomp, omega,
-                              p, dp, radius, swdn_toa, swup_toa, olr, swup_sfc,
-                              swdn_sfc, lwup_sfc, lwdn_sfc, shflx, evap):
-    """Residual in vertically integrated MSE budget."""
-    mse_ = mse(temp, hght, sphum)
-    transport = field_total_advec(mse_, ucomp, vcomp, omega, p, radius)
-    trans_vert_int = int_dp_g(transport, dp)
-    f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-                          lwup_sfc, lwdn_sfc, shflx, evap)
-    return f_net - trans_vert_int
-
-
-def fmse_budget_advec_residual(temp, hght, sphum, ice_wat, ucomp, vcomp, omega,
-                               p, dp, radius, swdn_toa, swup_toa, olr,
-                               swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc, shflx,
-                               evap):
-    """Residual in vertically integrated MSE budget."""
-    fmse_ = fmse(temp, hght, sphum, ice_wat)
-    transport = field_total_advec(fmse_, ucomp, vcomp, omega, p, radius)
-    trans_vert_int = int_dp_g(transport, dp)
-    f_net = column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-                          lwup_sfc, lwdn_sfc, shflx, evap)
-    return f_net - trans_vert_int
-
-
-def dse_horiz_flux_divg(temp, hght, u, v, radius):
-    """Horizontal flux convergence of moist static energy."""
-    return field_horiz_flux_divg(dse(temp, hght), u, v, radius)
-
-
-def dse_horiz_advec(temp, hght, u, v, radius):
-    """Horizontal advection of moist static energy."""
-    return horiz_advec(dse(temp, hght), u, v, radius)
-
-
-def dse_times_horiz_divg(temp, hght, u, v, radius, dp):
-    """Horizontal divergence of moist static energy."""
-    return field_times_horiz_divg(dse(temp, hght), u, v, radius, dp)
-
-
-def dse_horiz_advec_divg_sum(T, z, u, v, rad, dp):
-    return field_horiz_advec_divg_sum(dse(T, z), u, v, rad, dp)
-
-
-def dse_vert_advec(temp, hght, omega, p):
-    """Vertical advection of moist static energy."""
-    return vert_advec(dse(temp, hght), omega, p)
-
-
-def tdt_diab(tdt_lw, tdt_sw, tdt_conv, tdt_ls):
-    """Net diabatic heating rate."""
-    return tdt_lw + tdt_sw + tdt_conv + tdt_ls
-
-
-def tdt_lw_cld(tdt_lw, tdt_lw_clr):
-    """Cloudy-sky temperature tendency from longwave radiation."""
-    return tdt_lw - tdt_lw_clr
-
-
-def tdt_sw_cld(tdt_sw, tdt_sw_clr):
-    """Cloudy-sky temperature tendency from shortwave radiation."""
-    return tdt_sw - tdt_sw_clr
-
-
-def tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif):
-    """Net moist diabatic heating rate, i.e. neglecting condensation."""
-    return tdt_lw + tdt_sw + tdt_vdif
-
-
-def mse_tendency(tdt_lw, tdt_sw, tdt_vdif, qdt_vdif):
-    """Net moist energetic forcing, i.e. neglecting condensation."""
-    return (c_p.value*tdt_moist_diabatic(tdt_lw, tdt_sw, tdt_vdif) +
-            L_v.value*qdt_vdif)
