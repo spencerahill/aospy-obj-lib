@@ -25,10 +25,15 @@ from .thermo import (
     dse,
     mse,
     fmse,
+    kinetic_energy,
+    internal_energy,
+    energy,
+    total_energy,
+    cpt_lvq,
+    virt_temp,
     pot_temp,
     virt_pot_temp,
     equiv_pot_temp,
-    virt_temp,
     z_from_hypso,
     mse_from_hypso,
     mixing_ratio_from_specific_mass,
@@ -37,6 +42,11 @@ from .thermo import (
     heat_capacity_moist_air_constant_volume,
     specific_entropy_dry_air,
     specific_entropy_water_vapor,
+    tdt_diab,
+    tdt_lw_cld,
+    tdt_sw_cld,
+    tdt_moist_diabatic,
+    mse_tendency,
 )
 from .toa_sfc_fluxes import (
     albedo,
@@ -127,9 +137,7 @@ from .transport import (
     field_horiz_flux_divg_mass_adj,
     omega_from_divg_eta,
 )
-from .energy import (
-    kinetic_energy,
-    energy,
+from .energy_budget import (
     energy_column,
     energy_column_tendency,
     energy_column_tendency_each_timestep,
@@ -166,6 +174,8 @@ from .energy import (
     energy_horiz_advec_eta_adj_spharm,
     energy_horiz_advec_eta_adj_time_mean,
     energy_horiz_advec_eta_upwind,
+    energy_zonal_advec_eta_upwind,
+    energy_merid_advec_eta_upwind,
     energy_horiz_advec_eta_upwind_time_mean,
     energy_horiz_advec_eta_upwind_adj_time_mean,
     energy_horiz_divg_eta,
@@ -179,6 +189,8 @@ from .energy import (
     energy_vert_advec_eta_upwind,
     energy_vert_advec_eta_upwind_time_mean,
     energy_vert_advec_eta_upwind_adj_time_mean,
+)
+from .mse_budget import (
     mse_horiz_flux_divg,
     mse_horiz_advec,
     mse_times_horiz_divg,
@@ -192,18 +204,32 @@ from .energy import (
     mse_vert_advec_upwind,
     mse_total_advec_upwind,
     mse_budget_advec_residual,
+)
+from .mse_from_hypso_budget import(
+    mse_from_hypso_zonal_advec_upwind,
+    mse_from_hypso_merid_advec_upwind,
+    mse_from_hypso_horiz_advec_upwind,
+    mse_from_hypso_vert_advec_upwind,
+    cpt_lvq_zonal_deriv,
+    cpt_lvq_merid_deriv,
+    cpt_lvq_zonal_advec_upwind,
+    cpt_lvq_merid_advec_upwind,
+    cpt_lvq_horiz_advec_upwind,
+)
+from .fmse_budget import (
+    fmse_merid_deriv_eta,
+    fmse_zonal_deriv_eta,
+    fmse_horiz_advec_eta_upwind,
     fmse_budget_advec_residual,
+    omega_change_from_fmse_budget,
+)
+from .dse_budget import (
     dse_horiz_flux_divg,
     dse_horiz_advec,
     dse_times_horiz_divg,
     dse_horiz_advec_divg_sum,
     dse_vert_advec,
-    tdt_diab,
-    tdt_lw_cld,
-    tdt_sw_cld,
-    tdt_moist_diabatic,
-    mse_tendency
-    )
+)
 from .stats import (
     pointwise_corr,
     pointwise_lin_regr,
