@@ -1,7 +1,6 @@
 """Functions relating to precipitation, moisture budget, etc."""
 from aospy.constants import grav
 from aospy.utils import int_dp_g
-import numpy as np
 
 from .tendencies import time_tendency_first_to_last
 from .mass import (column_flux_divg, column_flux_divg_adj,
@@ -14,15 +13,10 @@ def p_minus_e(precip, evap):
     return precip - evap
 
 
-def prec_conv_frac(prec_conv, precip, prec_ls=False):
+def prec_conv_frac(prec_conv, precip):
     """Fraction of precipitation coming from convection scheme."""
     # Mask where precip is zero to avoid dividing by zero.
-    prec_conv = np.ma.masked_where(precip == 0., prec_conv)
-    precip = np.ma.masked_where(precip == 0., precip)
-    if prec_ls:
-        return prec_conv/(precip + prec_conv)
-    else:
-        return prec_conv/precip
+    return prec_conv / precip.where(precip)
 
 
 def moisture_column_source(precip, evap):
