@@ -153,7 +153,7 @@ am3_hc = Run(
     name='hurrell_cont',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell/'
-                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+                   'gfdl.ncrc3-intel-prod-openmp/pp'),
     data_in_dur=30,
     data_in_start_date=1981,
     data_in_end_date=2010,
@@ -173,7 +173,7 @@ am3_hp2k = Run(
     name='hurrell+2K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+2K/'
-                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+                   'gfdl.ncrc3-intel-prod-openmp/pp'),
     data_in_dur=30,
     data_in_start_date=1981,
     data_in_end_date=2010,
@@ -183,7 +183,7 @@ am3_hp4k = Run(
     name='hurrell+4K',
     description='',
     data_in_direc=('/archive/Spencer.Hill/am3/am3clim_hurrell+4K/'
-                   'gfdl.ncrc2-intel-prod-openmp/pp'),
+                   'gfdl.ncrc3-intel-prod-openmp/pp'),
     data_in_dur=30,
     data_in_start_date=1981,
     data_in_end_date=2010,
