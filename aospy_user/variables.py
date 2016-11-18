@@ -376,7 +376,7 @@ omega = Var(
 )
 precip = Var(
     name='precip',
-    alt_names=('pr', 'pre'),
+    alt_names=('pr', 'PRECT', 'pre'),
     units=units.kg_m2_s1,
     domain='atmos',
     description='Liquid precipitation reaching surface.',
@@ -671,7 +671,7 @@ swup_toa_clr = Var(
 )
 t_surf = Var(
     name='t_surf',
-    alt_names=('tas', 'tmp'),
+    alt_names=('tas', 'TS', 'tmp'),
     units=units.K,
     domain='atmos',
     description='Surface air temperature.',
