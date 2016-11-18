@@ -1,7 +1,7 @@
 """Functions for computing tracer transports."""
 from aospy.utils import (int_dp_g, to_pfull_from_phalf, d_deta_from_phalf,
                          dp_from_ps)
-from infinite_diff.advec import SphereUpwind
+from indiff.advec import SphereUpwind
 import numpy as np
 
 from .. import PFULL_STR

@@ -2,7 +2,7 @@
 from animal_spharm import SpharmInterface
 from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf, pfull_from_ps,
                          to_pfull_from_phalf, to_radians, to_pascal)
-from infinite_diff import CenDeriv
+from indiff import CenDeriv
 import numpy as np
 import xarray as xr
 

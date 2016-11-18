@@ -1,6 +1,6 @@
 """Advection-related quantities."""
 from aospy.utils import to_radians
-from infinite_diff import Upwind
+from indiff import Upwind
 
 from .. import LAT_STR, LON_STR, PFULL_STR
 from .numerics import (latlon_deriv_prefactor, wraparound,

@@ -1,7 +1,7 @@
 """Functions relating to the moist static energy budget."""
 from aospy.utils import int_dp_g
-from infinite_diff.advec import Upwind
-from infinite_diff.deriv import LatCenDeriv, LonCenDeriv
+from indiff.advec import Upwind
+from indiff.deriv import LatCenDeriv, LonCenDeriv
 
 from .. import LAT_STR, LON_STR, PLEVEL_STR
 from .advection import (horiz_advec, vert_advec, horiz_advec_upwind,

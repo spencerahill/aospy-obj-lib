@@ -1,6 +1,6 @@
 """MSE budget functions, with height computed using hypsometric equation."""
-from infinite_diff.advec import Upwind
-from infinite_diff.deriv import LatCenDeriv, LonCenDeriv
+from indiff.advec import Upwind
+from indiff.deriv import LatCenDeriv, LonCenDeriv
 
 from .. import LAT_STR, LON_STR, PLEVEL_STR
 from .advection import (zonal_advec_upwind, merid_advec_upwind,
