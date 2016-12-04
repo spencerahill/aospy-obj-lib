@@ -1,5 +1,5 @@
 """Advection-related quantities."""
-from aospy.utils import to_radians
+from aospy.utils.vertcoord import to_radians
 from indiff import Upwind
 
 from .. import LAT_STR, LON_STR, PFULL_STR

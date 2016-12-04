@@ -4,9 +4,9 @@ try:
 except ImportError:
     pass
 from aospy.constants import grav
-from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
-                         to_pfull_from_phalf, dp_from_ps, int_dp_g,
-                         integrate)
+from aospy.utils.vertcoord import (d_deta_from_pfull, d_deta_from_phalf,
+                                   to_pfull_from_phalf, dp_from_ps, int_dp_g,
+                                   integrate)
 import numpy as np
 
 from .. import PFULL_STR, PHALF_STR, PLEVEL_STR, TIME_STR

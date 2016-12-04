@@ -1,4 +1,6 @@
 """aospy.Run objects for simulations from the GFDL HiRAM model."""
+import datetime
+
 from aospy import Run
 
 hiram_cont = Run(
@@ -7,10 +9,9 @@ hiram_cont = Run(
         '1981-2000 HadISST climatological annual cycle of SSTs '
         'and sea ice repeated annually, with PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aero = Run(
@@ -22,10 +23,9 @@ hiram_aero = Run(
         'simulation of AM2.1 with a mixed layer ocean.  '
         'PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_atm = Run(
@@ -36,10 +36,9 @@ hiram_atm = Run(
         'SST anomaly from a PI-to-PD aerosols simulation of AM2.1 with a '
         'mixed layer ocean.  PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_'
                    'trop_mean/gfdl.ncrc2-default-prod/pp')
 )
 hiram_amtm = Run(
@@ -50,10 +49,9 @@ hiram_amtm = Run(
         'anomaly from a PI-to-PD aerosols simulation of AM2.1 with a mixed '
         'layer ocean.  PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_m_'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_m_'
                    'trop_mean/gfdl.ncrc2-default-prod/pp')
 )
 hiram_apac = Run(
@@ -64,10 +62,9 @@ hiram_apac = Run(
         'of equilibrium SST anomalies from a PI-to-PD aerosols simulation of '
         'AM2.1 with a mixed layer ocean.  PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_pac/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_pac/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aatl = Run(
@@ -78,10 +75,9 @@ hiram_aatl = Run(
         'of equilibrium SST anomalies from a PI-to-PD aerosols simulation of '
         'AM2.1 with a mixed layer ocean.  PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_atl/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_atl/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_aind = Run(
@@ -92,10 +88,9 @@ hiram_aind = Run(
         'of equilibrium SST anomalies from a PI-to-PD aerosols simulation of '
         'M2.1 with a mixed layer ocean. PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_ind/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_aero_ind/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_gas = Run(
@@ -107,10 +102,9 @@ hiram_gas = Run(
         'simulation of AM2.1 with a mixed layer ocean.  '
         'PD atmospheric composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_rerun2/'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_rerun2/'
                    'gfdl.ncrc2-default-prod/pp')
 )
 hiram_gtm = Run(
@@ -121,10 +115,9 @@ hiram_gtm = Run(
         'equilibrium SST anomaly from a PI-to-PD WMGG and ozone simulation '
         'of AM2.1 with a mixed layer ocean. PD atmospheric composition.'
         ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_'
                    'trop_mean/gfdl.ncrc2-default-prod/pp')
 )
 hiram_gmtm = Run(
@@ -136,10 +129,9 @@ hiram_gmtm = Run(
         'ozone simulation of AM2.1 with a mixed layer ocean. PD atmos'
         'composition.'
     ),
-    data_in_start_date=1979,
-    data_in_end_date=1995,
-    default_date_range=(1979, 1995),
-    data_in_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_m_'
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_direc=('/archive/Yi.Ming/siena_201211/c180_hiram_clim_gas_m_'
                    'trop_mean/gfdl.ncrc2-default-prod/pp')
 )
 hiram_amip = Run(
@@ -148,9 +140,8 @@ hiram_amip = Run(
     ens_mem_prefix='/archive/hrao/ornl/cmip5/c180_hiram_',
     ens_mem_ext=['H1', 'H3'],
     ens_mem_suffix='/pp',
-    data_in_dur=5,
-    data_in_start_date=1979,
-    data_in_end_date=2008,
-    default_date_range=(1979, 2008),
-    data_in_dir_struc='gfdl'
+    data_dur=5,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2008, 12, 31),
+    data_dir_struc='gfdl'
 )

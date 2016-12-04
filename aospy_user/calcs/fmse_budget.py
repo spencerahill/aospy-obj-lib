@@ -1,5 +1,5 @@
 """Functions relating to the budget of frozen moist static energy."""
-from aospy.utils import int_dp_g
+from aospy.utils.vertcoord import int_dp_g
 from indiff.advec import SphereEtaUpwind
 from indiff.deriv import SphereEtaCenDeriv
 

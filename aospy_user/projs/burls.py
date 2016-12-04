@@ -12,12 +12,12 @@ _ROOT = os.path.join(os.environ['HOME'], 'Dropbox/projects/gms_natalie_burls')
 cam_2xco2 = Run(
     name='2xco2',
     description='Coupled model w/ doubled CO2',
-    data_in_direc=os.path.join(_ROOT,' cam_output'),
-    data_in_dir_struc='one_dir',
-    data_in_dur=1,
-    data_in_start_date=datetime.datetime(701, 1, 1),
-    data_in_end_date=datetime.datetime(800, 12, 31),
-    data_in_files={
+    data_direc=os.path.join(_ROOT, 'cam_output'),
+    data_dir_struc='one_dir',
+    data_dur=100,
+    data_start_date=datetime.datetime(701, 1, 1),
+    data_end_date=datetime.datetime(800, 12, 31),
+    data_files={
         'precip': 'abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc'
         # '*': 'abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc'
     }
@@ -32,9 +32,9 @@ cam = Model(
         'cam_output/abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc'
         # 'cam_output/abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc
     ),
-    data_in_dur=1,
-    data_in_start_date=datetime.datetime(701, 1, 1),
-    data_in_end_date=datetime.datetime(800, 12, 31),
+    data_dur=1,
+    data_start_date=datetime.datetime(701, 1, 1),
+    data_end_date=datetime.datetime(800, 12, 31),
     runs=[cam_2xco2],
 )
 

@@ -1,8 +1,9 @@
 """Energy budget-related fields"""
 from aospy.constants import grav
-from aospy.utils import (d_deta_from_pfull, d_deta_from_phalf,
-                         to_pfull_from_phalf, int_dp_g, vert_coord_name,
-                         monthly_mean_ts, monthly_mean_at_each_ind, integrate)
+from aospy.utils.vertcoord import (d_deta_from_pfull, d_deta_from_phalf,
+                                   to_pfull_from_phalf, int_dp_g,
+                                   vert_coord_name, integrate)
+from aospy.utils.times import monthly_mean_ts, monthly_mean_at_each_ind
 from indiff.advec import EtaUpwind, SphereEtaUpwind
 from .. import PFULL_STR
 from .numerics import d_dp_from_eta, d_dp_from_p

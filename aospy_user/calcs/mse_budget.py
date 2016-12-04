@@ -1,5 +1,5 @@
 """Functions relating to the moist static energy budget."""
-from aospy.utils import int_dp_g
+from aospy.utils.vertcoord import int_dp_g
 from indiff.advec import Upwind
 from indiff.deriv import LatCenDeriv, LonCenDeriv
 
