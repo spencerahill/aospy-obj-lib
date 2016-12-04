@@ -5,7 +5,8 @@ from aospy_user import regions, models
 
 gcm_input = Proj(
     'gcm_input',
-    direc_out='/archive/s1h/gcm_input',
+    direc_out='/work/Spencer.Hill/',
+    tar_direc_out='/archive/Spencer.Hill/',
     nc_dir_struc='one_dir',
     models=(
         models.am2,

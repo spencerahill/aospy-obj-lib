@@ -5,7 +5,8 @@ from aospy_user import regions, models
 
 obs = Proj(
     name='obs',
-    direc_out='/archive/s1h/obs/',
+    direc_out='/work/Spencer.Hill/',
+    tar_direc_out='/archive/Spencer.Hill/',
     models=(
         models.cru,
         models.prec_l,

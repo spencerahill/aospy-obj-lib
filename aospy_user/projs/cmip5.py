@@ -5,7 +5,8 @@ from aospy_user import regions, models
 
 cmip5 = Proj(
     'cmip5',
-    direc_out='/archive/s1h/cmip5/',
+    direc_out='/work/Spencer.Hill/',
+    tar_direc_out='/archive/Spencer.Hill/',
     nc_dir_struc='one_dir',
     models=(
         models.bcc_csm1, models.bnu_esm, models.cccma_canam4,

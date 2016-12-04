@@ -5,7 +5,8 @@ from aospy_user import regions, models
 
 aero_3agcm = Proj(
     'aero_3agcm',
-    direc_out='/archive/Spencer.Hill/aero_3agcm/',
+    direc_out='/work/Spencer.Hill/',
+    tar_direc_out='/archive/Spencer.Hill/',
     nc_dir_struc='gfdl',
     models=(
         models.am2,
