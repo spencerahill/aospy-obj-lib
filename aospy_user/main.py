@@ -77,7 +77,7 @@ class MainParamsParser(object):
                                        main_params.var, main_params.region)
             )
         self.run = self.create_child_run_obj(self.model, self.run, self.proj)
-        self.region = [aospy.utils.dict_name_keys(self.region)]
+        self.region = [aospy.utils.io.dict_name_keys(self.region)]
 
 
 class CalcSuite(object):

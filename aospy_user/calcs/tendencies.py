@@ -1,5 +1,5 @@
 """Calculations involved in mass and energy budgets."""
-from infinite_diff import CenDeriv
+from indiff import CenDeriv
 import numpy as np
 
 from .. import TIME_STR

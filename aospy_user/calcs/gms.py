@@ -1,7 +1,7 @@
 """Gross moist stability-related quantities."""
 from aospy.constants import c_p, grav, L_v
-from aospy.utils import to_pascal
-from infinite_diff.deriv import EtaCenDeriv, CenDeriv
+from aospy.utils.vertcoord import to_pascal
+from indiff.deriv import EtaCenDeriv, CenDeriv
 import numpy as np
 
 from .. import PLEVEL_STR

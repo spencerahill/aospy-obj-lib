@@ -1,7 +1,7 @@
 """Zonal-mean meridional circulation and mass transport quantities."""
 from aospy import LAT_STR
 from aospy.constants import c_p, grav, L_f, L_v, Omega, r_e, R_d
-from aospy.utils import level_thickness, to_pascal
+from aospy.utils.vertcoord import level_thickness, to_pascal
 import numpy as np
 
 from .thermo import dse, mse

@@ -1,17 +1,18 @@
 """aospy.Run objects for observational data."""
+import datetime
+
 from aospy.run import Run
 
 # CRU
 cru_v322 = Run(
     name='v3.22',
     description='CRU v3.22',
-    data_in_direc='/archive/Spencer.Hill/obs/HadCRU/3.22',
-    data_in_dir_struc='one_dir',
-    data_in_dur=113,
-    data_in_start_date=1901,
-    data_in_end_date=2013,
-    default_date_range=(1901, 2013),
-    data_in_files={
+    data_direc='/archive/Spencer.Hill/obs/HadCRU/3.22',
+    data_dir_struc='one_dir',
+    data_dur=113,
+    data_start_date=datetime.datetime(1901, 1, 1),
+    data_end_date=datetime.datetime(2013, 12, 31),
+    data_files={
         'precip': 'cru_ts3.22.1901.2013.pre.dat.nc',
         'cld_amt': 'cru_ts3.22.1901.2013.cld.dat.nc',
         'diurnal_temp_range': 'cru_ts3.22.1901.2013.dtr.dat.nc',
@@ -29,50 +30,46 @@ cru_v322 = Run(
 prec_l_0p5deg = Run(
     name='0.5deg',
     description='PREC/L 0.5x0.5 degree resolution',
-    data_in_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
-    data_in_dir_struc='one_dir',
-    data_in_dur=64,
-    data_in_start_date=1948,
-    data_in_end_date=2011,
-    default_date_range=(1948, 2011),
-    data_in_files={'precip': 'precip.mon.mean.0.5x0.5.nc'}
+    data_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
+    data_dir_struc='one_dir',
+    data_dur=64,
+    data_start_date=datetime.datetime(1948, 1, 1),
+    data_end_date=datetime.datetime(2011, 12, 31),
+    data_files={'precip': 'precip.mon.mean.0.5x0.5.nc'}
 )
 prec_l_1deg = Run(
     name='1deg',
     description='PREC/L 1x1 degree resolution',
-    data_in_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
-    data_in_dir_struc='one_dir',
-    data_in_dur=67,
-    data_in_start_date=1948,
-    data_in_end_date=2014,
-    default_date_range=(1948, 2014),
-    data_in_files={'precip': 'precip.mon.mean.1x1.nc'}
+    data_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
+    data_dir_struc='one_dir',
+    data_dur=67,
+    data_start_date=datetime.datetime(1948, 1, 1),
+    data_end_date=datetime.datetime(2014, 12, 31),
+    data_files={'precip': 'precip.mon.mean.1x1.nc'}
 )
 prec_l_2p5deg = Run(
     name='2.5deg',
     description='PREC/L 2.5x2.5 degree resolution',
-    data_in_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
-    data_in_dir_struc='one_dir',
-    data_in_dur=67,
-    data_in_start_date=1948,
-    data_in_end_date=2014,
-    default_date_range=(1948, 2014),
-    data_in_files={'precip': 'precip.mon.mean.2.5x2.5.nc'}
+    data_direc='/archive/Spencer.Hill/obs/PREC_L/20150212',
+    data_dir_struc='one_dir',
+    data_dur=67,
+    data_start_date=datetime.datetime(1948, 1, 1),
+    data_end_date=datetime.datetime(2014, 12, 31),
+    data_files={'precip': 'precip.mon.mean.2.5x2.5.nc'}
 )
 
 # CERES
 ceres_ebaf = Run(
     name='ebaf',
     description='CERES EBAF',
-    data_in_direc=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/CERES-EBAF/'
+    data_direc=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/CERES-EBAF/'
                    'atmos/mon/v20140402/CERES-EBAF'),
-    data_in_dir_struc='one_dir',
-    data_in_dur=14,
-    data_in_start_date='2000-03-01',
-    data_in_end_date='2013-10-31',
-    default_date_range=(2000, 2012),
-    data_in_suffix='_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
-    data_in_files={
+    data_dir_struc='one_dir',
+    data_dur=14,
+    data_start_date=datetime.datetime(2000, 3, 1),
+    data_end_date=datetime.datetime(2013, 10, 31),
+    data_suffix='_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
+    data_files={
         'swdn_toa': 'rsdt_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
         'swup_toa': 'rsut_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
         'swup_toa_clr': 'rsutcs_CERES-EBAF_L3B_Ed2-8_200003-201310.nc',
@@ -105,15 +102,14 @@ ceres_ebaf = Run(
 ceres_ebaf_sfc = Run(
     name='ebaf-sfc',
     description='CERES EBAF-surface',
-    data_in_direc=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/CERES-EBAF_Surface/'
+    data_direc=('/archive/pcmdi/repo/obs4MIPs/NASA-LaRC/CERES-EBAF_Surface/'
               'atmos/mon/v20140402'),
-    data_in_dir_struc='one_dir',
-    data_in_dur=14,
-    data_in_start_date='2000-03-01',
-    data_in_end_date='2013-03-31',
-    default_date_range=(2000, 2012),
-    data_in_suffix='_CERES-EBAF_L3B_Ed2-7_200003-201303.nc',
-    data_in_files={
+    data_dir_struc='one_dir',
+    data_dur=14,
+    data_start_date=datetime.datetime(2000, 3, 1),
+    data_end_date=datetime.datetime(2013, 3, 31),
+    data_suffix='_CERES-EBAF_L3B_Ed2-7_200003-201303.nc',
+    data_files={
         'swdn_sfc': 'rsds_CERES-EBAF_L3B_Ed2-7_200003-201303.nc',
         'swdn_sfc_clr': 'rsdscs_CERES-EBAF_L3B_Ed2-7_200003-201303.nc',
         'swup_sfc': 'rsus_CERES-EBAF_L3B_Ed2-7_200003-201303.nc',
@@ -129,13 +125,12 @@ gpcp_v2p2 = Run(
     name='v2p2',
     description=('GPCP v2.2 gridded precipitation, from blend of '
                  'satellite and station gauge data.'),
-    data_in_direc='/archive/pcmdi/repo/obs4MIPs/NASA-GSFC/GPCP/atmos/',
-    data_in_dur=10,
-    data_in_start_date=1979,
-    data_in_end_date=2013,
-    default_date_range=(1979, 2013),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly':
+    data_direc='/archive/pcmdi/repo/obs4MIPs/NASA-GSFC/GPCP/atmos/',
+    data_dur=10,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2013, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly':
               ['mon/v20130401/pr_GPCP-SG_L3_v2.2_' + yrs + '.nc' for yrs in
                ('197901-197912', '198001-198912', '199001-199912',
                 '200001-200912', '201001-201312')],
@@ -146,13 +141,12 @@ gpcp_v2p2 = Run(
 trmm_v7a = Run(
     name='v7a',
     description='TRMM v7 gridded precipitation, from satellite data',
-    data_in_direc='/archive/pcmdi/repo/obs4MIPs/NASA-GSFC/TRMM/atmos/',
-    data_in_dur=2,
-    data_in_start_date=2000,
-    data_in_end_date='2010-09-30',
-    default_date_range=(2000, 2009),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': ['mon/v20130204/pr_TRMM-L3_v7A_' + yrs + '.nc'
+    data_direc='/archive/pcmdi/repo/obs4MIPs/NASA-GSFC/TRMM/atmos/',
+    data_dur=2,
+    data_start_date=datetime.datetime(2000, 1, 1),
+    data_end_date=datetime.datetime(2010, 9, 30),
+    data_dir_struc='one_dir',
+    data_files={'monthly': ['mon/v20130204/pr_TRMM-L3_v7A_' + yrs + '.nc'
                           for yrs in ('200001-200912', '201001-201009')]}
 
 )
@@ -162,26 +156,24 @@ cmap_standard = Run(
     name='standard',
     description=('CMAP standard version, which does not include NCEP '
                  'reanalysis data to fill in gaps.'),
-    data_in_direc='/archive/Spencer.Hill/obs/CMAP/standard',
-    data_in_dir_struc='one_dir',
-    data_in_dur=36,
-    data_in_start_date=1979,
-    data_in_end_date=2014,
-    default_date_range=(1979, 2014),
-    data_in_files={'monthly': 'precip.mon.mean.nc',
+    data_direc='/archive/Spencer.Hill/obs/CMAP/standard',
+    data_dir_struc='one_dir',
+    data_dur=36,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2014, 12, 31),
+    data_files={'monthly': 'precip.mon.mean.nc',
               'pentad': 'precip.pentad.mean.nc'}
 )
 cmap_enhanced = Run(
     name='enhanced',
     description=('CMAP enhanced version, which includes NCEP reanalysis '
                  'data to fill in gaps.'),
-    data_in_direc='/archive/Spencer.Hill/obs/CMAP/enhanced',
-    data_in_dur=36,
-    data_in_start_date=1979,
-    data_in_end_date=2014,
-    default_date_range=(1979, 2014),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'precip.mon.mean.nc',
+    data_direc='/archive/Spencer.Hill/obs/CMAP/enhanced',
+    data_dur=36,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2014, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'precip.mon.mean.nc',
               'pentad': 'precip.pentad.mean.nc'}
 )
 
@@ -189,25 +181,23 @@ cmap_enhanced = Run(
 udel_v201 = Run(
     name='v201',
     description='U. Delaware version 2.01',
-    data_in_direc='/archive/Spencer.Hill/obs/U_Del',
-    data_in_dur=109,
-    data_in_start_date=1900,
-    data_in_end_date=2008,
-    default_date_range=(1900, 2008),
-    data_in_dir_struc='one_dir',
-    data_in_files={'precip': 'precip.mon.total.v201.nc',
+    data_direc='/archive/Spencer.Hill/obs/U_Del',
+    data_dur=109,
+    data_start_date=datetime.datetime(1900, 1, 1),
+    data_end_date=datetime.datetime(2008, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'precip': 'precip.mon.total.v201.nc',
               't_surf': 'air.mon.total.v201.nc'}
     )
 udel_v301 = Run(
     name='v301',
     description='U. Delaware version 3.01',
-    data_in_direc='/archive/Spencer.Hill/obs/U_Del',
-    data_in_dur=111,
-    data_in_start_date=1900,
-    data_in_end_date=2010,
-    default_date_range=(1900, 2010),
-    data_in_dir_struc='one_dir',
-    data_in_files={'precip': 'precip.mon.total.v301.nc',
+    data_direc='/archive/Spencer.Hill/obs/U_Del',
+    data_dur=111,
+    data_start_date=datetime.datetime(1900, 1, 1),
+    data_end_date=datetime.datetime(2010, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'precip': 'precip.mon.total.v301.nc',
               't_surf': 'air.mon.total.v301.nc'}
     )
 
@@ -215,15 +205,16 @@ udel_v301 = Run(
 era_i = Run(
     name='interim',
     description='',
-    data_in_direc=('/archive/pcmdi/repo/ana4MIPs/ECMWF/ERA-Interim/atmos/'
+    data_direc=('/archive/pcmdi/repo/ana4MIPs/ECMWF/ERA-Interim/atmos/'
               'mon/v20140416'),
-    data_in_dur=1,
-    data_in_start_date=1979,
-    data_in_end_date=2013,
-    default_date_range=(1981, 2000),
-    # data_in_dir_struc='one_dir',
-    data_in_dir_struc='gfdl_repo',
-    data_in_files={
+    data_dur=1,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2013, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(2000, 12, 31),
+    # data_dir_struc='one_dir',
+    data_dir_struc='gfdl_repo',
+    data_files={
         'cld_amt': 'cl_*.nc',
         'evap': 'evspsbl_*.nc',
         'hght': 'zg_*.nc',
@@ -254,14 +245,15 @@ era_i = Run(
 merra = Run(
     name='merra',
     description='',
-    data_in_direc=('/archive/pcmdi/repo/ana4MIPs/NASA-GMAO/MERRA/atmos/mon/'
+    data_direc=('/archive/pcmdi/repo/ana4MIPs/NASA-GMAO/MERRA/atmos/mon/'
               'v20140624'),
-    data_in_dur=1,
-    data_in_start_date=1979,
-    data_in_end_date=2011,
-    default_date_range=(1981, 2000),
-    data_in_dir_struc='one_dir',
-    data_in_files={
+    data_dur=1,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2011, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(2000, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={
         'cld_amt': ['cl_Amon_reanalysis_MERRA_' + yrs + '.nc'
                     for yrs in [str(yr) + '01-' + str(yr) + '12'
                                 for yr in range(1979, 2012)]],
@@ -332,14 +324,15 @@ merra = Run(
 cfsr = Run(
     name='cfsr',
     description='',
-    data_in_direc=('/archive/pcmdi/repo/ana4MIPs/NOAA-NCEP/CFSR/atmos/'
+    data_direc=('/archive/pcmdi/repo/ana4MIPs/NOAA-NCEP/CFSR/atmos/'
               'mon/v20140822'),
-    data_in_dur=1,
-    data_in_start_date=1979,
-    data_in_end_date=2013,
-    default_date_range=(1981, 2000),
-    data_in_dir_struc='one_dir',
-    data_in_files={
+    data_dur=1,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2013, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(2000, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={
         'cld_amt': ['cl_Amon_reanalysis_CFSR_' + yrs + '.nc' for yrs in
                     ['%s01-%s12'% (yr, yr) for yr in range(1979, 2014)]],
         'hght': ['zg_Amon_reanalysis_CFSR_' + yrs + '.nc' for yrs in
@@ -383,13 +376,12 @@ cfsr = Run(
 jra25 = Run(
     name='jra-25',
     description='Japanase Meteorological Agency reanalyses',
-    data_in_direc='/archive/pcmdi/repo/ana4MIPs/JMA/JRA-25/atmos/mon/v20140408',
-    data_in_dur=1,
-    data_in_start_date=1979,
-    data_in_end_date=2013,
-    default_date_range=(1979, 2013),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': ['va_Amon_reanalysis_JRA-25_' + yrs + '.nc'
+    data_direc='/archive/pcmdi/repo/ana4MIPs/JMA/JRA-25/atmos/mon/v20140408',
+    data_dur=1,
+    data_start_date=datetime.datetime(1979, 1, 1),
+    data_end_date=datetime.datetime(2013, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': ['va_Amon_reanalysis_JRA-25_' + yrs + '.nc'
                           for yrs in [str(yr) + '01-' + str(yr) + '12'
                                       for yr in range(1979, 2014)]]}
 )
@@ -398,49 +390,45 @@ jra25 = Run(
 lfe_all = Run(
     name='all',
     description='LandFlux-EVAL 1989-2005 using all products',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=2005,
-    default_date_range=(1989, 2005),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.all.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(2005, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.all.nc',
               'annual': 'LandFluxEVAL.merged.89-05.yearly.all.nc'}
 )
 lfe_diag = Run(
     name='diagnostic',
     description='LandFlux-EVAL 1989-2005 using only diagnostic products',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=2005,
-    default_date_range=(1989, 2005),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.diagnostic.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(2005, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.diagnostic.nc',
               'annual': 'LandFluxEVAL.merged.89-05.yearly.diagnostic.nc'}
 )
 lfe_lsm = Run(
     name='lsm',
     description='LandFlux-EVAL 1989-2005 using land surface models only',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=2005,
-    default_date_range=(1989, 2005),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.lsm.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(2005, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.lsm.nc',
               'annual': 'LandFluxEVAL.merged.89-05.yearly.lsm.nc'}
 )
 lfe_rean = Run(
     name='reanalyses',
     description='LandFlux-EVAL 1989-2005 using reanalyses only',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=2005,
-    default_date_range=(1989, 2005),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.reanalyses.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(2005, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-05.monthly.reanalyses.nc',
               'annual': 'LandFluxEVAL.merged.89-05.yearly.reanlayses.nc'}
 )
 
@@ -448,49 +436,45 @@ lfe_rean = Run(
 lfe95_all = Run(
     name='all',
     description='LandFlux-EVAL 1989-1995 using all products',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=1995,
-    default_date_range=(1989, 1995),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.all.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.all.nc',
               'annual': 'LandFluxEVAL.merged.89-95.yearly.all.nc'}
 )
 lfe95_diag = Run(
     name='diagnostic',
     description='LandFlux-EVAL 1989-1995 using diagnostic products only',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=1995,
-    default_date_range=(1989, 1995),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.diagnostic.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.diagnostic.nc',
               'annual': 'LandFluxEVAL.merged.89-95.yearly.diagnostic.nc'}
 )
 lfe95_lsm = Run(
     name='lsm',
     description='LandFlux-EVAL 1989-1995 using land surface models only',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=1995,
-    default_date_range=(1989, 1995),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.lsm.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.lsm.nc',
               'annual': 'LandFluxEVAL.merged.89-95.yearly.lsm.nc'}
 )
 lfe95_rean = Run(
     name='reanalyses',
     description='LandFlux-EVAL 1989-1995 using reanalyses only',
-    data_in_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
-    data_in_dur=17,
-    data_in_start_date=1989,
-    data_in_end_date=1995,
-    default_date_range=(1989, 1995),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.reanalyses.nc',
+    data_direc='/archive/Spencer.Hill/obs/LandFlux-EVAL',
+    data_dur=17,
+    data_start_date=datetime.datetime(1989, 1, 1),
+    data_end_date=datetime.datetime(1995, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': 'LandFluxEVAL.merged.89-95.monthly.reanalyses.nc',
               'annual': 'LandFluxEVAL.merged.89-95.yearly.reanlayses.nc'}
 )
 
@@ -498,35 +482,32 @@ lfe95_rean = Run(
 hadisst1 = Run(
     name='hadisst1',
     description='HadISST1 product; SST data only',
-    data_in_direc='/archive/Spencer.Hill/obs/HadISST',
-    data_in_dur=1,
-    data_in_start_date=2005,
-    data_in_end_date=2005,
-    default_date_range=(2005, 2005),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly': '/archive/Spencer.Hill/obs/HadISST/HadISST_sst.nc'}
+    data_direc='/archive/Spencer.Hill/obs/HadISST',
+    data_dur=1,
+    data_start_date=datetime.datetime(2005, 1, 1),
+    data_end_date=datetime.datetime(2005, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly': '/archive/Spencer.Hill/obs/HadISST/HadISST_sst.nc'}
 )
 hurrell = Run(
     name='hurrell',
     description='Hurrell SST product',
-    data_in_direc='/archive/Spencer.Hill/obs/Hurrell',
-    data_in_dur=1,
-    data_in_start_date=2000,
-    data_in_end_date=2000,
-    default_date_range=(2000, 2000),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly':
+    data_direc='/archive/Spencer.Hill/obs/Hurrell',
+    data_dur=1,
+    data_start_date=datetime.datetime(2000, 1, 1),
+    data_end_date=datetime.datetime(2000, 12, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly':
               '/archive/Spencer.Hill/obs/Hurrell/sst.climo.1981-2000.data.nc'}
 )
 reynolds_oi = Run(
     name='reynolds_oi',
     description='Reynolds OI SST observational dataset',
-    data_in_direc='/archive/Spencer.Hill/obs/ReynoldsOI',
-    data_in_dur=19,
-    data_in_start_date='1981-11-01',
-    data_in_end_date='1999-01-31',
-    default_date_range=(1982, 1998),
-    data_in_dir_struc='one_dir',
-    data_in_files={'monthly':
+    data_direc='/archive/Spencer.Hill/obs/ReynoldsOI',
+    data_dur=19,
+    data_start_date=datetime.datetime(1981, 11, 1),
+    data_end_date=datetime.datetime(1999, 1, 31),
+    data_dir_struc='one_dir',
+    data_files={'monthly':
               '/archive/Spencer.Hill/obs/ReynoldsOI/reyoi_sst.data.nc'}
 )

@@ -1,7 +1,7 @@
 """Functions relating to the budget of frozen moist static energy."""
-from aospy.utils import int_dp_g
-from infinite_diff.advec import SphereEtaUpwind
-from infinite_diff.deriv import SphereEtaCenDeriv
+from aospy.utils.vertcoord import int_dp_g
+from indiff.advec import SphereEtaUpwind
+from indiff.deriv import SphereEtaCenDeriv
 
 from .transport import field_total_advec
 from .toa_sfc_fluxes import column_energy

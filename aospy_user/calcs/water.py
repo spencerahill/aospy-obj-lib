@@ -1,6 +1,6 @@
 """Functions relating to precipitation, moisture budget, etc."""
 from aospy.constants import grav
-from aospy.utils import int_dp_g
+from aospy.utils.vertcoord import int_dp_g
 
 from .tendencies import time_tendency_first_to_last
 from .mass import (column_flux_divg, column_flux_divg_adj,

@@ -1,5 +1,5 @@
 """Functions related to statistical methods."""
-from aospy.utils import level_thickness
+from aospy.utils.vertcoord import level_thickness
 import numpy as np
 import scipy
 
