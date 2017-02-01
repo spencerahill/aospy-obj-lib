@@ -19,6 +19,7 @@ p = Var(
 )
 ps = Var(
     name='ps',
+    alt_names=['PS'],
     units=units.Pa,
     domain='atmos',
     description='Surface pressure.',
@@ -30,6 +31,7 @@ ps = Var(
 )
 bk = Var(
     name='bk',
+    alt_names=['hybi'],
     units=units.Pa,
     domain='atmos_level',
     description='Sigma part of hybrid sigma coordinate.',
@@ -52,7 +54,7 @@ pk = Var(
 )
 temp = Var(
     name='temp',
-    alt_names=('ta',),
+    alt_names=('ta', 'T'),
     units=units.K,
     domain='atmos',
     description='Air temperature.',
@@ -251,7 +253,7 @@ lwup_sfc_clr = Var(
 )
 hght = Var(
     name='hght',
-    alt_names=('zg',),
+    alt_names=('zg', 'Z3'),
     units=units.m,
     domain='atmos',
     description='Geopotential height.',
@@ -550,7 +552,7 @@ soil_moisture = Var(
 )
 sphum = Var(
     name='sphum',
-    alt_names=('hus',),
+    alt_names=('hus', 'Q'),
     units=units.specific_mass,
     domain='atmos',
     description='Specific humidity.',
@@ -773,7 +775,7 @@ tot_cld_amt = Var(
 )
 ucomp = Var(
     name='ucomp',
-    alt_names=('ua',),
+    alt_names=('ua', 'U'),
     units=units.m_s1,
     domain='atmos',
     description='Eastward velocity.',
@@ -796,7 +798,7 @@ u_ref = Var(
 )
 vcomp = Var(
     name='vcomp',
-    alt_names=('va',),
+    alt_names=('va', 'V'),
     units=units.m_s1,
     domain='atmos',
     description='Northward velocity.',
@@ -886,6 +888,7 @@ level = Var(
 )
 pfull = Var(
     name='pfull',
+    alt_names=['lev'],
     units=units.hPa,
     domain='atmos_level',
     description=('Reference pressure of model native coordinate full levels. '
@@ -900,6 +903,7 @@ pfull = Var(
 )
 phalf = Var(
     name='phalf',
+    alt_names=['ilev'],
     units=units.hPa,
     domain='atmos_level',
     description=('Reference pressure of model native coordinate half levels. '

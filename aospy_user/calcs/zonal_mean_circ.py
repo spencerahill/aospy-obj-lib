@@ -459,12 +459,12 @@ def mse_flux(variables, **kwargs):
         return eddy_flux(variables, **kwargs)
 
 
-def mass_flux(variables, **kwargs):
+def mass_flux(vcomp):
     """Meridional mass flux by time and zonal mean flow."""
 
     # Apply mass flux correction.
-    lev_thick = level_thickness(nc)[np.newaxis,:,np.newaxis]/grav
-    v_znl = variables[0].mean(axis=-1)
+    lev_thick = level_thickness(vcomp)
+    v_znl = vcomp.mean(axis=-1)
     v_north = np.where(v_znl > 0., v_znl, 0.)
     v_south = np.where(v_znl < 0., v_znl, 0.)
     mass_adj = -((v_north*lev_thick).sum(axis=1) /

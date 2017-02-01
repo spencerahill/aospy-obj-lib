@@ -14,13 +14,12 @@ cam_2xco2 = Run(
     description='Coupled model w/ doubled CO2',
     data_direc=os.path.join(_ROOT, 'cam_output'),
     data_dir_struc='one_dir',
-    data_dur=100,
-    data_start_date=datetime.datetime(701, 1, 1),
-    data_end_date=datetime.datetime(800, 12, 31),
-    data_files={
-        'precip': 'abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc'
-        # '*': 'abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc'
-    }
+    data_dur=1,
+    data_start_date=datetime.datetime(700, 2, 1),
+    data_end_date=datetime.datetime(700, 2, 28),
+    data_files={name: 'abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc' for name in
+                ['temp', 'precip', 'hght', 'sphum', 'vcomp', 'ps', 'bk', 'pk',
+                 'pfull', 'phalf']}
 )
 
 
@@ -30,10 +29,10 @@ cam = Model(
     grid_file_paths=os.path.join(
         _ROOT,
         'cam_output/abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc'
-        # 'cam_output/abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc
+        # 'cam_output/abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc'
     ),
     data_dur=1,
-    data_start_date=datetime.datetime(701, 1, 1),
+    data_start_date=datetime.datetime(700, 1, 1),
     data_end_date=datetime.datetime(800, 12, 31),
     runs=[cam_2xco2],
 )
