@@ -13,6 +13,27 @@ def p_minus_e(precip, evap):
     return precip - evap
 
 
+def precip_large_scale(precip_convective, precip_total):
+    """Surface precipitation flux from large-scale cloud scheme.
+
+    Parameters
+    ----------
+    precip_convective, precip_total : xarray.DataArray or other np.ndarray-like
+        Surface precipitation flux from, respectively, only the convective
+        parameterization and from all sources
+
+    Returns
+    -------
+    Same type as input
+        Surface precipitation flux arising from the large-scale cloud physics
+
+    See Also
+    --------
+    prec_conv_frac
+    """
+    return precip_total - precip_convective
+
+
 def prec_conv_frac(prec_conv, precip):
     """Fraction of precipitation coming from convection scheme."""
     # Mask where precip is zero to avoid dividing by zero.

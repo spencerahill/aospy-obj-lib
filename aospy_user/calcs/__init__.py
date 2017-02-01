@@ -245,6 +245,7 @@ from .stats import (
 from .water import (
     p_minus_e,
     prec_conv_frac,
+    precip_large_scale,
     moisture_column_source,
     moisture_column_tendency,
     moisture_column_divg_with_adj2,

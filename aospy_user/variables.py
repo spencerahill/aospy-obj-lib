@@ -2983,6 +2983,18 @@ prec_conv_frac = Var(
     func=calcs.prec_conv_frac,
     units=units.unitless
 )
+precip_large_scale = Var(
+    name='precip_large_scale',
+    domain='atmos',
+    variables=(prec_conv, precip),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+    func=calcs.precip_large_scale,
+    units=units.kg_m2_s1,
+    colormap='BrBG_r'
+)
 ps_horiz_advec = Var(
     name='ps_horiz_advec',
     domain='atmos',
