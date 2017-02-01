@@ -15,7 +15,6 @@ p = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 ps = Var(
     name='ps',
@@ -27,7 +26,6 @@ ps = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 bk = Var(
     name='bk',
@@ -39,7 +37,6 @@ bk = Var(
     def_vert=True,
     def_lat=False,
     def_lon=False,
-    in_nc_grid=True
 )
 pk = Var(
     name='pk',
@@ -50,7 +47,6 @@ pk = Var(
     def_vert=True,
     def_lat=False,
     def_lon=False,
-    in_nc_grid=True
 )
 temp = Var(
     name='temp',
@@ -62,7 +58,6 @@ temp = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
 )
 dp = Var(
     name='dp',
@@ -78,7 +73,6 @@ dp = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     func=calcs.dp,
     units=units.Pa,
 )
@@ -93,7 +87,6 @@ alb_sfc = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 cld_amt = Var(
     name='cld_amt',
@@ -105,7 +98,6 @@ cld_amt = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 divg = Var(
     name='divg',
@@ -117,7 +109,6 @@ divg = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='RdBu'
 )
 esf = Var(
@@ -129,7 +120,6 @@ esf = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 evap = Var(
     name='evap',
@@ -142,7 +132,6 @@ evap = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 high_cld_amt = Var(
     name='high_cld_amt',
@@ -153,7 +142,6 @@ high_cld_amt = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 iwp = Var(
     name='IWP',
@@ -165,7 +153,6 @@ iwp = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
 )
 lai = Var(
     name='lai',
@@ -177,7 +164,6 @@ lai = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 low_cld_amt = Var(
     name='low_cld_amt',
@@ -188,7 +174,6 @@ low_cld_amt = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 lwdn_sfc = Var(
     name='lwdn_sfc',
@@ -201,7 +186,6 @@ lwdn_sfc = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 lwdn_sfc_clr = Var(
     name='lwdn_sfc_clr',
@@ -213,7 +197,6 @@ lwdn_sfc_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 lwp = Var(
     name='LWP',
@@ -225,7 +208,6 @@ lwp = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
 )
 lwup_sfc = Var(
     name='lwup_sfc',
@@ -237,7 +219,6 @@ lwup_sfc = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 lwup_sfc_clr = Var(
     name='lwup_sfc_clr',
@@ -249,7 +230,6 @@ lwup_sfc_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 hght = Var(
     name='hght',
@@ -261,7 +241,6 @@ hght = Var(
     def_vert='phalf',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 ice_mask = Var(
     name='ice_mask',
@@ -272,7 +251,6 @@ ice_mask = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 ice_wat = Var(
     name='ice_wat',
@@ -283,7 +261,6 @@ ice_wat = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 liq_wat = Var(
     name='liq_wat',
@@ -294,7 +271,6 @@ liq_wat = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 mc = Var(
     name='mc',
@@ -305,7 +281,6 @@ mc = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 mc_full = Var(
     name='mc_full',
@@ -316,7 +291,6 @@ mc_full = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 mc_half = Var(
     name='mc_half',
@@ -327,7 +301,6 @@ mc_half = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 mid_cld_amt = Var(
     name='mid_cld_amt',
@@ -338,7 +311,6 @@ mid_cld_amt = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 olr = Var(
     name='olr',
@@ -350,7 +322,6 @@ olr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 olr_clr = Var(
     name='olr_clr',
@@ -362,7 +333,6 @@ olr_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 omega = Var(
     name='omega',
@@ -374,7 +344,6 @@ omega = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 precip = Var(
     name='precip',
@@ -386,7 +355,6 @@ precip = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='BrBG'
 )
 prec_conv = Var(
@@ -399,7 +367,6 @@ prec_conv = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='BrBG'
 )
 prec_ls = Var(
@@ -411,7 +378,6 @@ prec_ls = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='BrBG'
 )
 pv = Var(
@@ -423,7 +389,6 @@ pv = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 qdt_conv = Var(
     name='qdt_conv',
@@ -434,7 +399,6 @@ qdt_conv = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 qdt_ls = Var(
     name='qdt_ls',
@@ -445,7 +409,6 @@ qdt_ls = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 qdt_vdif = Var(
     name='qdt_vdif',
@@ -456,7 +419,6 @@ qdt_vdif = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 rh = Var(
     name='rh',
@@ -468,7 +430,6 @@ rh = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 rh_ref = Var(
     name='rh_ref',
@@ -479,7 +440,6 @@ rh_ref = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 shflx = Var(
     name='shflx',
@@ -491,7 +451,6 @@ shflx = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 slp = Var(
     name='slp',
@@ -503,7 +462,6 @@ slp = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 snow_conv = Var(
     name='snow_conv',
@@ -514,7 +472,6 @@ snow_conv = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 snow_ls = Var(
     name='snow_ls',
@@ -525,7 +482,6 @@ snow_ls = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 soil_liq = Var(
     name='soil_liq',
@@ -536,7 +492,6 @@ soil_liq = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 soil_moisture = Var(
     name='soil_moisture',
@@ -548,7 +503,6 @@ soil_moisture = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 sphum = Var(
     name='sphum',
@@ -560,7 +514,6 @@ sphum = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='Greys'
 )
 sst = Var(
@@ -573,7 +526,6 @@ sst = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swdn_sfc = Var(
     name='swdn_sfc',
@@ -585,7 +537,6 @@ swdn_sfc = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swdn_sfc_clr = Var(
     name='swdn_sfc_clr',
@@ -597,7 +548,6 @@ swdn_sfc_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swup_sfc = Var(
     name='swup_sfc',
@@ -609,7 +559,6 @@ swup_sfc = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swup_sfc_clr = Var(
     name='swup_sfc_clr',
@@ -621,7 +570,6 @@ swup_sfc_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swdn_toa = Var(
     name='swdn_toa',
@@ -633,7 +581,6 @@ swdn_toa = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swdn_toa_clr = Var(
     name='swdn_toa_clr',
@@ -645,7 +592,6 @@ swdn_toa_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swup_toa = Var(
     name='swup_toa',
@@ -657,7 +603,6 @@ swup_toa = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 swup_toa_clr = Var(
     name='swup_toa_clr',
@@ -669,7 +614,6 @@ swup_toa_clr = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 t_surf = Var(
     name='t_surf',
@@ -681,7 +625,6 @@ t_surf = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_conv = Var(
     name='tdt_conv',
@@ -692,7 +635,6 @@ tdt_conv = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     valid_range=(-20, 20)
 )
 tdt_ls = Var(
@@ -704,7 +646,6 @@ tdt_ls = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_lw = Var(
     name='tdt_lw',
@@ -715,7 +656,6 @@ tdt_lw = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_lw_clr = Var(
     name='tdt_lw_clr',
@@ -726,7 +666,6 @@ tdt_lw_clr = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_sw = Var(
     name='tdt_sw',
@@ -737,7 +676,6 @@ tdt_sw = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_sw_clr = Var(
     name='tdt_sw_clr',
@@ -748,7 +686,6 @@ tdt_sw_clr = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tdt_vdif = Var(
     name='tdt_vdif',
@@ -759,7 +696,6 @@ tdt_vdif = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 tot_cld_amt = Var(
     name='tot_cld_amt',
@@ -771,7 +707,6 @@ tot_cld_amt = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 ucomp = Var(
     name='ucomp',
@@ -783,7 +718,6 @@ ucomp = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 u_ref = Var(
     name='u_ref',
@@ -794,7 +728,6 @@ u_ref = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 vcomp = Var(
     name='vcomp',
@@ -806,7 +739,6 @@ vcomp = Var(
     def_vert='pfull',
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 v_ref = Var(
     name='v_ref',
@@ -817,7 +749,6 @@ v_ref = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 vort = Var(
     name='vort',
@@ -828,7 +759,6 @@ vort = Var(
     def_vert=True,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 wvp = Var(
     name='WVP',
@@ -840,7 +770,6 @@ wvp = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False,
     colormap='Greys'
 )
 # Grid variables.
@@ -853,7 +782,6 @@ land_mask = Var(
     def_vert=True,
     def_lat=True,
     def_lon=False,
-    in_nc_grid=True
 )
 lat = Var(
     name='lat',
@@ -863,7 +791,6 @@ lat = Var(
     def_vert=False,
     def_lat=True,
     def_lon=False,
-    in_nc_grid=True
 )
 lon = Var(
     name='lon',
@@ -873,7 +800,6 @@ lon = Var(
     def_vert=False,
     def_lat=False,
     def_lon=True,
-    in_nc_grid=True
 )
 level = Var(
     name='level',
@@ -884,7 +810,6 @@ level = Var(
     def_vert=True,
     def_lat=False,
     def_lon=False,
-    in_nc_grid=True
 )
 pfull = Var(
     name='pfull',
@@ -899,7 +824,6 @@ pfull = Var(
     def_vert=True,
     def_lat=False,
     def_lon=False,
-    in_nc_grid=False
 )
 phalf = Var(
     name='phalf',
@@ -914,7 +838,6 @@ phalf = Var(
     def_vert=True,
     def_lat=False,
     def_lon=False,
-    in_nc_grid=True
 )
 sfc_area = Var(
     name='sfc_area',
@@ -926,7 +849,6 @@ sfc_area = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=False
 )
 zsurf = Var(
     name='zsurf',
@@ -937,7 +859,6 @@ zsurf = Var(
     def_vert=False,
     def_lat=True,
     def_lon=True,
-    in_nc_grid=True
 )
 
 # Calculations involving one or more model-native variables.
