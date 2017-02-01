@@ -1,9 +1,10 @@
 """Thermodynamic functions."""
-from aospy import PLEVEL_STR
 from aospy.constants import (c_p, c_v, grav, kappa, L_f, L_v, p_trip, T_trip,
                              c_va, c_vv, c_vl, c_vs, R_a, R_v, R_d, epsilon)
 from aospy.utils.vertcoord import dp_from_p, get_dim_name, to_pascal
 import numpy as np
+
+from .. import PLEVEL_STR
 
 
 def kinetic_energy(u, v):
