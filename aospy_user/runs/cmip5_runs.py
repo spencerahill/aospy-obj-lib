@@ -14,16 +14,16 @@ abrupt4xCO2 = Run(
 amip = Run(
     name='amip',
     description='Atmosphere only',
-    data_direc='mon/atmos/Amon/r1i1p1',
-    data_dir_struc='gfdl_repo',
+    # data_direc='mon/atmos/Amon/r1i1p1',
+    # data_dir_struc='gfdl_repo',
     default_start_date=datetime.datetime(1979, 1, 1),
     default_end_date=datetime.datetime(2008, 12, 31),
 )
 amip4K = Run(
     name='amip4K',
     description='Atmosphere only',
-    data_direc='mon/atmos/Amon/r1i1p1',
-    data_dir_struc='gfdl_repo',
+    # data_direc='mon/atmos/Amon/r1i1p1',
+    # data_dir_struc='gfdl_repo',
     default_start_date=datetime.datetime(1979, 1, 1),
     default_end_date=datetime.datetime(2008, 12, 31),
 )

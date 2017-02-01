@@ -1,6 +1,6 @@
 """Collection of aospy.Run objects created by Spencer Hill."""
-from . import cmip5_runs
-from .cmip5_runs import *
+# from . import cmip5_runs
+# from .cmip5_runs import *
 from . import am2_runs
 from .am2_runs import (
     am2_cont,
