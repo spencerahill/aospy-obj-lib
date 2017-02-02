@@ -159,7 +159,7 @@ from .hiram_runs import (
     hiram_gas,
     hiram_gtm,
     hiram_gmtm,
-    hiram_amip
+    # hiram_amip
 )
 from . import obs_runs
 from .obs_runs import *
