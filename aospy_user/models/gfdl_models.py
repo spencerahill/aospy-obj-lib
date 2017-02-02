@@ -16,10 +16,8 @@ am2 = Model(
         ('/archive/Spencer.Hill/am2/am2clim_reyoi/gfdl.ncrc2-default-prod/'
          'pp/atmos/ts/monthly/30yr/atmos.198301-201212.temp.nc'),
     ),
-    data_dur=1,
-    data_start_date=datetime.datetime(1982, 1, 1),
-    data_end_date=datetime.datetime(2012, 12, 31),
     default_start_date=datetime.datetime(1982, 1, 1),
+    default_end_date=datetime.datetime(2012, 12, 31),
     runs={
         runs.am2_cont,
         runs.am2_aero,
@@ -114,10 +112,8 @@ am3 = Model(
          'openmp/pp/atmos_level/ts/monthly/1yr/'
          'atmos_level.198101-198112.ucomp.nc')
     ),
-    data_dur=20,
-    data_start_date=datetime.datetime(1980, 1, 1),
-    data_end_date=datetime.datetime(2010, 12, 31),
     default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(2010, 12, 31),
     runs={
         runs.am3_cont,
         runs.am3_aero,
@@ -162,9 +158,8 @@ hiram = Model(
         '/archive/Yi.Ming/siena_201211/c180_hiram_clim/gfdl.ncrc2-default-prod/'
         'pp/atmos/ts/monthly/17yr/atmos.197901-199512.ucomp.nc'
     ),
-    data_dur=17,
-    data_start_date=datetime.datetime(1979, 1, 1),
-    data_end_date=datetime.datetime(1995, 12, 31),
+    default_start_date=datetime.datetime(1979, 1, 1),
+    default_end_date=datetime.datetime(1995, 12, 31),
     runs={
         runs.hiram_amip,
         runs.hiram_cont,
@@ -192,9 +187,6 @@ sm2 = Model(
         '/archive/Yi.Ming/sm2.1_fixed/SM2.1U_Control-1860_lm2_aie_rerun6.YIM/pp/'
         'atmos/atmos.static.nc'
     ),
-    data_dur=20,
-    data_start_date=datetime.datetime(1, 1, 1),
-    data_end_date=datetime.datetime(100, 12, 31),
     default_start_date=datetime.datetime(61, 1, 1),
     default_end_date=datetime.datetime(80, 12, 31),
     runs={
@@ -215,9 +207,8 @@ hiram_c48 = Model(
         'gfdl.ncrc2-intel-prod/pp/atmos/ts/monthly/15yr/'
         'atmos.198101-199512.ucomp.nc'
     ),
-    data_dur=15,
-    data_start_date=datetime.datetime(1981, 1, 1),
-    data_end_date=datetime.datetime(1995, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(1995, 12, 31),
     runs={
         runs.hiram_c48_0,
         runs.hiram_c48_0_p2K,
@@ -251,9 +242,8 @@ am3c90 = Model(
         '/archive/h1g/FMS/siena_201203/c90L48_am3p10_v6_clim/gfdl.ncrc2-intel'
         '-prod-openmp/pp/atmos/ts/monthly/10yr/atmos.198101-199012.ucomp.nc'
     ),
-    data_dur=10,
-    data_start_date=datetime.datetime(1981, 1, 1),
-    data_end_date=datetime.datetime(1990, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(1990, 12, 31),
     runs={
         runs.am3c90_cont,
         runs.am3c90_p2K,
@@ -275,9 +265,8 @@ am2p5 = Model(
          'prod/pp/atmos/ts/monthly/10yr/atmos.%04d01-%04d12.ucomp.nc'
          % (y1, y2) for (y1, y2) in zip((1981, 1991), (1990, 2000))]
     ),
-    data_dur=10,
-    data_start_date=datetime.datetime(1981, 1, 1),
-    data_end_date=datetime.datetime(2000, 12, 31),
+    default_start_date=datetime.datetime(1981, 1, 1),
+    default_end_date=datetime.datetime(2000, 12, 31),
     runs={
         runs.am2p5_cont,
         runs.am2p5_p2K,
@@ -298,9 +287,8 @@ am4a1 = Model(
          'ts/monthly/1yr/atmos.00%02d01-00%02d12.temp.nc' % (n, n)
          for n in range(2, 12)]
     ),
-    data_dur=1,
-    data_start_date=datetime.datetime(2, 1, 1),
-    data_end_date=datetime.datetime(11, 12, 31),
+    default_start_date=datetime.datetime(2, 1, 1),
+    default_end_date=datetime.datetime(11, 12, 31),
     runs={
         runs.am4_a1c,
         runs.am4_a1p2k,
@@ -315,9 +303,8 @@ am4a2 = Model(
          'intel-prod-openmp/pp/atmos/ts/monthly/5yr/atmos.00%02d01-00%02d12.'
          'ucomp.nc' % (y1, y2) for (y1, y2) in zip((2, 7), (6, 11))]
     ),
-    data_dur=5,
-    data_start_date=datetime.datetime(2, 1, 1),
-    data_end_date=datetime.datetime(11, 12, 31),
+    default_start_date=datetime.datetime(2, 1, 1),
+    default_end_date=datetime.datetime(11, 12, 31),
     runs={
         runs.am4_a2c,
         runs.am4_a2p2k,
@@ -333,9 +320,8 @@ am4c1 = Model(
         'c96L48_am4c1r2_2000climo/gfdl.ncrc2-intel-prod-openmp/pp/'
         'atmos/ts/monthly/10yr/atmos.000101-001012.temp.nc'
     ),
-    data_dur=10,
-    data_start_date=datetime.datetime(1, 1, 1),
-    data_end_date=datetime.datetime(10, 12, 31),
+    default_start_date=datetime.datetime(1, 1, 1),
+    default_end_date=datetime.datetime(10, 12, 31),
     runs={
         runs.am4_c1c,
         runs.am4_c1p2k,
