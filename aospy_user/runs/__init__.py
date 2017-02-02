@@ -106,7 +106,7 @@ from .am3_runs import (
     am3_hm8k,
     am3_hm10k,
     am3_hm15k,
-    am3_amip,
+    # am3_amip,
     am3_hwpwp_p2k,
     am3_hc_static_veg,
     am3_hc_static_veg_p4k,
