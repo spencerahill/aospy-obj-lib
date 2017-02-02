@@ -7,7 +7,6 @@ gcm_input = Proj(
     'gcm_input',
     direc_out='/work/Spencer.Hill/',
     tar_direc_out='/archive/Spencer.Hill/',
-    nc_dir_struc='one_dir',
     models=(
         models.am2,
         models.am3,

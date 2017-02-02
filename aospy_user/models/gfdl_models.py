@@ -139,7 +139,7 @@ am3 = Model(
         runs.am3_hm8k,
         runs.am3_hm10k,
         runs.am3_hm15k,
-        runs.am3_amip,
+        # runs.am3_amip,
         runs.am3_hwpwp_p2k,
         runs.am3_hc_static_veg,
         runs.am3_hc_static_veg_p4k,
@@ -161,7 +161,7 @@ hiram = Model(
     default_start_date=datetime.datetime(1979, 1, 1),
     default_end_date=datetime.datetime(1995, 12, 31),
     runs={
-        runs.hiram_amip,
+        # runs.hiram_amip,
         runs.hiram_cont,
         runs.hiram_aero,
         runs.hiram_atm,

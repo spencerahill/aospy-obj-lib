@@ -161,5 +161,5 @@ from .hiram_runs import (
     hiram_gmtm,
     # hiram_amip
 )
-from . import obs_runs
-from .obs_runs import *
+# from . import obs_runs
+# from .obs_runs import *

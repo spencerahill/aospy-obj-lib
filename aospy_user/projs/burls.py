@@ -41,7 +41,6 @@ cam = Model(
 burls = Proj(
     'burls',
     direc_out=os.path.join(_ROOT, 'aospy_output'),
-    nc_dir_struc='one_dir',
     models=[cam],
     regions=(
         regions.globe,
