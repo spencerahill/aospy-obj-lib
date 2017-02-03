@@ -219,6 +219,7 @@ am2p5_cont = Run(
     data_loader=GFDLDataLoader(
         data_direc=('/archive/miz/hiramdp/siena_201204/c180l32_am2_C0/'
                     'gfdl.ncrc2-intel-prod/pp'),
+        data_dur=10,
         data_start_date=datetime.datetime(1981, 1, 1),
         data_end_date=datetime.datetime(2000, 12, 31),
     ),
@@ -228,6 +229,7 @@ am2p5_p2K = Run(
     data_loader=GFDLDataLoader(
         data_direc=('/archive/miz/hiramdp/siena_201204/c180l32_am2_C0_p2K/'
                     'gfdl.ncrc2-intel-prod/pp'),
+        data_dur=10,
         data_start_date=datetime.datetime(1981, 1, 1),
         data_end_date=datetime.datetime(2000, 12, 31),
     ),
