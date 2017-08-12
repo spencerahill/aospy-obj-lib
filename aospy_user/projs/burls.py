@@ -2,9 +2,8 @@
 import datetime
 import os
 
-from aospy.proj import Proj
-from aospy.model import Model
-from aospy.run import Run
+from aospy import Model, Proj, Run
+from aospy.data_loader import DictDataLoader
 from aospy_user import regions
 
 _ROOT = os.path.join(os.environ['HOME'], 'Dropbox/projects/gms_natalie_burls')
@@ -12,14 +11,12 @@ _ROOT = os.path.join(os.environ['HOME'], 'Dropbox/projects/gms_natalie_burls')
 cam_2xco2 = Run(
     name='2xco2',
     description='Coupled model w/ doubled CO2',
-    data_direc=os.path.join(_ROOT, 'cam_output'),
-    data_dir_struc='one_dir',
-    data_dur=1,
-    data_start_date=datetime.datetime(700, 2, 1),
-    data_end_date=datetime.datetime(700, 2, 28),
-    data_files={name: 'abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc' for name in
-                ['temp', 'precip', 'hght', 'sphum', 'vcomp', 'ps', 'bk', 'pk',
-                 'pfull', 'phalf']}
+    default_start_date=datetime.datetime(700, 2, 1),
+    default_end_date=datetime.datetime(700, 2, 28),
+    data_loader=DictDataLoader(
+        file_map={'monthly': os.path.join(_ROOT, 'cam5_co2_runs_data', '2x',
+                                          'abrupt2xCO2_T31_gx3v7.cam2.*.nc')}
+    )
 )
 
 
@@ -31,9 +28,8 @@ cam = Model(
         'cam_output/abrupt2xCO2_T31_gx3v7.cam2.h0.0700-01.nc'
         # 'cam_output/abrupt2xCO2_T31_gx3v7_ANN_climo.701.800.nc'
     ),
-    data_dur=1,
-    data_start_date=datetime.datetime(700, 1, 1),
-    data_end_date=datetime.datetime(800, 12, 31),
+    default_start_date=datetime.datetime(700, 1, 1),
+    default_end_date=datetime.datetime(800, 12, 31),
     runs=[cam_2xco2],
 )
 
