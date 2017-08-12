@@ -1,73 +1,362 @@
 """Zonal-mean meridional circulation and mass transport quantities."""
-from aospy.constants import c_p, grav, L_f, L_v, Omega, r_e, R_d
-from aospy.utils.vertcoord import level_thickness, to_pascal
+from aospy.constants import c_p, grav, L_v, Omega, r_e, R_d
+from aospy.internal_names import (LAT_STR, LON_STR, PLEVEL_STR, PFULL_STR,
+                                  SFC_AREA_STR)
+from aospy.region import _sum_over_lat_lon
+from aospy.utils.vertcoord import level_thickness, to_pascal, int_dp_g
 import numpy as np
+import xarray as xr
 
-from .. import LAT_STR
+
 from .thermo import dse, mse
-from .toa_sfc_fluxes import column_energy
+from .toa_sfc_fluxes import toa_rad
 
 
-def msf(lats, levs, v):
-    """Meridional mass streamfunction."""
-    # Compute half level boundaries and widths.
-    p_top = 5.
-    p_bot = 1005.
-    p_half = 0.5*(levs[1:] + levs[:-1])
-    p_half = np.insert(np.append(p_half, p_top), 0, p_bot)
-    dp = to_pascal(p_half[:-1] - p_half[1:])[np.newaxis, ::-1, np.newaxis]
-    geom_factor = (2.*np.pi*r_e/grav *
-                   np.cos(np.deg2rad(lats))[np.newaxis, np.newaxis, :])
-    # Integrate from TOA down to surface.
-    msf_ = geom_factor * np.cumsum(v.mean(axis=-1) * dp, axis=1)[::-1]
-    # Average the values calculated at half levels; flip sign by convention.
-    msf_[:,:-1] = -0.5*(msf_[:,1:] + msf_[:,:-1])
-    # Uppermost level goes to 0 hPa (so divide by 2); surface value is zero.
-    msf_[:,-1]*=0.5
-    msf_[:,0] = 0.
-    return msf_
+def _cosdeg(arg):
+    """Cosine, including conversion from degrees to radians."""
+    return xr.ufuncs.cos(xr.ufuncs.deg2rad(arg))
 
 
-def msf_max(lats, levs, v):
-    """Maximum meridional mass streamfunction magnitude at each latitude."""
-    strmfunc = msf(lats, levs, v)
-    pos_max = np.amax(strmfunc, axis=1)
-    neg_max = np.amin(strmfunc, axis=1)
-    return np.where(pos_max > -neg_max, pos_max, neg_max)
+def _lat_area_weight(lat):
+    """Geometric factor corresponding to surface area at each latitude."""
+    return 2.*np.pi*r_e*_cosdeg(lat)
 
 
-def aht(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc, lwdn_sfc,
-        shflx, evap, snow_ls, snow_conv, sfc_area):
-    """Total atmospheric northward energy flux."""
-    # Calculate energy balance at each grid point.
-    local = (column_energy(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc,
-                           lwup_sfc, lwdn_sfc, shflx, evap) +
-             L_f*(snow_ls + snow_conv))
-    # Calculate meridional heat transport.
-    local_flat = local.reshape((local.shape[0],-1))
-    global_mean = np.ma.average(local_flat, weights=sfc_area.ravel(), axis=1)
-    zonal_integral = np.sum(
-        sfc_area * (local_flat - global_mean[:,np.newaxis,np.newaxis]),
-        axis=-1
-    )
-    return np.ma.cumsum(zonal_integral, axis=-1)
+def ang_mom(ucomp):
+    """Angular momentum per unit mass."""
+    cos_lat = _cosdeg(ucomp[LAT_STR])
+    return (Omega*r_e*cos_lat + ucomp)*r_e*cos_lat
 
 
-def gms_change_up_therm_low(temp, hght, sphum, level, lev_up=200., lev_dn=850.):
-    """Gross moist stability. Upper minus lower level MSE with thermodynamic
-    scaling estimate for low level MSE."""
-    m = mse(temp, hght, sphum).mean(axis=-1)
-    return (m[np.where(level == lev_up)] - m[np.where(level == lev_dn)])/c_p
+def merid_streamfunc(v, dp, impose_zero_col_flux=True):
+    """Meridional mass streamfunction.
+
+    Parameters
+    ----------
+    v : xarray.DataArray
+        Meridional wind field.
+    dp : xarray.DataArray
+        Pressure thickness of each gridbox
+
+    Returns
+    -------
+    xarray.DataArray
+        The meridional mass streamfunction.
+    """
+    # Zonally average v and dp.
+    v_znl_mean = v.mean(dim=LON_STR)
+    dp_znl_mean = to_pascal(dp).mean(dim=LON_STR)
+    # If desired, Impose zero net mass flux at each level.
+    if impose_zero_col_flux:
+        v_znl_mean = _subtract_col_avg(v_znl_mean, dp_znl_mean)
+    # At each vertical level, integrate from TOA to that level.
+    streamfunc = (v_znl_mean * dp_znl_mean).cumsum(dim=PFULL_STR) / grav.value
+    # Weight by surface area to get a mass overturning rate.
+    lats = v[LAT_STR]
+    return _lat_area_weight(lats) * streamfunc
+
+
+def _subtract_col_avg(arr, dp):
+    """Impoze zero column integral by subtracting column average at each level.
+
+    Used e.g. for computing the zonally integrated mass flux.  In the time-mean
+    and neglecting tendencies in column mass, the column integrated meridional
+    mass transport should be zero at each latitude; otherwise there would be a
+    build up of mass on one side.
+
+    """
+    col_avg = int_dp_g(arr, dp) / int_dp_g(1., dp)
+    return arr - col_avg
+
+
+def _merid_mass_overturning(streamfunc):
+    """Meridional overturning mass rate at each latitude.
+
+    Calculated as the signed maximum magnitude of the meridional mass
+    streamfunction at each latitude, which at different latitudes may occur at
+    different levels.
+
+    Parameters
+    ----------
+    streamfunc : xarray.DataArray
+        Meridional mass streamfunction
+
+    Returns
+    -------
+    xarray.DataArray
+        The signed mass overturning strength at each latitude
+    """
+    # Get positive and negative extrema at each latitude.
+    pos_max = streamfunc.max(dim=PFULL_STR)
+    neg_max = streamfunc.min(dim=PFULL_STR)
+    # Keep only the larger magnitude value at each latitude.
+    max_magnitude = (pos_max.where(pos_max > -neg_max).fillna(0.) +
+                     neg_max.where(pos_max <= -neg_max).fillna(0.))
+    # Re-mask any latitudes that were originally masked; those masks would have
+    # been lost via the above 'fillna' calls.
+    return max_magnitude.where(pos_max).where(neg_max)
+
+
+def merid_mass_overturning(v, dp):
+    return _merid_mass_overturning(merid_streamfunc(v, dp))
+
+
+def _merid_implied_flux(boundary_fluxes, adjust_global_mean=True):
+    """Column-integrated meridional flux that balances given boundary fluxes.
+
+    Strictly speaking, by not incorporating the time tendency, this is
+    imperfect for non-steady states.
+
+    Parameters
+    ----------
+    boundary_fluxes: xarray.DataArray
+        The net flux of the given quantity into each column through both the
+        top and bottom boundaries.  Assumed defined in longitude.
+    adjust_global_mean : bool, default True
+        Whether to subtract off any global mean of the boundary fluxes before
+        integrating meridionally, thereby ensuring that the global mean of the
+        transport is zero.
+
+    Returns
+    -------
+    xarray.DataArray
+       The column-integrated meridional flux of the given tracer at each
+       latitude.  Array shape and coordinates will be the same as the original
+       data.
+    """
+    if adjust_global_mean:
+        sfc_area = boundary_fluxes[SFC_AREA_STR]
+        global_mean = (_sum_over_lat_lon(boundary_fluxes * sfc_area) /
+                       _sum_over_lat_lon(sfc_area))
+        boundary_fluxes -= global_mean
+    zonal_integral = (boundary_fluxes * sfc_area).sum(dim=LON_STR)
+    return zonal_integral.cumsum(dim=LAT_STR)
+
+
+def merid_total_energy_transport(swdn_toa, swup_toa, olr):
+    """Atmosphere plus ocean energy flux that balances the given TOA fluxes.
+
+    Parameters
+    ----------
+    swdn_toa, swup_toa, olr : xarray.DataArray
+        Downwelling shortwave, upwelling shortwave, and upwelling (outgoing)
+        longwave radiative flux, respectively.
+
+    Returns
+    -------
+    xarray.DataArray
+        The total atmosphere plus ocean energy transport that would balance the
+        given TOA flux.
+    """
+    return _merid_implied_flux(toa_rad(swdn_toa, swup_toa, olr))
+
+
+def merid_ocean_energy_transport(sw_net_sfc, lw_net_sfc, sens_heat_flux,
+                                 latent_heat_flux):
+    """Ocean energy flux that balances the given surface fluxes.
+
+    Parameters
+    ----------
+    sw_net_sfc, lw_net_sfc : xarray.DataArray
+        Net (upwelling minus downwelling) shortwave and longwave radiative flux
+        at the surface, respectively.
+    sens_heat_flux, latent_heat_flux : xarray.DataArray
+        Surface sensible and latent heat fluxes, respectively.
+
+    Returns
+    -------
+    xarray.DataArray
+        The total ocean energy transport that would balance the given surface
+        flux.
+    """
+    energy_sfc = sw_net_sfc + lw_net_sfc + sens_heat_flux + latent_heat_flux
+    # Flip sign to get flux into the ocean, instead of into the atmosphere.
+    return _merid_implied_flux(-1*energy_sfc)
+
+
+def merid_atmos_energy_transport(swdn_toa, swup_toa, olr, sw_net_sfc,
+                                 lw_net_sfc, sens_heat_flux, latent_heat_flux):
+    """Atmospheric energy flux that balances the given surface + TOA fluxes.
+
+    Parameters
+    ----------
+    swdn_toa, swup_toa, olr : xarray.DataArray
+        Downwelling shortwave, upwelling shortwave, and upwelling (outgoing)
+        longwave radiative flux at top-of-atmosphere (TOA), respectively.
+    sw_net_sfc, lw_net_sfc : xarray.DataArray
+        Net (upwelling minus downwelling) shortwave and longwave radiative flux
+        at the surface, respectively.
+    sens_heat_flux, latent_heat_flux : xarray.DataArray
+        Surface sensible and latent heat fluxes, respectively.
+
+    Returns
+    -------
+    xarray.DataArray
+        The total atmosphere energy transport that would balance the given TOA
+        plus surface flux.
+    """
+    col_energy = (swdn_toa - swup_toa - olr + sw_net_sfc + lw_net_sfc +
+                  sens_heat_flux + latent_heat_flux)
+    return _merid_implied_flux(col_energy)
+
+
+def _gross_stab(energy_flux, mass_overturning, mass_threshold=1e9):
+    """Ratio of an energy flux to a mass overturning strength.
+
+    Utility function for use in various flavors of "gross moist stability", all
+    of which are ultimately the ratio of an energy transport or divergence to a
+    mass transport or divergence.
+    """
+    gross_stab = energy_flux / mass_overturning / c_p.value
+    if mass_threshold:
+        cond = xr.ufuncs.fabs(mass_overturning) > mass_threshold
+        gross_stab = gross_stab.where(cond)
+    return gross_stab
+
+
+def total_gross_moist_stab(v, dp, swdn_toa, swup_toa, olr, sw_net_sfc,
+                           lw_net_sfc, sens_heat_flux, latent_heat_flux):
+    """Total atmospheric gross moist stability.
+
+    Ratio of the total atmospheric energy transport (as inferred from the net
+    radiative and turbulent fluxes at the surface and TOA) to the mass
+    overturning strength.
+
+    The "total" in the title signifies that the energy transport includes all
+    sources, namely both eddies (transient and stationary) plus the time-mean
+    flow.  A more traditional formulation is to use only the energy transport
+    by the time-mean flow.
+
+    References
+    ----------
+    Kang, Sarah M., Dargan M. W. Frierson, and Isaac M. Held.  "The Tropical
+    Response to Extratropical Thermal Forcing in an Idealized GCM: The
+    Importance of Radiative Feedbacks and Convective Parameterization."
+    Journal of the Atmospheric Sciences 66, no. 9 (September 1, 2009):
+    2812–27.  doi:10.1175/2009JAS2924.1.
+
+    """
+    aht = merid_atmos_energy_transport(swdn_toa, swup_toa, olr, sw_net_sfc,
+                                       lw_net_sfc, sens_heat_flux,
+                                       latent_heat_flux)
+    return _gross_stab(aht, merid_mass_overturning(v, dp))
+
+
+def _impose_zero_col_mass_flux(v_znl_mean, dp_znl_mean):
+    """Impose zero column-integrated meridional mass transport.
+
+    This is the expectation for steady states; otherwise there would be a
+    build-up of mass in one direction or the other.  But calculations using
+    post-processed model data can lead to slight imbalances, which then affect
+    downstream calculations of meridional transports of energy, water, or other
+    tracers.  As such it can be necessary to adjust the zonal-mean winds such
+    that this zero-net-mass-flux condition is ensured.
+
+    There are multiple ways in which the residual can be removed; this
+    particular method is that described in the Appendix of Hill et al 2015,
+    J. Climate.
+
+    """
+    v_north = v_znl_mean.where(v_znl_mean > 0.).fillna(0)
+    v_south = v_znl_mean.where(v_znl_mean < 0.).fillna(0)
+    mass_adj = int_dp_g(v_north, dp_znl_mean) / int_dp_g(v_south, dp_znl_mean)
+    return v_north - v_south * mass_adj
+
+
+def _merid_tracer_flux(dp, v, tracer):
+    """Zonally and column-integrated meridional flux of a tracer."""
+    return _lat_area_weight(v[LAT_STR]) * int_dp_g(tracer*v, dp)
+
+
+def _merid_mmc_tracer_flux(dp, v, tracer, p_top=0., do_fix_mass=True):
+    """Meridional energy flux by mean meridional circulation.
+
+    Parameters
+    ----------
+    dp : xarray.DataArray
+        Pressure thickness of each gridbox
+    v : xarray.DataArray
+        Meridional wind of each gridbox
+    tracer : xarray.DataArray
+        Tracer being transported
+    p_top : float, int, or xarray.DataArray (default 0.0)
+        Minimum pressure (i.e. highest vertical extent) over which column
+        integrals will be performed.
+    do_fix_mass : bool, default True
+        Whether to apply an adjustment to the wind field after zonally
+        integrating at each level such that the column integral at each
+        latitude is (almost) exactly zero.  This is the expectation for steady
+        states; otherwise there would be a build-up of mass in one direction or
+        the other.
+
+    Returns
+    -------
+    xarray.DataArray
+        The column integrated transport of the given tracer by the time-mean,
+        zonal-mean circulation (i.e. the "mean meridional circulation") at each
+        latitude.
+
+    """
+    # Specify upper bound for column integrals.
+    p_top_cond = tracer[PFULL_STR] >= p_top
+    v_znl_mean = v.where(p_top_cond).mean(dim=LON_STR)
+    dp_znl_mean = dp.where(p_top_cond).mean(dim=LON_STR)
+    # Apply mass flux correction to zonal mean data.
+    if do_fix_mass:
+        v_znl_mean = _impose_zero_col_mass_flux(v_znl_mean, dp_znl_mean)
+    # Integrate the specified flux by the adjusted v vertically and zonally.
+    tracer_znl_mean = tracer.where(p_top_cond).mean(dim=LON_STR)
+    return _merid_tracer_flux(dp_znl_mean, v_znl_mean, tracer_znl_mean)
+
+
+def mean_merid_circ_mse_flux(dp, v, temp, hght, sphum):
+    """Column-integrated MSE flux by mean meridional circulation (MMC)."""
+    return _merid_mmc_tracer_flux(dp, v, mse(temp, hght, sphum))
+
+
+def mean_merid_circ_gross_moist_stab(dp, v, temp, hght, sphum):
+    """Gross moist stability of mean meridional circulation."""
+    return _gross_stab(mean_merid_circ_mse_flux(dp, v, temp, hght, sphum),
+                       merid_mass_overturning(v, dp))
+
+
+def _zonal_asym_component(field, lon_str=LON_STR):
+    """Field minus its zonal mean at each latitude."""
+    return field - field.mean(dim=lon_str)
+
+
+def _stationary_eddy_merid_tracer_flux(dp, v, tracer):
+    """Column-integrated tracer flux by stationary eddies."""
+    v_st_edd = _zonal_asym_component(v)
+    tracer_st_edd = _zonal_asym_component(tracer)
+    st_edd_flux = (v_st_edd*tracer_st_edd).mean(dim=LON_STR)
+    dp_znl_mean = dp.mean(dim=LON_STR)
+    return _lat_area_weight(v[LAT_STR])*int_dp_g(st_edd_flux, dp_znl_mean)
+
+
+def stationary_eddy_merid_mse_flux(dp, v, temp, hght, sphum):
+    """Column-integrated MSE flux by stationary eddies."""
+    return _stationary_eddy_merid_tracer_flux(dp, v, mse(temp, hght, sphum))
+
+
+def gms_change_up_therm_low(temp, hght, sphum, lev_up=200., lev_dn=850.):
+    """Approximation to Hadley cell gross moist stability.
+
+    Upper minus lower level MSE with thermodynamic scaling estimate for low
+    level MSE.
+
+    """
+    m = mse(temp, hght, sphum).mean(dim=LAT_STR)
+    return (m.sel(**{PLEVEL_STR: lev_up}) - m.sel(**{PLEVEL_STR: lev_dn}))/c_p
 
 
 def gms_h01(temp, hght, sphum, precip, level, lev_sfc=925.):
-    """
-    Approximation of gross moist stability from Held (2001).
+    """Approximation of gross moist stability from Held (2001).
 
     Near surface MSE diff b/w ITCZ and the given latitude.
     """
     # ITCZ defined as latitude with maximum zonal mean precip.
-    itcz_ind = np.argmax(precip.mean(axis=-1))
+    itcz_ind = precip.mean(dim=LON_STR).argmax(dim=LAT_STR)
     m = mse(np.squeeze(temp[np.where(level == lev_sfc)].mean(axis=-1)),
             np.squeeze(hght[np.where(level == lev_sfc)].mean(axis=-1)),
             np.squeeze(sphum[np.where(level == lev_sfc)].mean(axis=-1)))
@@ -149,7 +438,7 @@ def gms_change_est2(T_cont, T_pert, q_cont, precip, level, lat,
     q_cont = np.squeeze(q_cont[np.where(level == lev_sfc)].mean(axis=-1))
     # GMS is difference between surface
     alpha = 0.07
-    return (np.cos(np.deg2rad(lat))**2*gamma*
+    return (_cosdeg(lat)**2*gamma*
             (c_p + L_v*alpha*q_cont[itcz_ind])*dT_itcz -
             (c_p + L_v*alpha*q_cont)*dT)/c_p
 
@@ -274,7 +563,7 @@ def prec_centroid(precip, lat_max=20.):
     lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
     prec = np.interp(lat_interp, lat[trop], precip[trop])
     # Integrate area-weighted precip and find median.
-    prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))))
+    prec_int = np.cumsum(prec*np.abs(_cosdeg(lat_interp)))
     return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]))]
 
 
@@ -288,14 +577,8 @@ def precip_centroid(lats, precip, lat_max=20.):
     lat_interp = np.arange(-lat_max, lat_max + 0.01, 0.1)
     prec = np.interp(lat_interp, lats[trop], precip)
     # Integrate area-weighted precip and find median.
-    prec_int = np.cumsum(prec*np.abs(np.cos(np.deg2rad(lat_interp))), axis=0)
+    prec_int = np.cumsum(prec*np.abs(_cosdeg(lat_interp)), axis=0)
     return lat_interp[np.argmin(np.abs(prec_int - 0.5*prec_int[-1]), axis=0)]
-
-
-def ang_mom(lats, ucomp):
-    """Angular momentum per unit mass."""
-    cos_lat = np.cos(np.deg2rad(lats[np.newaxis,:,np.newaxis]))
-    return (Omega*r_e*cos_lat + ucomp)*r_e*cos_lat
 
 
 def trop_height(level, T):
@@ -322,191 +605,3 @@ def trop_height(level, T):
                (Gamma_crit - Gamma[tp-1])/(Gamma[tp] - Gamma[tp-1])))
     # Convert from pressure^kappa to pressure.
     return pkap_tp**(1./kap)
-
-
-# Functions below this line haven't been converted to new argument format.
-def tht(variables, **kwargs):
-    """Total atmospheric plus oceanic northward energy flux."""
-    # Calculate energy balance at each grid point.
-    loc = -1*(variables[0] - variables[1] - variables[2])
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)
-
-
-def oht(variables, **kwargs):
-    """Total oceanic northward energy flux as residual of total minus atmospheric flux."""
-    # Calculate energy balance at each grid point.
-    loc = (variables[0] - variables[1] + variables[2] - variables[3] +   # sfc radiation
-           variables[4] +                                 # sfc SH flux
-           L_f*(variables[5] + variables[6]) + L_v*variables[7])   # column LH flux
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)
-    #return tht(variables, **kwargs) - aht(variables, **kwargs)
-
-
-def moc_flux(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by time and
-    zonal mean flow."""
-    # Specify upper bound of vertical integrals.
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    # Apply mass flux correction to zonal mean data.
-    v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    v_north = np.where(v_znl > 0., v_znl, 0.)
-    v_south = np.where(v_znl < 0., v_znl, 0.)
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis]
-    # Adjustment imposes that column integrated mass flux is zero.
-    mass_adj = -((v_north*lev_thick).sum(axis=1) /
-                 (v_south*lev_thick).sum(axis=1))
-    # Integrate the specified flux by the adjusted v vertically and zonally.
-    flux_type = kwargs['flux_type']
-    if flux_type == 'dse':
-        flux = (np.squeeze(dse(variables[:2])[:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    elif flux_type == 'mse':
-        flux = (np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    elif flux_type == 'moisture':
-        flux = L_v*(np.squeeze(variables[0][:,trop]).mean(axis=-1) *
-                (v_north + v_south * mass_adj[:,np.newaxis,:]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1))
-
-
-def moc_flux_raw(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by time and zonal mean flow, without applying column mass flux correction."""
-    # Specify upper bound of vertical integrals.
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    # Take zonal mean and calculate grid level thicknesses.
-    v_znl = np.squeeze(variables[-1][:,trop]).mean(axis=-1)
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis]
-    # Integrate the specified flux vertically and zonally.
-    flux_type = kwargs.get('flux_type', 'mse')
-    if flux_type == 'dse':
-        flux = np.squeeze(dse(variables[:2])[:,trop]).mean(axis=-1) * v_znl
-    elif flux_type == 'mse':
-        flux = np.squeeze(mse(variables[:3])[:,trop]).mean(axis=-1) * v_znl
-    elif flux_type == 'moisture':
-        flux = L_v*np.squeeze(variables[0][:,trop]).mean(axis=-1) * v_znl
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1))
-
-
-def st_eddy_flux(variables, **kwargs):
-    """Mass weighted column integrated meridional flux by stationary eddies."""
-    p_top = kwargs.get('p_top', 0.)
-    trop = np.where(nc.variables['level'][:] >= p_top)
-    v = np.squeeze(variables[-1][:,trop])
-    flux_type = kwargs['flux_type']
-    if flux_type == 'dse':
-        m = np.squeeze(dse(variables[:2])[:,trop])
-    elif flux_type == 'mse':
-        m = np.squeeze(mse(variables[:3])[:,trop])
-    elif flux_type == 'moisture':
-        m = np.squeeze(variables[0][:,trop])*L_v
-    lev_thick = np.squeeze(level_thickness(nc)[:,trop])/grav
-    lev_thick = lev_thick[np.newaxis,:,np.newaxis,np.newaxis]
-    flux = ((m - m.mean(axis=-1)[:,:,:,np.newaxis]) *
-            (v - v.mean(axis=-1)[:,:,:,np.newaxis]))
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            (flux*lev_thick).sum(axis=1).mean(axis=-1))
-
-
-def moc_st_eddy_flux(variables, **kwargs):
-    """Mass weighted column integrated flux by time mean flow."""
-    return moc_flux(variables, **kwargs) + st_eddy_flux(variables, **kwargs)
-
-
-def trans_eddy_flux(variables, **kwargs):
-    """Meridional flux by transient eddies."""
-    return aht(variables[4:], **kwargs) - moc_st_eddy_flux(variables[:4], **kwargs)
-
-
-def eddy_flux(variables, **kwargs):
-    """Meridional flux by stationary and transient eddies."""
-    return aht(variables[4:], **kwargs) - moc_flux(variables[:4], **kwargs)
-
-
-def mse_flux(variables, **kwargs):
-    """Column integrated moist static energy meridional flux."""
-    flux_type = kwargs.get('flux_type', 'moc')
-    if flux_type == 'moc':
-        return moc_flux(variables[:4], **kwargs)
-    elif flux_type == 'st_eddy':
-        return st_eddy_flux(variables[:4], **kwargs)
-    elif flux_type == 'moc_st_eddy':
-        return moc_st_eddy_flux(variables[:4], **kwargs)
-    elif flux_type =='trans_eddy':
-        return trans_eddy_fux(variables, **kwargs)
-    elif flux_type == 'all':
-        return aht(variables[4:], **kwargs)
-    elif flux_type == 'eddy':
-        return eddy_flux(variables, **kwargs)
-
-
-def mass_flux(vcomp):
-    """Meridional mass flux by time and zonal mean flow."""
-
-    # Apply mass flux correction.
-    lev_thick = level_thickness(vcomp)
-    v_znl = vcomp.mean(axis=-1)
-    v_north = np.where(v_znl > 0., v_znl, 0.)
-    v_south = np.where(v_znl < 0., v_znl, 0.)
-    mass_adj = -((v_north*lev_thick).sum(axis=1) /
-                 (v_south*lev_thick).sum(axis=1))
-    # Integrate vertically and pick level where magnitude maximized.
-    int_flux = ((v_north + v_south*mass_adj[:,np.newaxis,:]) *
-                lev_thick).cumsum(axis=1)
-    flux_pos = np.amax(int_flux, axis=1)
-    flux_neg = np.amin(int_flux, axis=1)
-    return (2.*np.pi*r_e*np.cos(np.deg2rad(nc.variables[LAT_STR][:])) *
-            np.where(flux_pos > - flux_neg, flux_pos, flux_neg))
-
-
-def gms_moc(variables, **kwargs):
-    """Gross moist stability."""
-    return -moc_flux(variables, **kwargs)/msf_max([variables[-1]], **kwargs)/c_p
-
-
-def gms_msf(variables, **kwargs):
-    """Gross moist stability."""
-    return -(moc_st_eddy_flux(variables, **kwargs) /
-            (msf_max([variables[-1]], **kwargs)*c_p))
-
-
-def total_gms(variables, **kwargs):
-    """Total (mean plus eddy) gross moist stability."""
-    return -(aht(variables[:-1], **kwargs) /
-             msf_max([variables[-1]], **kwargs))/c_p
-
-
-def aht_no_snow(variables, **kwargs):
-    """Total atmospheric northward energy flux."""
-    # Calculate energy balance at each grid point.
-    loc = -1*(variables[0] - variables[1] - variables[2] +             # TOA radiation
-              variables[3] - variables[4] + variables[5] - variables[6] +   # sfc radiation
-              variables[7] +                                 # sfc SH flux
-              L_v*variables[-1])   # column LH flux
-    # Calculate meridional heat transport.
-    len_dt = variables[0].shape[0]
-    sfc_area = grid_sfc_area(nc)
-    glb = np.average(loc.reshape(len_dt, -1),
-                     weights=sfc_area.ravel(), axis=1)
-    # AHT is meridionally integrated energy flux divergence.
-    flux_div = np.sum(sfc_area*(glb[:,np.newaxis,np.newaxis] - loc), axis=-1)
-    return np.cumsum(flux_div, axis=-1)

@@ -90,7 +90,7 @@ alb_sfc = Var(
 )
 cld_amt = Var(
     name='cld_amt',
-    alt_names=('cl',),
+    alt_names=('cl', 'CLOUD'),
     units=units.unitless,
     domain='atmos',
     description='Cloud fraction at each level.',
@@ -165,6 +165,17 @@ lai = Var(
     def_lat=True,
     def_lon=True,
 )
+latent_heat_flux = Var(
+    name='latent_heat_flux',
+    alt_names=['LHFLX'],
+    units=units.W_m2,
+    domain='atmos',
+    description='Surface latent heat flux into the atmosphere.',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+)
 low_cld_amt = Var(
     name='low_cld_amt',
     units=units.unitless,
@@ -177,7 +188,7 @@ low_cld_amt = Var(
 )
 lwdn_sfc = Var(
     name='lwdn_sfc',
-    alt_names=('rlds',),
+    alt_names=('rlds', 'FLDS'),
     math_str="$R^{LW\downarrow_{sfc}$",
     description='All-sky downwelling longwave radiation at the surface.',
     domain='atmos',
@@ -189,10 +200,22 @@ lwdn_sfc = Var(
 )
 lwdn_sfc_clr = Var(
     name='lwdn_sfc_clr',
-    alt_names=('rldscs',),
+    alt_names=('rldscs', 'FLDSC'),
     units=units.W_m2,
     domain='atmos',
     description='Clear-sky downwelling longwave radiation at the surface.',
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+)
+lw_net_sfc = Var(
+    name='lw_net_sfc',
+    alt_names=['FLNS'],
+    math_str="$R^{LW}_{sfc}$",
+    description='All-sky net longwave radiative flux at the surface.',
+    domain='atmos',
+    units=units.W_m2,
     def_time=True,
     def_vert=False,
     def_lat=True,
@@ -238,7 +261,8 @@ hght = Var(
     domain='atmos',
     description='Geopotential height.',
     def_time=True,
-    def_vert='phalf',
+    # def_vert='phalf',
+    def_vert=True,
     def_lat=True,
     def_lon=True,
 )
@@ -314,7 +338,7 @@ mid_cld_amt = Var(
 )
 olr = Var(
     name='olr',
-    alt_names=('rlut',),
+    alt_names=('rlut', 'FLUT'),
     units=units.W_m2,
     domain='atmos',
     description='All-sky outgoing longwave radiation at TOA.',
@@ -336,7 +360,7 @@ olr_clr = Var(
 )
 omega = Var(
     name='omega',
-    alt_names=('wap',),
+    alt_names=('wap', 'OMEGA'),
     units=units.Pa_s1,
     domain='atmos',
     description='Pressure vertical velocity.',
@@ -359,7 +383,7 @@ precip = Var(
 )
 prec_conv = Var(
     name='prec_conv',
-    alt_names=('prc',),
+    alt_names=('prc', 'PRECC'),
     units=units.kg_m2_s1,
     domain='atmos',
     description='Liquid precip reaching surface from convection scheme.',
@@ -371,6 +395,7 @@ prec_conv = Var(
 )
 prec_ls = Var(
     name='prec_ls',
+    alt_names=['PRECL'],
     units=units.kg_m2_s1,
     domain='atmos',
     description='Liquid precip reaching surface from large scale ascent.',
@@ -422,7 +447,7 @@ qdt_vdif = Var(
 )
 rh = Var(
     name='rh',
-    alt_names=('hur',),
+    alt_names=('hur', 'RELHUM'),
     units=units.unitless,
     domain='atmos',
     description='Relative humidity',
@@ -443,7 +468,7 @@ rh_ref = Var(
 )
 shflx = Var(
     name='shflx',
-    alt_names=('hfss',),
+    alt_names=('hfss', 'SHFLX'),
     units=units.W_m2,
     domain='atmos',
     description='Surface sensible heat flux into the atmosphere.',
@@ -454,7 +479,7 @@ shflx = Var(
 )
 slp = Var(
     name='slp',
-    alt_names=('psl',),
+    alt_names=('psl', 'PSL'),
     units=units.hPa,
     domain='atmos',
     description='Sea level pressure.',
@@ -549,9 +574,21 @@ swdn_sfc_clr = Var(
     def_lat=True,
     def_lon=True,
 )
+sw_net_sfc = Var(
+    name='sw_net_sfc',
+    alt_names=['FSNS'],
+    math_str="$R^{SW}_{sfc}$",
+    description='All-sky net shortwave radiative flux at the surface.',
+    domain='atmos',
+    units=units.W_m2,
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=True,
+)
 swup_sfc = Var(
     name='swup_sfc',
-    alt_names=('rsus',),
+    alt_names=('rsus', 'FSDS'),
     units=units.W_m2,
     domain='atmos',
     description='All-sky upwelling shortwave radiation at the surface.',
@@ -562,7 +599,7 @@ swup_sfc = Var(
 )
 swup_sfc_clr = Var(
     name='swup_sfc_clr',
-    alt_names=('rsuscs',),
+    alt_names=('rsuscs', 'FSDSC'),
     units=units.W_m2,
     domain='atmos',
     description='Clear-sky upwelling shortwave radiation at the surface.',
@@ -573,7 +610,7 @@ swup_sfc_clr = Var(
 )
 swdn_toa = Var(
     name='swdn_toa',
-    alt_names=('rsdt',),
+    alt_names=('rsdt', 'FSDTOA'),
     units=units.W_m2,
     domain='atmos',
     description='Downwelling shortwave radiation at TOA.',
@@ -595,7 +632,7 @@ swdn_toa_clr = Var(
 )
 swup_toa = Var(
     name='swup_toa',
-    alt_names=('rsut',),
+    alt_names=('rsut', 'FSUTOA'),
     units=units.W_m2,
     domain='atmos',
     description='All-sky Upwelling shortwave radiation at TOA.',
@@ -762,7 +799,7 @@ vort = Var(
 )
 wvp = Var(
     name='WVP',
-    alt_names=('wvp', 'prw'),
+    alt_names=('wvp', 'prw', 'TMQ'),
     units=units.kg_m2,
     domain='atmos',
     description='Water vapor path',
@@ -862,19 +899,6 @@ zsurf = Var(
 )
 
 # Calculations involving one or more model-native variables.
-aht = Var(
-    name='aht',
-    domain='atmos',
-    description='Total northward atmospheric heat transport.',
-    variables=(swdn_toa, swup_toa, olr, swup_sfc, swdn_sfc, lwup_sfc,
-               lwdn_sfc, shflx, evap, snow_ls, snow_conv, sfc_area),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=False,
-    func=calcs.aht,
-    units=units.W
-)
 albedo = Var(
     name='albedo',
     domain='atmos',
@@ -1255,30 +1279,6 @@ gms_h01est2 = Var(
     def_lat=True,
     def_lon=False,
     func=calcs.gms_h01est2,
-    units=units.K
-)
-gms_moc = Var(
-    name='gms_moc',
-    domain='atmos',
-    description='Gross moist stability using only MMC MSE transport',
-    variables=(temp, hght, sphum, precip, p),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=False,
-    func=calcs.gms_moc,
-    units=units.K
-)
-gms_msf = Var(
-    name='gms_msf',
-    domain='atmos',
-    description='Gross moist stability using MMC plus stationary eddy MSE transport.',
-    variables=(temp, hght, sphum, precip, p),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=False,
-    func=calcs.gms_msf,
     units=units.K
 )
 gms_up_low = Var(
@@ -2302,6 +2302,86 @@ mass_column_budget_adj_residual = Var(
     func=calcs.mass_column_budget_adj_residual,
     units=units.Pa_s1_mass,
 )
+merid_mass_overturning = Var(
+    name='merid_mass_overturning',
+    domain='atmos',
+    description='Total mass overturning rate at each latitude.',
+    variables=(vcomp, dp),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.merid_mass_overturning,
+    units=units.kg_s1
+)
+merid_streamfunc = Var(
+    name='merid_streamfunc',
+    domain='atmos',
+    description='Eulerian meridional mass streamfunction.',
+    variables=(vcomp, dp),
+    def_time=True,
+    def_vert=True,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.merid_streamfunc,
+    units=units.kg_s1
+)
+merid_total_energy_transport = Var(
+    name='merid_total_energy_transport',
+    domain='atmos',
+    variables=(swdn_toa, swup_toa, olr),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.merid_total_energy_transport,
+    units=units.W
+)
+merid_ocean_energy_transport = Var(
+    name='merid_ocean_energy_transport',
+    domain='atmos',
+    variables=(sw_net_sfc, lw_net_sfc, shflx, latent_heat_flux),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.merid_ocean_energy_transport,
+    units=units.W
+)
+merid_atmos_energy_transport = Var(
+    name='merid_atmos_energy_transport',
+    domain='atmos',
+    variables=(swdn_toa, swup_toa, olr, sw_net_sfc, lw_net_sfc, shflx,
+               latent_heat_flux),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.merid_atmos_energy_transport,
+    units=units.W
+)
+mean_merid_circ_mse_flux = Var(
+    name='mean_merid_circ_mse_flux',
+    domain='atmos',
+    variables=(dp, vcomp, temp, hght, sphum),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.mean_merid_circ_mse_flux,
+    units=units.W
+)
+mean_merid_circ_gross_moist_stab = Var(
+    name='mean_merid_circ_gross_moist_stab',
+    domain='atmos',
+    variables=(dp, vcomp, temp, hght, sphum),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.mean_merid_circ_gross_moist_stab,
+    units=units.W
+)
 moisture_column_source = Var(
     name='moisture_column_source',
     domain='atmos',
@@ -2809,31 +2889,6 @@ mse_total_advec_upwind = Var(
     units=units.J_kg1_s1,
     colormap='RdBu'
 )
-msf = Var(
-    name='msf',
-    domain='atmos',
-    description='Eulerian meridional mass streamfunction.',
-    variables=(level, vcomp),
-    def_time=True,
-    def_vert=True,
-    def_lat=True,
-    def_lon=False,
-    func=calcs.msf,
-    units=units.kg_s1
-)
-mass_flux = Var(
-    name='mass_flux',
-    domain='atmos',
-    description=('Mass flux: Eulerian meridional mass streamfunction '
-                 'integrated to the level of its maximum magnitude.'),
-    variables=(level, vcomp),
-    def_time=True,
-    def_vert=False,
-    def_lat=True,
-    def_lon=False,
-    func=calcs.msf_max,
-    units=units.kg_s1
-)
 omega_from_divg_eta = Var(
     name='omega_from_divg_eta',
     domain='atmos',
@@ -3277,6 +3332,17 @@ sfc_sw_cld = Var(
     func=calcs.sfc_sw_cld,
     units=units.W_m2
 )
+stationary_eddy_merid_mse_flux = Var(
+    name='stationary_eddy_merid_mse_flux',
+    domain='atmos',
+    variables=(dp, vcomp, temp, hght, sphum),
+    def_time=True,
+    def_vert=False,
+    def_lat=True,
+    def_lon=False,
+    func=calcs.stationary_eddy_merid_mse_flux,
+    units=units.W
+)
 temp_horiz_advec = Var(
     name='temp_horiz_advec',
     domain='atmos',
@@ -3421,16 +3487,16 @@ toa_sw = Var(
     func=calcs.toa_sw,
     units=units.W_m2
 )
-total_gms = Var(
-    name='total_gms',
+total_gross_moist_stab = Var(
+    name='total_gross_moist_stab',
     domain='atmos',
-    description='Total gross moist stability, i.e. GMS using MMC plus stationary and transient eddy MSE transports.',
-    variables=(temp, hght, sphum, precip, p),
+    variables=[vcomp, dp, swdn_toa, swup_toa, olr, sw_net_sfc, lw_net_sfc,
+               shflx, latent_heat_flux],
     def_time=True,
     def_vert=False,
     def_lat=True,
     def_lon=False,
-    func=calcs.total_gms,
+    func=calcs.total_gross_moist_stab,
     units=units.K
 )
 cre_sw_precip_corr = Var(
