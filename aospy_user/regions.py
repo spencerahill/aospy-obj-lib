@@ -238,8 +238,8 @@ burls_pac = Region(
 burls_trop_pac = Region(
     name='burls_trop_pac',
     description='Tropical Pacific region used by Burls and Fedorov 2014',
-    mask_bounds=[(( -5, 8), (100, 290)),
-                 (( -8,  -5), (130, 290))],
+    mask_bounds=[(( -5,  8), (100, 290)),
+                 (( -8, -5), (130, 290))],
     do_land_mask='strict_ocean'
 )
 burls_ext_pac = Region(
@@ -247,7 +247,7 @@ burls_ext_pac = Region(
     description='Extratropical Pacific region used by Burls and Fedorov 2014',
     mask_bounds=[(( 15, 65), (100, 260)),
                  (( 10, 15), (100, 275)),
-                 (( 8, 10), (100, 290)),
+                 ((  8, 10), (100, 290)),
                  ((-65, -8), (130, 290))],
     do_land_mask='strict_ocean'
 )
@@ -281,21 +281,24 @@ nino4 = Region(
 )
 cld_seed_np = Region(
     name='cld_seed_np',
-    description='North Pacific region of Hill & Ming 2012 GRL cloud brightening geoengineering study',
+    description=('North Pacific region of Hill & Ming 2012 GRL cloud '
+                 'brightening geoengineering study'),
     lat_bounds=(10, 30),
     lon_bounds=(204, 244),
     do_land_mask='ocean'
 )
 cld_seed_sp = Region(
     name='cld_seed_sp',
-    description='South Pacific region of Hill & Ming 2012 GRL cloud brightening geoengineering study',
+    description=('South Pacific region of Hill & Ming 2012 GRL cloud '
+                 'brightening geoengineering study'),
     lat_bounds=(-30, -5),
     lon_bounds=(240, 285),
     do_land_mask='ocean'
 )
 cld_seed_sa = Region(
     name='cld_seed_sa',
-    description='South Atlantic region of Hill & Ming 2012 GRL cloud brightening geoengineering study',
+    description=('South Atlantic region of Hill & Ming 2012 GRL cloud '
+                 'brightening geoengineering study'),
     mask_bounds=[((-30, 5), (0, 12)),
                  ((-30, 5), (342, 360))],
     do_land_mask='ocean'
