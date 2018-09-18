@@ -33,7 +33,7 @@ def fmse(temp, hght, sphum, ice_wat):
 
 def internal_energy(T, z, q_v, q_i):
     """Internal energy, including ice-phase.  Units J/kg."""
-    return c_v.value*T + dse(T, z) - L_f.value*q_i
+    return c_v.value*T + grav.value*z + L_v.value*q_v - L_f.value*q_i
 
 
 def energy(temp, z, q, q_i, u, v):
